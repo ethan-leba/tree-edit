@@ -1,0 +1,138 @@
+(require 'dash)
+(require 'buttercup)
+(require 's)
+
+(defun buffer-status-as-string ()
+  (if (equal evil-state 'tree)
+      (progn
+        (let ((start (tsc-node-start-position tree-edit--current-node))
+              (end (tsc-node-end-position tree-edit--current-node)))
+          (goto-char end)
+          (insert "]")
+          (goto-char start)
+          (insert "[")))
+    (let ((p (point))
+          (m (when mark-active (mark))))
+      (goto-char p)
+      (insert "|")
+
+      ;; show mark as well (other side of selection, if any)
+      (when m
+        (goto-char m)
+        (insert "~"))))
+
+  (let ((result-lines (->> (buffer-substring-no-properties (point-min)
+                                                           (point-max))
+                           (s-split "\n"))))
+    result-lines))
+
+(defun insert-one-or-many-lines (input)
+  (cond ((stringp input)
+         (insert input))
+        (t ;; it's a list
+         (--each input (insert it "\n"))
+         ;; remove last extra newline
+         (backward-delete-char 1))))
+
+(defmacro with-test-buffer (contents &rest test-forms)
+  "This awesome macro is adapted (borrowed) from
+  https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
+  (declare (indent 1))
+  `(progn
+     (-when-let (b (get-buffer "tree-edit-test-buffer"))
+       (kill-buffer b))
+     (let ((temp-buffer (get-buffer-create "tree-edit-test-buffer")))
+       (save-window-excursion
+         (switch-to-buffer temp-buffer)
+         (java-mode)
+         (evil-mode)
+         (tree-sitter-mode)
+         (tree-edit-mode)
+
+         (insert-one-or-many-lines ,contents)
+
+         (evil-goto-first-line)
+         (when (search-forward "|")
+           (backward-delete-char 1))
+
+         ,@test-forms
+
+         temp-buffer))))
+
+(defun select-node ()
+  (when (search-forward "[")
+    (backward-delete-char 1)
+    (let ((start (point)))
+      (when (search-forward "]")
+        (backward-delete-char 1)
+        (let ((temp-node (tsc-get-descendant-for-position-range
+                          (tsc-root-node tree-sitter-tree) start (point))))
+          (evil-tree-state)
+          (setq tree-edit--current-node temp-node))))))
+
+(defmacro with-tree-test-buffer (contents &rest test-forms)
+  "This awesome macro is adapted (borrowed) from
+  https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
+  (declare (indent 1)
+           (debug t))
+  `(progn
+     (-when-let (b (get-buffer "tree-edit-test-buffer"))
+       (kill-buffer b))
+     (let ((temp-buffer (get-buffer-create "tree-edit-test-buffer")))
+       (save-window-excursion
+         (switch-to-buffer temp-buffer)
+         (java-mode)
+         (evil-mode)
+         (tree-sitter-mode)
+         (tree-edit-mode)
+         (mode-local--activate-bindings)
+
+         (insert-one-or-many-lines ,contents)
+
+         (evil-goto-first-line)
+         (select-node)
+
+
+         ,@test-forms
+
+         temp-buffer))))
+
+(buttercup-define-matcher :to-have-buffer-contents (test-buffer
+                                                    expected-contents)
+  (setq test-buffer (funcall test-buffer))
+  (setq expected-contents (funcall expected-contents))
+  (with-current-buffer test-buffer
+    (let ((contents (buffer-status-as-string)))
+      (if (equal contents expected-contents)
+          t
+        `(nil . ,(format "Expected '%s' to equal '%s'."
+                         (apply 's-concat contents)
+                         (apply 's-concat expected-contents)))))))
+
+(buttercup-define-matcher :to-be-in-lispy-mode (test-buffer)
+  (setq test-buffer (funcall test-buffer))
+  (with-current-buffer test-buffer
+    lispy-mode))
+
+;; these are borrowed from omnisharp-emacs
+;;
+(defun ot--keyboard-input (&rest text-vectors)
+  "Simulates typing. Can be used to do interactive input, but
+detecting situations in the middle of input is impossible.
+Be careful: weird errors may happen if you try to call functions in the middle
+of this function. Only use text-vectors."
+  (condition-case error
+      (execute-kbd-macro (reduce 'vconcat text-vectors))
+    (error (print (format "ot--keyboard-input error: %s" error)))))
+
+(defun ot--meta-x-command (command)
+  (vconcat
+   (ot--press-key "M-x")
+   (ot--type command)
+   (ot--press-key "RET")))
+
+(defun ot--type (text)
+  (string-to-vector text))
+
+(defun ot--press-key (key-or-chord)
+  (edmacro-parse-keys key-or-chord))

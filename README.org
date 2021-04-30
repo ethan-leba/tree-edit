@@ -1,0 +1,22 @@
+#+TITLE: Tree-edit.el - Structural editing for any™ language!
+
+#+begin_quote
+You want to change the structure of a program. You figure out what series of
+text editing operations, operations that manipulate a 2D grid of characters, are
+equivalent to the change in the code you desire. What a waste of time and
+energy.
+#+end_quote
+
+Tree-edit is an attempt to realize the dream of development based on the
+*intent* of the user, abstracting away the process of manually typing out
+syntax.
+
+
+* Transformations
+All transformations are performed on the current node.
+
+- Raise :: Replace the current node's parent with the current node.
+- Wrap :: Create a new node and insert the current one in it.
+- Exchange :: Exchange the current node with another.
+- Delete :: Delete the current node.
+- Insert :: Insert a new node.
