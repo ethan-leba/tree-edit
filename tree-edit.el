@@ -6,7 +6,7 @@
 ;; Modified: June 28, 2021
 ;; Version: 0.0.1
 ;; Homepage: https://github.com/ethan-leba/tree-edit
-;; Package-Requires: ((emacs "27.0") (tree-sitter "0.15.0") (tree-sitter-langs "0.10.0") (dash "2.19") (evil "1.0.0") (avy "0.5.0"))
+;; Package-Requires: ((emacs "27.0") (tree-sitter "0.15.0") (tree-sitter-langs "0.10.0") (dash "2.19") (evil "1.0.0") (avy "0.5.0") (reazon "0.3.0"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
