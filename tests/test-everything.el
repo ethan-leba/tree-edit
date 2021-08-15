@@ -1,7 +1,7 @@
 
 (condition-case nil
     (tree-edit-load-grammar "tests/java-grammar")
-  (error (progn (load-file "setup.el") (tree-edit-load-grammar "java-grammar"))))
+  (error (tree-edit-load-grammar "java-grammar")))
 
 (describe "test set up"
   (it "grammar properly loaded"

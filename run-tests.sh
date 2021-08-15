@@ -3,12 +3,7 @@
 set -x # show executed commands
 set -e # exit on error
 
-# This directory gets created and stored on the developer's machine and it can't
-# be deleted by anyone else than root
-#rm -rf .cask/
-#cask
-
-TERM=dumb SHELL=sh cask exec emacs \
+cask exec emacs \
     -Q \
     -batch \
     -f package-initialize \
