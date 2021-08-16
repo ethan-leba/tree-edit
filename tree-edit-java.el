@@ -7,8 +7,8 @@
 ;;; Commentary:
 ;;
 ;;; Code:
-
 (require 'mode-local)
+(require 'tree-edit-java-grammar)
 
 (setq-mode-local
  java-mode
@@ -38,7 +38,9 @@
     :key "v")
    (:type method_invocation
     :name "static call"
-    :key "c")))
+    :key "c"))
+
+ evil-tree-state-map (make-sparse-keymap))
 
 (provide 'tree-edit-java)
 ;;; tree-edit-java.el ends here
