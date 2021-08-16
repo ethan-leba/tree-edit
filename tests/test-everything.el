@@ -8,26 +8,7 @@
     (expect tree-edit-grammar :not :to-be nil))
   (it "inserts buffer contents and returns them"
     (expect (with-test-buffer '("hello world|"))
-            :to-have-buffer-contents '("hello world|")))
-  (it "returns multiple lines as a list"
-    (expect (with-test-buffer (list "hello"
-                                    "|world"))
-            :to-have-buffer-contents (list "hello"
-                                           "|world")))
-
-  (it "allows calling code in the given buffer"
-    (expect (with-test-buffer (list "hello"
-                                    "|world")
-              ;; move cursor to end of line
-              (evil-append-line 1))
-            :to-have-buffer-contents (list "hello"
-                                           "world|")))
-
-  (it "allows inserting multiple lines in a list"
-    (expect (with-test-buffer
-                (list "hello" "|world"))
-            :to-have-buffer-contents (list "hello"
-                                           "|world"))))
+            :to-have-buffer-contents '("hello world|"))))
 
 ;; TODO: Rename navigation primitives
 (describe "basic navigation"
@@ -72,14 +53,16 @@
     (expect (with-test-buffer '("if (foo =|= 3) {}")
               (evil-tree-state))
             :to-have-buffer-contents '("if ([foo == 3]) {}")))
-  (expect (with-test-buffer '("if (foo == 3) {"
-                              "  int x |= 3;"
-                              "}")
+  (expect (with-test-buffer '("
+if (foo == 3) {
+   int x |= 3;
+}")
             (evil-tree-state))
           :to-have-buffer-contents
-          '("if (foo == 3) {"
-            "  int [x = 3];"
-            "}")))
+          '("
+if (foo == 3) {
+   int [x = 3];
+}")))
 
 ;; TODO: Test avy?
 (describe "node creation"

@@ -21,10 +21,8 @@
         (goto-char m)
         (insert "~"))))
 
-  (let ((result-lines (->> (buffer-substring-no-properties (point-min)
-                                                           (point-max))
-                           (s-split "\n"))))
-    result-lines))
+  `(,(buffer-substring-no-properties (point-min)
+                                     (point-max))))
 
 (defun insert-one-or-many-lines (input)
   (cond ((stringp input)
