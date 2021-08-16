@@ -297,13 +297,6 @@ build queries and cursors once, then reuse them."
     (cons (-map #'tsc-node-type pnodes)
           (--find-index (equal (tsc-node-position-range node) (tsc-node-position-range it)) pnodes))))
 
-(defun tree-edit--valid-replacements ()
-  "Return a list of valid node types to replace the current node."
-  (let ((grammar (alist-get (tsc-node-type (tsc-get-parent tree-edit--current-node)) tree-edit-grammar))
-        (current (tree-edit--get-parent-tokens tree-edit--current-node)))
-    (tree-edit-run-query 1 q
-      (te-parseo grammar (-replace-at (cdr current) q (car current)) '()))))
-
 ;; TODO: Handle less restrictively by ripping out surrounding syntax (ie delete)
 (defun tree-edit--valid-replacement-p (type node)
   "Return non-nil if the NODE can be replaced with a node of the provided TYPE."
