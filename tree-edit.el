@@ -160,14 +160,16 @@ further."
 
 ;; XXX: bake value into file?
 ;; XXX: vector -> list a priori
-(defun tree-edit-load-grammar (directory)
-  "Load grammar from DIRECTORY."
-  (let ((json-array-type 'list))
-    (setq tree-edit-types (tree-edit--process-node-type (json-read-file (format "%s/node-types.json" directory))))
-    (let ((grammar (tree-edit--process-grammar (json-read-file (format "%s/grammar.json" directory)))))
-      (setq tree-edit-grammar (alist-get 'rules grammar))
-      ;; Convert to list
-      (setq tree-edit-supertypes (-map #'intern (alist-get 'supertypes grammar))))))
+(defmacro tree-edit-load-grammar (directory mode)
+  "Load grammar from DIRECTORY for the given MODE."
+  `(let ((json-array-type 'list))
+     (let ((grammar (tree-edit--process-grammar (json-read-file (format "%s/grammar.json" ,directory)))))
+       (setq-mode-local ,mode
+                        tree-edit-types
+                        (tree-edit--process-node-type (json-read-file (format "%s/node-types.json" ,directory)))
+
+                        tree-edit-grammar
+                        (alist-get 'rules grammar)))))
 
 ;;* Locals: navigation
 (defun tree-edit--get-current-index (node)
