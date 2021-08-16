@@ -1,11 +1,7 @@
 
-(condition-case nil
-    (tree-edit-load-grammar "tests/java-grammar")
-  (error (tree-edit-load-grammar "java-grammar")))
-
 (describe "test set up"
   (it "grammar properly loaded"
-    (expect tree-edit-grammar :not :to-be nil))
+    (with-mode-local java-mode (expect tree-edit-grammar :not :to-be nil)))
   (it "inserts buffer contents and returns them"
     (expect (with-test-buffer '("hello world|"))
             :to-have-buffer-contents '("hello world|"))))
@@ -185,17 +181,17 @@ if (foo == 3) {
     (expect (with-tree-test-buffer '("{foo([x]);}")
               (tree-edit-delete-node))
             :to-have-buffer-contents '("{foo[()];}"))
-    ;; FIXME: Class body decl. is an inline type
-    ;; (expect (with-tree-test-buffer '("
-;; class Main {
-;;   [void foo() {}]
-;;   void bar() {}
-;; }")
-;;               (tree-edit-delete-node))
-;;             :to-have-buffer-contents '("
-;; class Main {
-;;   [void bar() {}]
-;; }"))
+    ;; TODO: Check tree-equals, I don't care about formatting
+    (expect (with-tree-test-buffer '("
+class Main {
+  [void foo() {}]
+  void bar() {}
+}")
+              (tree-edit-delete-node))
+            :to-have-buffer-contents '("
+class Main {
+  [void bar() {}]
+}"))
     (expect (with-tree-test-buffer '("{foo([x],y);}")
               (tree-edit-delete-node))
             :to-have-buffer-contents '("{foo([y]);}"))
