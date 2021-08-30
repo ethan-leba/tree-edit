@@ -9,7 +9,10 @@
 ;;; Code:
 (require 'mode-local)
 
-(tree-edit-load-grammar "tests/java-grammar" java-mode)
+(tree-edit-load-grammar
+ (expand-file-name "tests/java-grammar"
+                   (file-name-directory load-file-name))
+ java-mode)
 
 (setq-mode-local
  java-mode

@@ -6,6 +6,12 @@
     (expect (with-test-buffer '("hello world|"))
             :to-have-buffer-contents '("hello world|"))))
 
+(describe "mode local settings"
+  (it "sets keybindings"
+    (expect (with-tree-test-buffer '("if ([foo] == 3) {}")
+              (execute-kbd-macro "j"))
+            :to-have-buffer-contents '("if (foo == [3]) {}"))))
+
 ;; TODO: Rename navigation primitives
 (describe "basic navigation"
   (it "can move between sibling nodes"

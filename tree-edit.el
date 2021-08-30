@@ -167,7 +167,6 @@ further."
        (setq-mode-local ,mode
                         tree-edit-types
                         (tree-edit--process-node-type (json-read-file (format "%s/node-types.json" ,directory)))
-
                         tree-edit-grammar
                         (alist-get 'rules grammar)))))
 

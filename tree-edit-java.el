@@ -42,5 +42,8 @@
 
  evil-tree-state-map (make-sparse-keymap))
 
+(with-mode-local java-mode
+  (tree-edit--set-state-bindings))
+
 (provide 'tree-edit-java)
 ;;; tree-edit-java.el ends here
