@@ -32,7 +32,18 @@
          ;; remove last extra newline
          (backward-delete-char 1))))
 
-(defmacro with-test-buffer (contents &rest test-forms)
+(defun select-node ()
+  (when (search-forward "[")
+    (backward-delete-char 1)
+    (let ((start (point)))
+      (when (search-forward "]")
+        (backward-delete-char 1)
+        (let ((temp-node (tsc-get-descendant-for-position-range
+                          (tsc-root-node tree-sitter-tree) start (point))))
+          (evil-tree-state)
+          (setq tree-edit--current-node temp-node))))))
+
+(defmacro with-base-test-buffer (contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
   https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
   (declare (indent 1))
@@ -46,54 +57,30 @@
          (evil-mode)
          (tree-sitter-mode)
          (tree-edit-mode)
-
+         (mode-local--activate-bindings)
          (insert-one-or-many-lines ,contents)
-
          (evil-goto-first-line)
-         (when (search-forward "|")
-           (backward-delete-char 1))
 
          ,@test-forms
 
          temp-buffer))))
 
-(defun select-node ()
-  (when (search-forward "[")
-    (backward-delete-char 1)
-    (let ((start (point)))
-      (when (search-forward "]")
-        (backward-delete-char 1)
-        (let ((temp-node (tsc-get-descendant-for-position-range
-                          (tsc-root-node tree-sitter-tree) start (point))))
-          (evil-tree-state)
-          (setq tree-edit--current-node temp-node))))))
+(defmacro with-test-buffer (contents &rest test-forms)
+  "This awesome macro is adapted (borrowed) from
+  https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
+  (declare (indent 1))
+  `(with-base-test-buffer ,contents
+       (when (search-forward "|")
+         (backward-delete-char 1))
+       ,@test-forms))
 
 (defmacro with-tree-test-buffer (contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
   https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
-  (declare (indent 1)
-           (debug t))
-  `(progn
-     (-when-let (b (get-buffer "tree-edit-test-buffer"))
-       (kill-buffer b))
-     (let ((temp-buffer (get-buffer-create "tree-edit-test-buffer")))
-       (save-window-excursion
-         (switch-to-buffer temp-buffer)
-         (java-mode)
-         (evil-mode)
-         (tree-sitter-mode)
-         (tree-edit-mode)
-         (mode-local--activate-bindings)
-
-         (insert-one-or-many-lines ,contents)
-
-         (evil-goto-first-line)
-         (select-node)
-
-
-         ,@test-forms
-
-         temp-buffer))))
+  (declare (indent 1))
+  `(with-base-test-buffer ,contents
+       (select-node)
+       ,@test-forms))
 
 (buttercup-define-matcher :to-have-buffer-contents (test-buffer
                                                     expected-contents)
