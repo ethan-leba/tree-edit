@@ -106,31 +106,3 @@
         `(nil . ,(format "Expected '%s' to equal '%s'."
                          (apply 's-concat contents)
                          (apply 's-concat expected-contents)))))))
-
-(buttercup-define-matcher :to-be-in-lispy-mode (test-buffer)
-  (setq test-buffer (funcall test-buffer))
-  (with-current-buffer test-buffer
-    lispy-mode))
-
-;; these are borrowed from omnisharp-emacs
-;;
-(defun ot--keyboard-input (&rest text-vectors)
-  "Simulates typing. Can be used to do interactive input, but
-detecting situations in the middle of input is impossible.
-Be careful: weird errors may happen if you try to call functions in the middle
-of this function. Only use text-vectors."
-  (condition-case error
-      (execute-kbd-macro (reduce 'vconcat text-vectors))
-    (error (print (format "ot--keyboard-input error: %s" error)))))
-
-(defun ot--meta-x-command (command)
-  (vconcat
-   (ot--press-key "M-x")
-   (ot--type command)
-   (ot--press-key "RET")))
-
-(defun ot--type (text)
-  (string-to-vector text))
-
-(defun ot--press-key (key-or-chord)
-  (edmacro-parse-keys key-or-chord))
