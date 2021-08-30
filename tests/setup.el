@@ -21,16 +21,8 @@
         (goto-char m)
         (insert "~"))))
 
-  `(,(buffer-substring-no-properties (point-min)
-                                     (point-max))))
-
-(defun insert-one-or-many-lines (input)
-  (cond ((stringp input)
-         (insert input))
-        (t ;; it's a list
-         (--each input (insert it "\n"))
-         ;; remove last extra newline
-         (backward-delete-char 1))))
+  (buffer-substring-no-properties (point-min)
+                                  (point-max)))
 
 (defun select-node ()
   (when (search-forward "[")
@@ -58,7 +50,7 @@
          (tree-sitter-mode)
          (tree-edit-mode)
          (mode-local--activate-bindings)
-         (insert-one-or-many-lines ,contents)
+         (insert ,contents)
          (evil-goto-first-line)
 
          ,@test-forms
@@ -91,5 +83,5 @@
       (if (equal contents expected-contents)
           t
         `(nil . ,(format "Expected '%s' to equal '%s'."
-                         (apply 's-concat contents)
-                         (apply 's-concat expected-contents)))))))
+                         contents
+                         expected-contents))))))
