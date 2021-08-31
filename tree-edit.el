@@ -23,6 +23,7 @@
 (require 'reazon)
 (require 'avy)
 (require 'json)
+(require 's)
 
 ;; XXX: see mode-local
 ;;* Internal variables
@@ -694,14 +695,21 @@ POSITION can be :before, :after, or nil."
   :keymap (make-sparse-keymap))
 
 ;; XXX: TODO minor mode dependency?
-
 (defun define-tree-edit-verb (key func)
-  "Define a key command prefixed by KEY, calling FUNC."
+  "Define a key command prefixed by KEY, calling FUNC.
+
+FUNC must take two arguments, a symbol of the node type"
   (dolist (node tree-edit-nodes)
-    (define-key evil-tree-state-map
-      (string-join (list key (plist-get node :key)))
-      (lambda () (interactive)
-        (funcall func (plist-get node :type))))))
+    (define-key
+     evil-tree-state-map
+     (string-join (list key (plist-get node :key)))
+     (cons
+      ;; emacs-which-key integration
+      (or (plist-get node :name) (s-replace "_" " " (symbol-name (plist-get node :type))))
+      `(lambda ()
+         (interactive)
+         (let ((tree-edit-semantic-snippets (append ,(plist-get node :node-override) tree-edit-semantic-snippets)))
+           (,func ',(plist-get node :type))))))))
 
 (evil-define-key 'normal tree-edit-mode-map "Q" #'evil-tree-state)
 
