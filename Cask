@@ -6,4 +6,5 @@
 
 (development
  (depends-on "elsa")
+ (depends-on "tree-sitter-langs")
  (depends-on "buttercup"))
