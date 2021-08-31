@@ -54,7 +54,16 @@ Must be an alist of node type (as a symbol) to list, where the list can contain
 any string or a symbol referencing another node type in the alist.")
 
 (defvar tree-edit-nodes nil
-  "Nodes that a user can create via tree-edit.")
+  "Nodes that a user can create via tree-edit.
+
+Must be a list of plists, with the following properties:
+
+Properties
+  :type           the node's type
+  :key            the keybinding for the given node
+  :name           human readable name for which-key, defaults to
+                  :type if left unset
+  :node-override  overrides semantic snippets for the verb")
 
 
 
@@ -665,7 +674,7 @@ POSITION can be :before, :after, or nil."
   (overlay-put tree-edit--node-overlay 'face 'nil))
 
 (evil-define-state tree
-  "If enabled, foo on you!"
+  "Tree-edit state"
   :tag " <T>"
   :entry-hook (tree-edit--enter-tree-state)
   :exit-hook (tree-edit--exit-tree-state)
@@ -695,6 +704,10 @@ FUNC must take two arguments, a symbol of the node type"
 (evil-define-key 'normal tree-edit-mode-map "Q" #'evil-tree-state)
 
 (defun tree-edit--set-state-bindings ()
+  "Set keybindings for evil-tree-state.
+
+Should only be used in the context of mode-local bindings, as
+each language will have it's own set of nouns."
   (define-tree-edit-verb "i" #'tree-edit-insert-sibling)
   (define-tree-edit-verb "a" #'tree-edit-avy-jump)
   (define-tree-edit-verb "e" #'tree-edit-exchange-node)
