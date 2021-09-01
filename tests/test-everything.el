@@ -12,6 +12,31 @@
               (execute-kbd-macro "j"))
             :to-have-buffer-contents "if (foo == [3]) {}")))
 
+(describe "defining tree-edit verbs"
+  :var (dummy-verb)
+
+  (before-each
+    (setf (symbol-function 'dummy-verb)
+          (lambda (noun)))
+    (spy-on 'dummy-verb))
+
+  ;; TODO: Test which-key
+  (it "sets keybindings"
+    (with-base-test-buffer ""
+      (let ((evil-tree-state-map (make-sparse-keymap))
+            (tree-edit-nodes
+             '((:type if_statement
+                :key "i"))))
+        (define-tree-edit-verb "t" #'dummy-verb)
+        (evil-tree-state)
+        (expect (key-binding "ti"))
+        (expect (not (key-binding "tq")))
+        (execute-kbd-macro "ti")
+        (expect 'dummy-verb :to-have-been-called-with 'if_statement))))
+
+  ;; TODO
+  (xit "uses node overrides"))
+
 ;; TODO: Rename navigation primitives
 (describe "basic navigation"
   (it "can move between sibling nodes"
