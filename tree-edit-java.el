@@ -20,8 +20,9 @@
    (continue_statement . ("continue" ";\n"))
    (break_statement . ("break" ";"))
    (expression_statement . (identifier ";\n"))
-   (block . ("{}"))
+   (block . ("{" "}"))
    (parenthesized_expression . ("(" identifier ")"))
+   (expression . (identifier))
    (identifier . ("TREE")))
 
  tree-edit-significant-node-types
@@ -30,15 +31,25 @@
  tree-edit-nodes
  '((:type if_statement
     :key "i")
+   (:type identifier
+    :key "a")
    (:type break_statement
-    :key "b")
+    :key "B")
    (:type continue_statement
     :key "c")
    (:type local_variable_declaration
     :key "v")
    (:type method_invocation
     :name "static call"
-    :key "c"))
+    :key "c")
+   (:type binary_expression
+    :key "b+"
+    :name "+ expression"
+    :node-override '((binary_expression . (expression "-" expression))))
+   (:type binary_expression
+    :key "b-"
+    :name "- expression"
+    :node-override '((binary_expression . (expression "-" expression)))))
 
  evil-tree-state-map (make-sparse-keymap))
 
