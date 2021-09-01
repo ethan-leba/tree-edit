@@ -51,7 +51,7 @@
     :name "- expression"
     :node-override '((binary_expression . (expression "-" expression)))))
 
- evil-tree-state-map (make-sparse-keymap))
+ evil-tree-state-map (tree-edit--make-suppressed-keymap))
 
 (with-mode-local java-mode
   (tree-edit--set-state-bindings))

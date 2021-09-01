@@ -681,8 +681,7 @@ POSITION can be :before, :after, or nil."
   :suppress-keymap t)
 
 (define-minor-mode tree-edit-mode
-  "If enabled, foo on you!"
-  :keymap (make-sparse-keymap))
+  "Structural editing for any* language.")
 
 ;; XXX: TODO minor mode dependency?
 (defun define-tree-edit-verb (key func)
@@ -691,17 +690,21 @@ POSITION can be :before, :after, or nil."
 FUNC must take two arguments, a symbol of the node type"
   (dolist (node tree-edit-nodes)
     (define-key
-     evil-tree-state-map
-     (string-join (list key (plist-get node :key)))
-     (cons
-      ;; emacs-which-key integration
-      (or (plist-get node :name) (s-replace "_" " " (symbol-name (plist-get node :type))))
-      `(lambda ()
-         (interactive)
-         (let ((tree-edit-semantic-snippets (append ,(plist-get node :node-override) tree-edit-semantic-snippets)))
-           (,func ',(plist-get node :type))))))))
+      evil-tree-state-map
+      (string-join (list key (plist-get node :key)))
+      (cons
+       ;; emacs-which-key integration
+       (or (plist-get node :name) (s-replace "_" " " (symbol-name (plist-get node :type))))
+       `(lambda ()
+          (interactive)
+          (let ((tree-edit-semantic-snippets (append ,(plist-get node :node-override) tree-edit-semantic-snippets)))
+            (,func ',(plist-get node :type))))))))
 
 (evil-define-key 'normal tree-edit-mode-map "Q" #'evil-tree-state)
+
+(defun tree-edit--make-suppressed-keymap ()
+  "Create a sparse keymap where keys default to undefined."
+  (make-composed-keymap (make-sparse-keymap) evil-suppress-map))
 
 (defun tree-edit--set-state-bindings ()
   "Set keybindings for evil-tree-state.
