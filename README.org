@@ -1,5 +1,7 @@
 #+TITLE: Tree-edit.el - Structural editing for any™ language!
 
+/Please check back late November (EmacsConf 2021)!/
+
 #+begin_quote
 You want to change the structure of a program. You figure out what series of
 text editing operations, operations that manipulate a 2D grid of characters, are
