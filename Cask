@@ -5,6 +5,5 @@
 (package-file "tree-edit.el")
 
 (development
- (depends-on "elsa")
  (depends-on "tree-sitter-langs")
  (depends-on "buttercup"))

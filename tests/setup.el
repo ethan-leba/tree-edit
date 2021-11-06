@@ -1,6 +1,8 @@
 (require 'dash)
+(require 'mode-local)
 (require 'buttercup)
 (require 's)
+(require 'tree-sitter-langs)
 
 (defun buffer-status-as-string ()
   (if (equal evil-state 'tree)
@@ -33,7 +35,8 @@
         (let ((temp-node (tsc-get-descendant-for-position-range
                           (tsc-root-node tree-sitter-tree) start (point))))
           (evil-tree-state)
-          (setq tree-edit--current-node temp-node))))))
+          (setq tree-edit--current-node temp-node)
+          (tree-edit--update-overlay))))))
 
 (defmacro with-base-test-buffer (contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
@@ -51,7 +54,7 @@
          (tree-edit-mode)
          (mode-local--activate-bindings)
          (insert ,contents)
-         (evil-goto-first-line)
+         (goto-char 0)
 
          ,@test-forms
 
@@ -85,3 +88,11 @@
         `(nil . ,(format "Expected '%s' to equal '%s'."
                          contents
                          expected-contents))))))
+
+(defmacro with-tree-test-buffer-avy (contents avy-index &rest test-forms)
+  "If AVY-INDEX is out of bounds a 'user-ptr' error will appear."
+  (declare (indent 2))
+  `(with-tree-test-buffer ,contents
+     (cl-letf (((symbol-function 'avy-process)
+                (lambda (positions) (funcall avy-action (nth ,avy-index positions)))))
+       ,@test-forms)))

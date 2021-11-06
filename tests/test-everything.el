@@ -1,3 +1,6 @@
+(require 'tree-edit)
+(require 'tree-edit-java)
+(ignore-errors (load-file "setup.el"))
 
 (describe "test set up"
   (it "grammar properly loaded"
@@ -93,40 +96,58 @@ if (foo == 3) {
 ;; TODO: Test avy?
 (describe "node creation"
   (it "works with trivial nodes"
-    (expect (tree-edit-make-node 'break_statement '((break_statement . ("break" ";"))))
+    (expect (with-mode-local java-mode
+              (tree-edit-make-node 'break_statement '((break_statement . ("break" ";")))))
             :to-equal "break;")
-    (expect (tree-edit-make-node 'continue_statement '((continue_statement . ("continue" ";"))))
+    (expect (with-mode-local java-mode
+              (tree-edit-make-node 'continue_statement '((continue_statement . ("continue" ";")))))
             :to-equal "continue;"))
   (it "can select choices based on input"
-    (expect (tree-edit-make-node
-             'expression_statement
-             '((expression_statement . (identifier ";")) ;; _expression = identifier
-               (identifier . ("TREE_EDIT"))))
+    (expect (with-mode-local java-mode
+              (tree-edit-make-node
+               'expression_statement
+               '((expression_statement . (identifier ";")) ;; _expression = identifier
+                 (identifier . ("TREE_EDIT")))))
             :to-equal "TREE_EDIT;")
-    (expect (tree-edit-make-node
-             'argument_list
-             '((expression_statement . (call_expression ";")) ;; _expression = identifier
-               (call_expression . (identifier argument_list))
-               (argument_list . ("(" identifier ")"))
-               (identifier . ("TREE_EDIT"))))
+    (expect (with-mode-local java-mode
+              (tree-edit-make-node
+               'argument_list
+               '((expression_statement . (call_expression ";")) ;; _expression = identifier
+                 (call_expression . (identifier argument_list))
+                 (argument_list . ("(" identifier ")"))
+                 (identifier . ("TREE_EDIT")))))
             :to-equal "(TREE_EDIT)")
-    (expect (tree-edit-make-node
-             'expression_statement
-             '((expression_statement . (call_expression ";")) ;; _expression = identifier
-               (call_expression . (identifier argument_list))
-               (argument_list . ("(" identifier ")"))
-               (identifier . ("TREE_EDIT"))))
+    (expect (with-mode-local java-mode
+              (tree-edit-make-node
+               'expression_statement
+               '((expression_statement . (call_expression ";")) ;; _expression = identifier
+                 (call_expression . (identifier argument_list))
+                 (argument_list . ("(" identifier ")"))
+                 (identifier . ("TREE_EDIT")))))
             :to-equal "TREE_EDIT(TREE_EDIT);")
-    (expect (tree-edit-make-node
-             'if_statement
-             '((if_statement . ("if" parenthesized_expression expression_statement)) ;; _expression = identifier
-               (expression_statement . (identifier ";"))
-               (parenthesized_expression . ("(" identifier ")"))
-               (identifier . ("TREE"))))
+    (expect (with-mode-local java-mode
+              (tree-edit-make-node
+               'if_statement
+               '((if_statement . ("if" parenthesized_expression expression_statement)) ;; _expression = identifier
+                 (expression_statement . (identifier ";"))
+                 (parenthesized_expression . ("(" identifier ")"))
+                 (identifier . ("TREE")))))
             :to-equal "if(TREE)TREE;"))
-  (xit "can space words properly"
+  (it "can space words properly"
     ;; FIXME: private void, etc?
-    ))
+    (expect (with-mode-local java-mode
+              (tree-edit-make-node
+               'modifiers
+               '((modifiers . ("private" "void")))))
+            :to-equal "private void")
+    (expect (with-mode-local java-mode
+              (tree-edit-make-node
+               'if_statement
+               '((if_statement . ("if" parenthesized_expression expression_statement "else" expression_statement)) ;; _expression = identifier
+                 (expression_statement . (identifier ";"))
+                 (parenthesized_expression . ("(" identifier ")"))
+                 (identifier . ("TREE")))))
+            :to-equal "if(TREE)TREE;else TREE;")))
 
 ;;* Raise node
 (describe "raise node"
@@ -164,9 +185,57 @@ if (foo == 3) {
               (tree-edit-raise))
             :to-throw 'user-error)))
 
+(describe "change node"
+  (it "enters insert mode after deleting the current node"
+    (expect (with-tree-test-buffer "{foo([x]);}"
+              (tree-edit-change-node))
+            :to-have-buffer-contents "{foo(|);}"))
+  (xit "re-enters tree mode on escape and reselects the node"
+    (expect (with-tree-test-buffer "{foo([x]);}"
+              (tree-edit-change-node)
+              (insert "foo")
+              (evil-normal-state))
+            :to-have-buffer-contents "{foo([foo]);}")
+    (expect (with-tree-test-buffer "{foo(x + [y]);}"
+              (tree-edit-change-node)
+              (insert "z")
+              (evil-normal-state))
+            :to-have-buffer-contents "{foo(x + [z]);}"))
+  ;; TODO
+  (xit "only allows string nodes to be changed"
+    (expect (with-tree-test-buffer "[{foo;}]"
+              (tree-edit-change-node))
+            :to-throw 'user-error)
+    (expect (with-tree-test-buffer "{[3 + 5];}"
+              (tree-edit-change-node))
+            :to-throw 'user-error)))
+
 (describe "exchange node"
   (it "correctly replaces valid transformations")
   (xit "does not allow invalid transformations"))
+
+(describe "copy/paste node"
+  (it "correctly replaces valid transformations"
+    (expect (with-tree-test-buffer "{foo([x]);}"
+              (tree-edit-copy)
+              (tree-edit-insert-sibling (car kill-ring)))
+            :to-have-buffer-contents "{foo(x,[x]);}")
+    ;; Regression: "foo.readl()" would parse as an expression_statement with a missing ";"
+    (expect (with-tree-test-buffer "{foo([x]);}"
+              (tree-edit-copy)
+              (tree-edit-insert-sibling "foo.readl()"))
+            :to-have-buffer-contents "{foo(x,[foo.readl()]);}")
+    (expect (with-tree-test-buffer "{[foo;]bar;}"
+              (tree-edit-copy)
+              (tree-edit-up)
+              (tree-edit-exchange-node (car kill-ring)))
+            :to-have-buffer-contents "{foo;[foo;]}")
+    (expect (with-tree-test-buffer "{foo([x]);}"
+              (tree-edit-copy)
+              (tree-edit-left)
+              (tree-edit-down)
+              (tree-edit-exchange-node (car kill-ring)))
+            :to-have-buffer-contents "{[x](x);}")))
 
 (describe "insert sibling"
   (it "correctly inserts sibling nodes"
@@ -179,12 +248,16 @@ if (foo == 3) {
             :to-have-buffer-contents "{foo(x,[TREE()]);}")
     (expect (with-tree-test-buffer "{[foo(x);]}"
               (tree-edit-insert-sibling 'break_statement))
-            :to-have-buffer-contents "{foo(x);[break;]}"))
-  (xit "calling insert on a node with no named children will enter in"
-    ;; Should select bounds of new named node
-    (expect (with-tree-test-buffer "{foo[()];}"
-              (tree-edit-insert-sibling 'identifier))
-            :to-have-buffer-contents "{foo([TREE]);}"))
+            :to-have-buffer-contents "{foo(x);[break;]}")
+    (expect (with-tree-test-buffer "
+{
+[foo();]// i'm a comment!
+}"
+              (tree-edit-insert-sibling 'break_statement))
+            :to-have-buffer-contents "
+{
+foo();[break;]// i'm a comment!
+}"))
   (xit "can perform multi-node insertions"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer "{if(foo) [bar;]}"
@@ -195,9 +268,52 @@ if (foo == 3) {
               (tree-edit-insert-sibling 'break_statement))
             :to-throw 'user-error)))
 
+(describe "insert child"
+  (it "correctly inserts child nodes"
+    ;; Should select bounds of new named node
+    (expect (with-tree-test-buffer "{if (TREE) [{}]}"
+              (tree-edit-insert-child 'break_statement))
+            :to-have-buffer-contents "{if (TREE) {[break;]}}")
+    (expect (with-tree-test-buffer "{foo[()];}"
+              (tree-edit-insert-child 'identifier))
+            :to-have-buffer-contents "{foo([TREE]);}"))
+  (it "can insert text fragments"
+    ;; Should select bounds of new named node
+    (expect (with-tree-test-buffer "{if (TREE) [{}]}"
+              (tree-edit-insert-child "break;"))
+            :to-have-buffer-contents "{if (TREE) {[break;]}}")
+    (expect (with-tree-test-buffer "{foo[()];}"
+              (tree-edit-insert-child "3 + 4"))
+            :to-have-buffer-contents "{foo([3 + 4]);}"))
+  (it "does not allow invalid transformations"
+    (expect (with-tree-test-buffer "{foo[()];}"
+              (tree-edit-insert-child 'break_statement))
+            :to-throw 'user-error)
+    (expect (with-tree-test-buffer "{foo[()];}"
+              (tree-edit-insert-child "break;"))
+            :to-throw 'user-error)))
+
 (describe "wrap node"
-  (xit "correctly replaces valid transformations")
-  (xit "does not allow invalid transformations"))
+  (it "correctly wraps nodes"
+    (expect (with-tree-test-buffer-avy "{[break;]}" 0
+              (let ((tree-edit-semantic-snippets `((block . ("{" expression_statement "}")) . ,tree-edit-semantic-snippets)))
+                (tree-edit-wrap-node 'if_statement)))
+            :to-have-buffer-contents "{[if(TREE)break;]}")
+    (expect (with-tree-test-buffer-avy "{[break;]}" 1
+              (let ((tree-edit-semantic-snippets `((block . ("{" expression_statement "}")) . ,tree-edit-semantic-snippets)))
+                (tree-edit-wrap-node 'if_statement)))
+            :to-have-buffer-contents "{[if(TREE){break;}]}")
+    (expect (with-tree-test-buffer "{[3 + 3];}"
+              (let ((tree-edit-semantic-snippets `((argument_list . ("(" expression ")")) . ,tree-edit-semantic-snippets)))
+                (tree-edit-wrap-node 'method_invocation)))
+            :to-have-buffer-contents "{[TREE(3 + 3)];}"))
+  (it "gracefully fails if node is unwrappable"
+    (expect (with-tree-test-buffer "{[break;]}"
+              (ignore-errors (tree-edit-wrap-node 'method_invocation)))
+            :to-have-buffer-contents "{[break;]}")
+    (expect (with-tree-test-buffer "{[3 + 3];}"
+              (ignore-errors (tree-edit-wrap-node 'method_invocation)))
+            :to-have-buffer-contents "{[3 + 3];}")))
 
 (describe "modify node"
   (xit "correctly replaces valid transformations")
@@ -218,8 +334,56 @@ class Main {
 }"
               (tree-edit-delete-node))
             :to-have-buffer-contents "
+class Main {[void bar() {}]
+}")
+    (expect (with-tree-test-buffer "
 class Main {
+  // should we delete this?
+  [void foo() {}]
+  void bar() {}
+}"
+              (tree-edit-delete-node))
+            :to-have-buffer-contents "
+class Main {
+  // should we delete this?
   [void bar() {}]
+}")
+    (expect (with-tree-test-buffer "
+class Main {
+  // should we delete this?
+  // i'm a second comment in a row
+  [void foo() {}]
+  void bar() {}
+  // here too
+}"
+              (tree-edit-delete-node))
+            :to-have-buffer-contents "
+class Main {
+  // should we delete this?
+  // i'm a second comment in a row
+  [void bar() {}]
+  // here too
+}")
+    (expect (with-tree-test-buffer "
+{
+  break;
+  [break;]
+  break;
+}"
+              (tree-edit-delete-node))
+            :to-have-buffer-contents "
+{
+  break;
+  [break;]
+}")
+    (expect (with-tree-test-buffer "
+class Main {[public] void main() {}
+}"
+              ;; FIXME: Test selects anonymous keyword 'public', instead of 'modifiers
+              (tree-edit-left)
+              (tree-edit-delete-node))
+            :to-have-buffer-contents "
+class Main {[void] main() {}
 }")
     (expect (with-tree-test-buffer "{foo([x],y);}"
               (tree-edit-delete-node))
@@ -227,10 +391,27 @@ class Main {
     (expect (with-tree-test-buffer "{foo(x,[y]);}"
               (tree-edit-delete-node))
             :to-have-buffer-contents "{foo([x]);}")
+
     (expect (with-tree-test-buffer "{foo(x);[break;]}"
               (tree-edit-delete-node))
             :to-have-buffer-contents "{[foo(x);]}"))
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer "{[foo](x);}"
               (tree-edit-delete-node))
-            :to-throw 'user-error)))
+            :to-throw 'user-error)
+    (expect (with-tree-test-buffer "
+class Main {
+  [void] main() {}
+}"
+              (tree-edit-delete-node))
+            :to-throw 'user-error))
+  (xit "can deal with comments in between relevant syntax"
+    (expect (with-tree-test-buffer "{
+foo(x, // comment
+    [y]);
+}"
+              (tree-edit-delete-node))
+            :to-have-buffer-contents "{
+foo(x // comment
+    );
+}")))

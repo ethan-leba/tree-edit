@@ -3,8 +3,8 @@
 set -x # show executed commands
 set -e # exit on error
 
-cask exec emacs \
-    -Q \
+cask emacs \
+    -q \
     -batch \
     -f package-initialize \
     -l buttercup \
