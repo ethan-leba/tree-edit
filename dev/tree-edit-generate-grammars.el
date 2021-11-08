@@ -13,6 +13,9 @@
 ;; Copyright (C) 2021 Ethan Leba
 ;; Author: Ethan Leba <ethanleba5@gmail.com>
 ;; SPDX-License-Identifier: GPL-3.0-or-later
+;; Version: 0.1.0
+;; Package-Requires: ((emacs "27.0"))
+;; Homepage: https://github.com/ethan-leba/tree-edit
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
