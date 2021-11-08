@@ -6,7 +6,7 @@
 ;; Version: 0.1.0
 ;; Homepage: https://github.com/ethan-leba/tree-edit
 ;; Package-Requires: ((emacs "27.0") (tree-sitter "0.15.0") (tree-sitter-langs "0.10.0") (dash "2.19") (evil "1.0.0") (avy "0.5.0") (reazon "0.4.0") (s "0.0.0"))
-;; SPDX-License-Identifier: MIT
+;; SPDX-License-Identifier: GPL-3.0-or-later
 ;;
 ;; This file is not part of GNU Emacs.
 ;;

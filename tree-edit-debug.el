@@ -6,7 +6,7 @@
 ;; Version: 0.1.0
 ;; Homepage: https://github.com/ethan-leba/tree-edit
 ;; Package-Requires: ((emacs "27.0"))
-;; SPDX-License-Identifier: MIT
+;; SPDX-License-Identifier: GPL-3.0-or-later
 ;;
 ;; This file is not part of GNU Emacs.
 ;;

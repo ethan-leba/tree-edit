@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (C) 2021 Ethan Leba
 ;; Author: Ethan Leba <ethanleba5@gmail.com>
-;; SPDX-License-Identifier: MIT
+;; SPDX-License-Identifier: GPL-3.0-or-later
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
