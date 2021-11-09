@@ -220,9 +220,9 @@ if (foo == 3) {
               (tree-edit-change-node))
             :to-throw 'user-error)))
 
-(describe "exchange node"
-  (it "correctly replaces valid transformations")
-  (xit "does not allow invalid transformations"))
+;; (describe "exchange node"
+;;   (it "correctly replaces valid transformations")
+;;   (xit "does not allow invalid transformations"))
 
 (describe "copy/paste node"
   (it "correctly replaces valid transformations"
@@ -381,10 +381,10 @@ foo();[break;]// i'm a comment!
               (ignore-errors (tree-edit-wrap-node 'method_invocation)))
             :to-have-buffer-contents "{[3 + 3];}")))
 
-(describe "modify node"
-  (xit "correctly replaces valid transformations")
-  (xit "does not allow invalid transformations")
-  (xit "provides an accurate list of possible replacements"))
+;; (describe "modify node"
+;;   (xit "correctly replaces valid transformations")
+;;   (xit "does not allow invalid transformations")
+;;   (xit "provides an accurate list of possible replacements"))
 
 (describe "delete node"
   (it "correctly replaces valid transformations"

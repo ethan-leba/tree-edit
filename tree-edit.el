@@ -462,7 +462,6 @@ Retrieves text from node's start until before the beginning of it's next sibling
   "Insert rendered FRAGMENT at NODE in the provided POSITION.
 
 POSITION can be :before, :after, or nil."
-  ;; XXX: i don't think this accounts for word rules
   (-let* ((parent (tsc-get-parent node))
           (children (tree-edit--get-all-children parent))
           (children-text (tree-edit--node-text-with-whitespace children))
@@ -600,7 +599,6 @@ current, otherwise after."
              (unless (tree-edit--valid-insertions
                       (tsc-node-type slurp-candidate) t
                       slurper)
-               ;; FIXME
                (user-error "Cannot add %s into %s!"
                            (tsc-node-text slurp-candidate)
                            (tsc-node-type tree-edit--current-node)))
@@ -617,7 +615,6 @@ current, otherwise after."
   (let* ((barfee (tsc-get-nth-named-child tree-edit--current-node
                                           (1- (tsc-count-named-children tree-edit--current-node))))
          (barfer (tsc-get-parent tree-edit--current-node))
-         ;; FIXME: need to get refreshed node
          (barfer-steps (tsc--node-steps barfer)))
     (unless (tree-edit--valid-deletions barfee)
       (user-error "Cannot delete %s!" (tsc-node-text barfee)))
@@ -852,7 +849,7 @@ If WRAP is t, include :wrap-override."
                          ,(if wrap (plist-get node :wrap-override))
                          tree-edit-semantic-snippets)))
             (,func ',(plist-get node :type)))))))
-  ;; FIXME
+  ;; Can this be integrated into the loop?
   (define-key
     evil-tree-state-map
     (string-join (list key "p"))
