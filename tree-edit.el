@@ -811,9 +811,11 @@ current, otherwise after."
 
 (evil-define-key 'normal tree-edit-mode-map "Q" #'evil-tree-state)
 
+;;;###autoload
 (define-minor-mode tree-edit-mode
   "Structural editing for any* language."
   :init-value nil
+  :group 'tree-edit
   :keymap tree-edit-mode-map
   :lighter " TE "
   (cond
