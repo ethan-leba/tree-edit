@@ -75,6 +75,10 @@ Properties
   "How long a query should take before giving up."
   :type 'float
   :group 'tree-edit)
+(defcustom tree-edit-language-alist '((java-mode . tree-edit-java))
+  "Mapping from mode to language file."
+  :type '(alist :key-type symbol :value-type symbol)
+  :group 'tree-edit)
 (defcustom tree-edit-movement-hook nil
   "Functions to call after a tree-edit movement command has been issued."
   :type 'hook
@@ -805,6 +809,8 @@ current, otherwise after."
   :exit-hook (tree-edit--exit-tree-state)
   :suppress-keymap t)
 
+(evil-define-key 'normal tree-edit-mode-map "Q" #'evil-tree-state)
+
 (define-minor-mode tree-edit-mode
   "Structural editing for any* language."
   :init-value nil
@@ -812,7 +818,14 @@ current, otherwise after."
   :lighter " TE "
   (cond
    (tree-edit-mode
+    (let ((language-file (alist-get major-mode tree-edit-language-alist)))
+      (unless language-file
+        (tree-edit-mode -1)
+        (user-error "Tree-edit does not support %s!" (symbol-name major-mode)))
+      (require language-file))
     (tree-sitter-mode)
+    ;; HACK: Above mode binding won't come into effect until the state is changed.
+    (evil-normal-state)
     (add-hook 'before-revert-hook #'tree-edit-teardown nil 'local))
    (t
     (remove-hook 'before-revert-hook #'tree-edit-teardown 'local))))
@@ -845,8 +858,6 @@ If WRAP is t, include :wrap-override."
      `(lambda ()
         (interactive)
         (,func (car kill-ring))))))
-
-(evil-define-key 'normal tree-edit-mode-map "Q" #'evil-tree-state)
 
 (defun tree-edit--make-suppressed-keymap ()
   "Create a sparse keymap where keys default to undefined."

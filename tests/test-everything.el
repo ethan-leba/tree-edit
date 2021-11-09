@@ -1,5 +1,4 @@
 (require 'tree-edit)
-(require 'tree-edit-java)
 (ignore-errors (load-file "setup.el"))
 
 (describe "test set up"
@@ -36,6 +35,17 @@
         (expect (not (key-binding "tq")))
         (execute-kbd-macro "ti")
         (expect 'dummy-verb :to-have-been-called-with 'if_statement))))
+
+  ;; TODO
+  (xit "uses node overrides"))
+
+(describe "load grammar based on major mode"
+  (it "loads grammar"
+    (with-base-test-buffer ""
+      (expect tree-edit-grammar)))
+  (it "errors and disables tree-edit-mode on unknown mode"
+    (let ((tree-edit-test-mode #'emacs-lisp-mode))
+      (expect (with-base-test-buffer "") :to-throw 'error)))
 
   ;; TODO
   (xit "uses node overrides"))

@@ -4,6 +4,8 @@
 (require 's)
 (require 'tree-sitter-langs)
 
+(defvar-local tree-edit-test-mode #'java-mode)
+
 (defun buffer-status-as-string ()
   (if (equal evil-state 'tree)
       (progn
@@ -48,7 +50,7 @@
      (let ((temp-buffer (get-buffer-create "tree-edit-test-buffer")))
        (save-window-excursion
          (switch-to-buffer temp-buffer)
-         (java-mode)
+         (funcall tree-edit-test-mode)
          (evil-mode)
          (tree-sitter-mode)
          (tree-edit-mode)
