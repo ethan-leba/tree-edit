@@ -303,6 +303,62 @@ foo();[break;]// i'm a comment!
               (tree-edit-insert-child "break;"))
             :to-throw 'user-error)))
 
+(describe "slurp"
+  (it "correctly slurps nodes"
+    (expect (with-tree-test-buffer "{if(foo)[{}]break;}"
+              (tree-edit-slurp))
+            :to-have-buffer-contents "{if(foo)[{break;}]}")
+    (expect (with-tree-test-buffer "{if(foo)[{break;}]break;}"
+              (tree-edit-slurp))
+            :to-have-buffer-contents "{if(foo)[{break;break;}]}")
+    (expect (with-tree-test-buffer "{if(foo)[{break;}] if(foobar){} else if (qwerty){}}"
+              (tree-edit-slurp))
+            :to-have-buffer-contents "{if(foo)[{break;if(foobar){} else if (qwerty){}}] }")
+    (expect (with-tree-test-buffer "{foo(bar[()], x, y, z)}"
+              (tree-edit-slurp))
+            :to-have-buffer-contents "{foo(bar[(x)],y, z)}")
+    (expect (with-tree-test-buffer "{foo(bar[(x)], y, z)}"
+              (tree-edit-slurp))
+            :to-have-buffer-contents "{foo(bar[(x,y)],z)}"))
+  (it "gracefully fails if slurp is impossible"
+    (expect (with-tree-test-buffer "{foo(bar[()])}"
+              (ignore-errors (tree-edit-slurp)))
+            :to-have-buffer-contents "{foo(bar[()])}")
+    (expect (with-tree-test-buffer "{foo(bar[(x)])}"
+              (ignore-errors (tree-edit-slurp)))
+            :to-have-buffer-contents "{foo(bar[(x)])}")
+    (expect (with-tree-test-buffer "{if(foo)[{}]}"
+              (ignore-errors (tree-edit-slurp)))
+            :to-have-buffer-contents "{if(foo)[{}]}")
+    (expect (with-tree-test-buffer "{if(foo)[{break;}]}"
+              (ignore-errors (tree-edit-slurp)))
+            :to-have-buffer-contents "{if(foo)[{break;}]}")))
+
+(describe "barf"
+  (it "correctly barfs nodes"
+    (expect (with-tree-test-buffer "{if(foo)[{break;}]}"
+              (tree-edit-barf))
+            :to-have-buffer-contents "{if(foo)[{}]break;}")
+    (expect (with-tree-test-buffer "{if(foo)[{break;break;}]}"
+              (tree-edit-barf))
+            :to-have-buffer-contents "{if(foo)[{break;}]break;}")
+    (expect (with-tree-test-buffer "{if(foo)[{break;if(foobar){} else if (qwerty){}}] }"
+              (tree-edit-barf))
+            :to-have-buffer-contents "{if(foo)[{break;}] if(foobar){} else if (qwerty){}}")
+    (expect (with-tree-test-buffer "{foo(bar[(x)], y, z)}"
+              (tree-edit-barf))
+            :to-have-buffer-contents "{foo(bar[()],x, y, z)}")
+    (expect (with-tree-test-buffer "{foo(bar[(x,y)], z)}"
+              (tree-edit-barf))
+            :to-have-buffer-contents "{foo(bar[(x)],y, z)}"))
+  (it "gracefully fails if barf is impossible"
+    (expect (with-tree-test-buffer "{foo(bar[()])}"
+              (ignore-errors (tree-edit-barf)))
+            :to-have-buffer-contents "{foo(bar[()])}")
+    (expect (with-tree-test-buffer "{if(foo)[{}]}"
+              (ignore-errors (tree-edit-barf)))
+            :to-have-buffer-contents "{if(foo)[{}]}")))
+
 (describe "wrap node"
   (it "correctly wraps nodes"
     (expect (with-tree-test-buffer-avy "{[break;]}" 0

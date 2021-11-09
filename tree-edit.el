@@ -478,7 +478,7 @@ POSITION can be :before, :after, or nil."
                          tree-edit-semantic-snippets
                          fragment) ""))
           (reconstructed-node (tree-edit--render-node (append left (if fragment render-fragment) right))))
-    ;; HACK
+    (goto-char (tsc-node-start-position parent))
     (delete-region (tsc-node-start-position parent)
                    (tsc-node-end-position parent))
     (insert reconstructed-node)))
@@ -576,7 +576,7 @@ current, otherwise after."
     (cond ((not slurp-candidate) (user-error "Nothing to slurp!"))
           ;; No named children, use insert child
           ((equal (tsc-count-named-children tree-edit--current-node) 0)
-           (let ((slurper tree-edit--current-node))
+           (let ((slurper (tsc--node-steps tree-edit--current-node)))
              (unless (tree-edit--valid-deletions slurp-candidate)
                (user-error "Cannot delete %s!" (tsc-node-text slurp-candidate)))
              (unless (tree-edit--valid-insertions (tsc-node-type slurp-candidate)
@@ -588,12 +588,13 @@ current, otherwise after."
              (let ((slurp-text (tsc-node-text slurp-candidate)))
                (tree-edit--preserve-location tree-edit--current-node 0
                  (tree-edit-delete-node slurp-candidate)
-                 (tree-edit-insert-child slurp-text slurper)))))
+                 (tree-edit-insert-child slurp-text (tsc--node-from-steps tree-sitter-tree slurper))))))
           ;; Named children, use insert sibling
           (t
-           (let ((slurper
-                  (tsc-get-nth-named-child tree-edit--current-node
-                                           (1- (tsc-count-named-children tree-edit--current-node)))))
+           (let* ((slurper
+                   (tsc-get-nth-named-child tree-edit--current-node
+                                            (1- (tsc-count-named-children tree-edit--current-node))))
+                  (slurper-steps (tsc--node-steps slurper)))
              (unless (tree-edit--valid-deletions slurp-candidate)
                (user-error "Cannot delete %s!" (tsc-node-text slurp-candidate)))
              (unless (tree-edit--valid-insertions
@@ -606,7 +607,7 @@ current, otherwise after."
              (let ((slurp-text (tsc-node-text slurp-candidate)))
                (tree-edit--preserve-location tree-edit--current-node 0
                  (tree-edit-delete-node slurp-candidate)
-                 (tree-edit-insert-sibling slurp-text nil slurper))))))))
+                 (tree-edit-insert-sibling slurp-text nil (tsc--node-from-steps tree-sitter-tree slurper-steps)))))))))
 
 (defun tree-edit-barf ()
   "Transform NODE's leftmost child into it's next sibling, if possible."

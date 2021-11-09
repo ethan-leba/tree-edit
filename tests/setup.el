@@ -47,7 +47,9 @@
   `(progn
      (-when-let (b (get-buffer "tree-edit-test-buffer"))
        (kill-buffer b))
-     (let ((temp-buffer (get-buffer-create "tree-edit-test-buffer")))
+     (let ((temp-buffer (get-buffer-create "tree-edit-test-buffer"))
+           tree-edit-after-change-hook
+           tree-edit-movement-hook)
        (save-window-excursion
          (switch-to-buffer temp-buffer)
          (funcall tree-edit-test-mode)
