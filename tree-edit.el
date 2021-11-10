@@ -469,8 +469,7 @@ POSITION can be :before, :after, or nil."
                                            (tsc-node-position-range it))
                                     children))
           ((left right) (if children-text
-                            (-split-at (min (1- (length children-text))
-                                            (+ node-index (if (equal position :after) 1 0))) children-text)))
+                            (-split-at (+ node-index (if (equal position :after) 1 0)) children-text)))
           (render-fragment
            (if fragment (tree-edit--generate-node
                          (tsc-node-type (tsc-get-parent node))

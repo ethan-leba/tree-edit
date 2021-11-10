@@ -249,7 +249,6 @@ if (foo == 3) {
 
 (describe "insert sibling"
   (it "correctly inserts sibling nodes"
-    ;; Should select bounds of new named node
     (expect (with-tree-test-buffer "{foo([x]);}"
               (tree-edit-insert-sibling 'identifier))
             :to-have-buffer-contents "{foo(x,[TREE]);}")
@@ -259,6 +258,18 @@ if (foo == 3) {
     (expect (with-tree-test-buffer "{[foo(x);]}"
               (tree-edit-insert-sibling 'break_statement))
             :to-have-buffer-contents "{foo(x);[break;]}")
+    (expect (with-tree-test-buffer "{if(TREE)[{}]}"
+              (tree-edit-insert-sibling 'if_statement))
+            :to-have-buffer-contents "{if(TREE){}else [if(TREE){}]}")
+    (expect (with-tree-test-buffer "{if(TREE)[{}]}"
+              (tree-edit-insert-sibling 'block))
+            :to-have-buffer-contents "{if(TREE){}else[{}]}")
+    (expect (with-tree-test-buffer "{try{}[catch(Exception e) {}]}"
+              (tree-edit-insert-sibling 'catch_clause))
+            :to-have-buffer-contents "{try{}catch(Exception e) {}[catch(Exception e){}]}")
+    (expect (with-tree-test-buffer "{try{}[catch(Exception e) {}]}"
+              (tree-edit-insert-sibling 'finally_clause))
+            :to-have-buffer-contents "{try{}catch(Exception e) {}[finally{}]}")
     (expect (with-tree-test-buffer "
 {
 [foo();]// i'm a comment!
@@ -276,6 +287,18 @@ foo();[break;]// i'm a comment!
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer "{foo([x]);}"
               (tree-edit-insert-sibling 'break_statement))
+            :to-throw 'user-error)
+    ;; Only one else block
+    (expect (with-tree-test-buffer "{if(TREE){}else[{}]}"
+              (tree-edit-insert-sibling 'block))
+            :to-throw 'user-error)
+    ;; Only one finally clause
+    (expect (with-tree-test-buffer "{try{}catch(Exception e) {}[finally{}]}"
+              (tree-edit-insert-sibling 'finally_clause))
+            :to-throw 'user-error)
+    ;; Catch cannot go after finally
+    (expect (with-tree-test-buffer "{try{}catch(Exception e) {}[finally{}]}"
+              (tree-edit-insert-sibling 'catch_clause))
             :to-throw 'user-error)))
 
 (describe "insert child"
