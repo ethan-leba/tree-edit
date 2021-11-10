@@ -51,8 +51,7 @@ lighter color if CHILD-OF-CURRENT-NODE is non-nil."
       (when (not (or current-nodep child-of-current-node))
         (add-text-properties point-before (point) '(face (:foreground "dim gray")))))
     (tsc-mapc-children (lambda (c)
-                         (when (and (tsc-node-named-p c)
-                                    (> (tsc-count-named-children c) 0))
+                         (when (tsc-node-named-p c)
                            (tree-edit-debug--display-node c (1+ depth) (or child-of-current-node current-nodep))))
                        node)))
 
