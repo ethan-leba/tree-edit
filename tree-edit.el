@@ -43,7 +43,7 @@
   "The regex used to determine if a string is an identifier. Set by mode-local grammar file.")
 (defvar tree-edit-significant-node-types nil
   "List of nodes that are considered significant, like methods or classes. Set by mode-local grammar file.")
-(defvar tree-edit-semantic-snippets nil
+(defvar tree-edit-syntax-snippets nil
   "Snippets for constructing nodes. Set by mode-local grammar file.
 
 Must be an alist of node type (as a symbol) to list, where the list can
@@ -59,8 +59,8 @@ Properties
   :key            the keybinding for the given node
   :name           human readable name for which-key, defaults to
                   :type if left unset
-  :node-override  overrides semantic snippets for the verb
-  :wrap-override  overrides semantic snippets for the verb when wrapping")
+  :node-override  overrides syntax snippets for the verb
+  :wrap-override  overrides syntax snippets for the verb when wrapping")
 
 
 (defvar tree-edit-mode-map (make-sparse-keymap))
@@ -450,7 +450,7 @@ Retrieves text from node's start until before the beginning of it's next sibling
           (render-fragment
            (if fragment (tree-edit--generate-node
                          (tsc-node-type (tsc-get-parent node))
-                         tree-edit-semantic-snippets
+                         tree-edit-syntax-snippets
                          fragment) ""))
           (reconstructed-node (tree-edit--render-node (append left (if fragment render-fragment) right))))
     (goto-char (tsc-node-start-position parent))
@@ -473,7 +473,7 @@ POSITION can be :before, :after, or nil."
           (render-fragment
            (if fragment (tree-edit--generate-node
                          (tsc-node-type (tsc-get-parent node))
-                         tree-edit-semantic-snippets
+                         tree-edit-syntax-snippets
                          fragment) ""))
           (reconstructed-node (tree-edit--render-node (append left (if fragment render-fragment) right))))
     (goto-char (tsc-node-start-position parent))
@@ -519,7 +519,7 @@ the text."
       (delete-region (tsc-node-start-position tree-edit--current-node)
                      (tsc-node-end-position tree-edit--current-node))
       (insert (if (symbolp type-or-text)
-                  (tree-edit-make-node type tree-edit-semantic-snippets)
+                  (tree-edit-make-node type tree-edit-syntax-snippets)
                 type-or-text)))))
 
 (defun tree-edit-raise ()
@@ -843,10 +843,10 @@ If WRAP is t, include :wrap-override."
        (or (plist-get node :name) (s-replace "_" " " (symbol-name (plist-get node :type))))
        `(lambda ()
           (interactive)
-          (let ((tree-edit-semantic-snippets
+          (let ((tree-edit-syntax-snippets
                  (append ,(plist-get node :node-override)
                          ,(if wrap (plist-get node :wrap-override))
-                         tree-edit-semantic-snippets)))
+                         tree-edit-syntax-snippets)))
             (,func ',(plist-get node :type)))))))
   ;; Can this be integrated into the loop?
   (define-key

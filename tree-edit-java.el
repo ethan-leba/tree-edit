@@ -28,7 +28,7 @@
 (setq-mode-local
  java-mode
 
- tree-edit-semantic-snippets
+ tree-edit-syntax-snippets
  '((class_declaration . ("class" identifier "{" "}"))
    (method_declaration . ("void" identifier "(" ")" "{" "}"))
    (method_declaration . ("void" identifier "(" ")" "{" "}"))
