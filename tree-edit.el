@@ -862,29 +862,31 @@ If WRAP is t, include :wrap-override."
   "Create a sparse keymap where keys default to undefined."
   (make-composed-keymap (make-sparse-keymap) evil-suppress-map))
 
-(defun tree-edit--set-state-bindings ()
-  "Set keybindings for `evil-tree-state'.
+(defun tree-edit--set-state-bindings (mode)
+  "Set keybindings for MODE in `evil-tree-state'.
 
 Should only be used in the context of mode-local bindings, as
 each language will have it's own set of nouns."
-  (define-tree-edit-verb "i" #'tree-edit-insert-sibling-before)
-  (define-tree-edit-verb "a" #'tree-edit-insert-sibling)
-  (define-tree-edit-verb "I" #'tree-edit-insert-child)
-  (define-tree-edit-verb "s" #'tree-edit-avy-jump)
-  (define-tree-edit-verb "e" #'tree-edit-exchange-node)
-  (define-tree-edit-verb "w" #'tree-edit-wrap-node t)
-  (define-key evil-tree-state-map [escape] 'evil-normal-state)
-  (define-key evil-tree-state-map ">" #'tree-edit-slurp)
-  (define-key evil-tree-state-map "<" #'tree-edit-barf)
-  (define-key evil-tree-state-map "j" #'tree-edit-up)
-  (define-key evil-tree-state-map "k" #'tree-edit-down)
-  (define-key evil-tree-state-map "h" #'tree-edit-left)
-  (define-key evil-tree-state-map "f" #'tree-edit-right)
-  (define-key evil-tree-state-map "c" #'tree-edit-change-node)
-  (define-key evil-tree-state-map "d" #'tree-edit-delete-node)
-  (define-key evil-tree-state-map "r" #'tree-edit-raise)
-  (define-key evil-tree-state-map "y" #'tree-edit-copy)
-  (define-key evil-tree-state-map "A" #'tree-edit-sig-up))
+  (with-mode-local-symbol mode
+    (mode-local-bind `((evil-tree-state-map . ,(tree-edit--make-suppressed-keymap))) nil mode)
+    (define-tree-edit-verb "i" #'tree-edit-insert-sibling-before)
+    (define-tree-edit-verb "a" #'tree-edit-insert-sibling)
+    (define-tree-edit-verb "I" #'tree-edit-insert-child)
+    (define-tree-edit-verb "s" #'tree-edit-avy-jump)
+    (define-tree-edit-verb "e" #'tree-edit-exchange-node)
+    (define-tree-edit-verb "w" #'tree-edit-wrap-node t)
+    (define-key evil-tree-state-map [escape] 'evil-normal-state)
+    (define-key evil-tree-state-map ">" #'tree-edit-slurp)
+    (define-key evil-tree-state-map "<" #'tree-edit-barf)
+    (define-key evil-tree-state-map "j" #'tree-edit-up)
+    (define-key evil-tree-state-map "k" #'tree-edit-down)
+    (define-key evil-tree-state-map "h" #'tree-edit-left)
+    (define-key evil-tree-state-map "f" #'tree-edit-right)
+    (define-key evil-tree-state-map "c" #'tree-edit-change-node)
+    (define-key evil-tree-state-map "d" #'tree-edit-delete-node)
+    (define-key evil-tree-state-map "r" #'tree-edit-raise)
+    (define-key evil-tree-state-map "y" #'tree-edit-copy)
+    (define-key evil-tree-state-map "A" #'tree-edit-sig-up)))
 
 (provide 'tree-edit)
 ;;; tree-edit.el ends here

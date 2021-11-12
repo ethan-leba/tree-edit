@@ -133,12 +133,9 @@
    (:type finally_clause
     :key "f")
    (:type null_literal
-    :key "n"))
+    :key "n")))
 
- evil-tree-state-map (tree-edit--make-suppressed-keymap))
-
-(with-mode-local java-mode
-  (tree-edit--set-state-bindings))
+(tree-edit--set-state-bindings 'java-mode)
 
 (provide 'tree-edit-java)
 ;;; tree-edit-java.el ends here
