@@ -54,29 +54,29 @@
 (describe "basic navigation"
   (it "can move between sibling nodes"
     (expect (with-tree-test-buffer "if ([foo] == 3) {}"
-              (tree-edit-up))
+              (tree-edit-goto-next-sibling))
             :to-have-buffer-contents "if (foo == [3]) {}")
     (expect (with-tree-test-buffer "if (foo == [3]) {}"
-              (tree-edit-down))
+              (tree-edit-goto-prev-sibling))
             :to-have-buffer-contents "if ([foo] == 3) {}"))
   (it "can move between parent and children nodes"
     (expect (with-tree-test-buffer "if (foo == [3]) {}"
-              (tree-edit-left))
+              (tree-edit-goto-parent))
             :to-have-buffer-contents "if ([foo == 3]) {}")
     (expect (with-tree-test-buffer "if (foo == [3]) {}"
-              (tree-edit-left)
-              (tree-edit-left))
+              (tree-edit-goto-parent)
+              (tree-edit-goto-parent))
             :to-have-buffer-contents "if [(foo == 3)] {}")
     (expect (with-tree-test-buffer "if (foo == [3]) {}"
-              (tree-edit-left)
-              (tree-edit-left)
-              (tree-edit-left))
+              (tree-edit-goto-parent)
+              (tree-edit-goto-parent)
+              (tree-edit-goto-parent))
             :to-have-buffer-contents "[if (foo == 3) {}]")
     (expect (with-tree-test-buffer "[if (foo == 3) {}]"
-              (tree-edit-right))
+              (tree-edit-goto-child))
             :to-have-buffer-contents "if [(foo == 3)] {}")
     (expect (with-tree-test-buffer "if ([foo == 3]) {}"
-              (tree-edit-right))
+              (tree-edit-goto-child))
             :to-have-buffer-contents "if ([foo] == 3) {}")))
 
 (describe "entering tree state"
@@ -237,13 +237,13 @@ if (foo == 3) {
             :to-have-buffer-contents "{foo(x,[foo.readl()]);}")
     (expect (with-tree-test-buffer "{[foo;]bar;}"
               (tree-edit-copy)
-              (tree-edit-up)
+              (tree-edit-goto-next-sibling)
               (tree-edit-exchange-node (car kill-ring)))
             :to-have-buffer-contents "{foo;[foo;]}")
     (expect (with-tree-test-buffer "{foo([x]);}"
               (tree-edit-copy)
-              (tree-edit-left)
-              (tree-edit-down)
+              (tree-edit-goto-parent)
+              (tree-edit-goto-prev-sibling)
               (tree-edit-exchange-node (car kill-ring)))
             :to-have-buffer-contents "{[x](x);}")))
 
@@ -469,7 +469,7 @@ class Main {
 class Main {[public] void main() {}
 }"
               ;; FIXME: Test selects anonymous keyword 'public', instead of 'modifiers
-              (tree-edit-left)
+              (tree-edit-goto-parent)
               (tree-edit-delete-node))
             :to-have-buffer-contents "
 class Main {[void] main() {}

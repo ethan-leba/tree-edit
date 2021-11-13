@@ -181,22 +181,22 @@ TODO: Build queries and cursors once, then reuse them?"
     (tree-edit--update-overlay)))
 
 ;;* Globals: navigation
-(defun tree-edit-up ()
+(defun tree-edit-goto-next-sibling ()
   "Move to the next (interesting) named sibling."
   (interactive)
   (tree-edit--apply-movement #'tsc-get-next-named-sibling))
 
-(defun tree-edit-down ()
+(defun tree-edit-goto-prev-sibling ()
   "Move to the previous (interesting) named sibling."
   (interactive)
   (tree-edit--apply-movement #'tsc-get-prev-named-sibling))
 
-(defun tree-edit-left ()
-  "Move to the up to the next interesting parent."
+(defun tree-edit-goto-parent ()
+  "Move up to the next interesting parent."
   (interactive)
   (tree-edit--apply-movement #'tsc-get-parent))
 
-(defun tree-edit-right ()
+(defun tree-edit-goto-child ()
   "Move to the first child, unless it's an only child."
   (interactive)
   (tree-edit--apply-movement (lambda (node) (tsc-get-nth-named-child node 0))))
@@ -565,7 +565,7 @@ current, otherwise after."
              (fragment (tree-edit--valid-insertions type t node))
              (fragment (if (symbolp type-or-text) fragment (-replace-first type type-or-text fragment))))
         (tree-edit--insert-fragment fragment node :after))))
-  (tree-edit-right))
+  (tree-edit-goto-child))
 
 (defun tree-edit-slurp ()
   "Transform NODE's next sibling into it's leftmost child, if possible."
@@ -878,10 +878,10 @@ each language will have it's own set of nouns."
     (define-key evil-tree-state-map [escape] 'evil-normal-state)
     (define-key evil-tree-state-map ">" #'tree-edit-slurp)
     (define-key evil-tree-state-map "<" #'tree-edit-barf)
-    (define-key evil-tree-state-map "j" #'tree-edit-up)
-    (define-key evil-tree-state-map "k" #'tree-edit-down)
-    (define-key evil-tree-state-map "h" #'tree-edit-left)
-    (define-key evil-tree-state-map "f" #'tree-edit-right)
+    (define-key evil-tree-state-map "j" #'tree-edit-goto-next-sibling)
+    (define-key evil-tree-state-map "k" #'tree-edit-goto-prev-sibling)
+    (define-key evil-tree-state-map "h" #'tree-edit-goto-parent)
+    (define-key evil-tree-state-map "f" #'tree-edit-goto-child)
     (define-key evil-tree-state-map "c" #'tree-edit-change-node)
     (define-key evil-tree-state-map "d" #'tree-edit-delete-node)
     (define-key evil-tree-state-map "r" #'tree-edit-raise)
