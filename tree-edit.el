@@ -166,13 +166,13 @@ TODO: Build queries and cursors once, then reuse them?"
     (seq-map (lambda (capture) (cons (tsc-node-start-position (cdr capture)) (cdr capture)))
              (tsc-query-captures query tree-edit--current-node #'tsc--buffer-substring-no-properties))))
 
-(defun tree-edit--sig-up (node)
+(defun tree-edit--goto-sig-parent (node)
   "Move NODE to the next (interesting) named sibling."
-  (interactive)
-  (setq node (tsc-get-parent node))
-  (while (not (member (tsc-node-type node) tree-edit-significant-node-types))
-    (setq node (tsc-get-parent node)))
-  node)
+  (let ((parent (tsc-get-parent node)))
+    (cond
+     ((not parent) (user-error "No significant node past the current!"))
+     ((member (tsc-node-type parent) tree-edit-significant-node-types) parent)
+     (t (tree-edit--goto-sig-parent parent)))))
 
 (defun tree-edit--apply-movement (fun)
   "Apply movement FUN, and then update the node position and display."
@@ -201,10 +201,10 @@ TODO: Build queries and cursors once, then reuse them?"
   (interactive)
   (tree-edit--apply-movement (lambda (node) (tsc-get-nth-named-child node 0))))
 
-(defun tree-edit-sig-up ()
+(defun tree-edit-goto-sig-parent ()
   "Move to the next (interesting) named sibling."
   (interactive)
-  (tree-edit--apply-movement #'tree-edit--sig-up))
+  (tree-edit--apply-movement #'tree-edit--goto-sig-parent))
 
 (defun tree-edit-avy-jump (node-type &optional pred)
   "Avy jump to a node with the NODE-TYPE and filter the node with PRED.
@@ -886,7 +886,7 @@ each language will have it's own set of nouns."
     (define-key evil-tree-state-map "d" #'tree-edit-delete-node)
     (define-key evil-tree-state-map "r" #'tree-edit-raise)
     (define-key evil-tree-state-map "y" #'tree-edit-copy)
-    (define-key evil-tree-state-map "A" #'tree-edit-sig-up)))
+    (define-key evil-tree-state-map "A" #'tree-edit-goto-sig-parent)))
 
 (provide 'tree-edit)
 ;;; tree-edit.el ends here

@@ -50,7 +50,6 @@
   ;; TODO
   (xit "uses node overrides"))
 
-;; TODO: Rename navigation primitives
 (describe "basic navigation"
   (it "can move between sibling nodes"
     (expect (with-tree-test-buffer "if ([foo] == 3) {}"
@@ -77,7 +76,21 @@
             :to-have-buffer-contents "if [(foo == 3)] {}")
     (expect (with-tree-test-buffer "if ([foo == 3]) {}"
               (tree-edit-goto-child))
-            :to-have-buffer-contents "if ([foo] == 3) {}")))
+            :to-have-buffer-contents "if ([foo] == 3) {}"))
+  (it "can move to sig node"
+    (expect (with-tree-test-buffer "{if (foo == [3]) {}}"
+              (let ((tree-edit-significant-node-types '(block)))
+                (tree-edit-goto-sig-parent)))
+            :to-have-buffer-contents "[{if (foo == 3) {}}]")
+    (expect (with-tree-test-buffer "{[{if (foo == 3) {}}]}"
+              (let ((tree-edit-significant-node-types '(block)))
+                (tree-edit-goto-sig-parent)))
+            :to-have-buffer-contents "[{{if (foo == 3) {}}}]"))
+  (it "sig node gracefully fails"
+    (expect (with-tree-test-buffer "{[{if (foo == 3) {}}]}"
+              (let ((tree-edit-significant-node-types '()))
+                (ignore-errors (tree-edit-goto-sig-parent))))
+            :to-have-buffer-contents "{[{if (foo == 3) {}}]}")))
 
 (describe "entering tree state"
   (it "will select the smallest node at point"
