@@ -38,7 +38,7 @@
                           (tsc-root-node tree-sitter-tree) start (point))))
           (evil-tree-state)
           (setq tree-edit--current-node temp-node)
-          (tree-edit--update-overlay))))))
+          (evil-tree-edit--update-overlay))))))
 
 (defmacro with-base-test-buffer (contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
@@ -55,7 +55,7 @@
          (funcall tree-edit-test-mode)
          (evil-mode)
          (tree-sitter-mode)
-         (tree-edit-mode)
+         (evil-tree-edit-mode)
          (mode-local--activate-bindings)
          (insert ,contents)
          (goto-char 0)

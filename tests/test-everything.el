@@ -1,4 +1,4 @@
-(require 'tree-edit)
+(require 'evil-tree-edit)
 (ignore-errors (load-file "setup.el"))
 
 (describe "test set up"
@@ -29,7 +29,7 @@
             (tree-edit-nodes
              '((:type if_statement
                 :key "i"))))
-        (define-tree-edit-verb "t" #'dummy-verb)
+        (define-evil-tree-edit-verb "t" #'dummy-verb)
         (evil-tree-state)
         (expect (key-binding "ti"))
         (expect (not (key-binding "tq")))
@@ -211,26 +211,26 @@ if (foo == 3) {
 (describe "change node"
   (it "enters insert mode after deleting the current node"
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (tree-edit-change-node))
+              (evil-tree-edit-change-node))
             :to-have-buffer-contents "{foo(|);}"))
   (xit "re-enters tree mode on escape and reselects the node"
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (tree-edit-change-node)
+              (evil-tree-edit-change-node)
               (insert "foo")
               (evil-normal-state))
             :to-have-buffer-contents "{foo([foo]);}")
     (expect (with-tree-test-buffer "{foo(x + [y]);}"
-              (tree-edit-change-node)
+              (evil-tree-edit-change-node)
               (insert "z")
               (evil-normal-state))
             :to-have-buffer-contents "{foo(x + [z]);}"))
   ;; TODO
   (xit "only allows string nodes to be changed"
     (expect (with-tree-test-buffer "[{foo;}]"
-              (tree-edit-change-node))
+              (evil-tree-edit-change-node))
             :to-throw 'user-error)
     (expect (with-tree-test-buffer "{[3 + 5];}"
-              (tree-edit-change-node))
+              (evil-tree-edit-change-node))
             :to-throw 'user-error)))
 
 ;; (describe "exchange node"

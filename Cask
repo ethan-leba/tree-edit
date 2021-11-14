@@ -6,4 +6,9 @@
 
 (development
  (depends-on "tree-sitter-langs")
- (depends-on "buttercup"))
+ (depends-on "buttercup")
+ ;; FIXME: can't reference evil-tree-edit's package-file directly, since it
+ ;; relies on tree-edit (which causes a dependency error). manually declaring
+ ;; the deps. instead.
+ (depends-on "evil")
+ (depends-on "avy"))

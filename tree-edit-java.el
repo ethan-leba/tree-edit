@@ -135,7 +135,5 @@
    (:type null_literal
     :key "n")))
 
-(tree-edit--set-state-bindings 'java-mode)
-
 (provide 'tree-edit-java)
 ;;; tree-edit-java.el ends here
