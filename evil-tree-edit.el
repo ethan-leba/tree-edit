@@ -40,6 +40,47 @@
                  (tsc-node-end-position tree-edit--current-node))
   (evil-change-state 'insert))
 
+(defun evil-tree-edit-avy-jump (node-type &optional pred)
+  "Avy jump to a node with the NODE-TYPE and filter the node with PRED.
+
+PRED will receive a pair of (position . node).
+NODE-TYPE can be a symbol or a list of symbol."
+  (interactive)
+  (let* ((node-type (if (listp node-type) node-type `(,node-type)))
+         ;; Querying needs a @name for unknown reasons
+         (query-string
+          (format "[%s] @foo"
+                  (-as-> node-type %
+                         (-mapcat (lambda (x) (alist-get x tree-edit--subtypes)) %)
+                         (-uniq %)
+                         (--remove (string-prefix-p "_" (symbol-name it)) %)
+                         (--map (format "(%s)" it) %)
+                         (string-join % " "))))
+         (position->node
+          (-filter (or pred (-const t))
+                   (-remove-first (-lambda ((pos . _))
+                                    (equal pos (tsc-node-start-position tree-edit--current-node)))
+                                  (tree-edit-query query-string))))
+         ;; avy-action declares what should be done with the result of avy-process
+         (avy-action (lambda (pos)
+                       (setq tree-edit--current-node (alist-get pos position->node))
+                       (run-hooks 'tree-edit-movement-hook))))
+    (cond ((not position->node) (user-error "Nothing to jump to!"))
+          ((equal (length position->node) 1) (funcall avy-action (caar position->node)))
+          (t (avy-process (-map #'car position->node))))))
+
+;; TODO: Moved wrap here since it relies on avy, but it should be part of
+;; `tree-edit.el` proper.
+(defun evil-tree-edit-wrap-node (type)
+  "Wrap the current node in a node of selected TYPE."
+  (tree-edit--preserve-location tree-edit--current-node 0
+    (let ((node-text (tsc-node-text tree-edit--current-node)))
+      (tree-edit-exchange-node type)
+      (unwind-protect
+          (evil-tree-edit-avy-jump (alist-get type tree-edit--supertypes)
+                                   (-lambda ((_ . node)) (tree-edit--valid-replacement-p type node)))
+        (tree-edit-exchange-node node-text)))))
+
 ;;* Evil state definition and keybindings
 (defun evil-tree-edit--update-overlay ()
   "Update the display of the current selected node, and move the cursor."
@@ -155,7 +196,7 @@ each language will have it's own set of nouns."
     (define-evil-tree-edit-verb "i" #'tree-edit-insert-sibling-before)
     (define-evil-tree-edit-verb "a" #'tree-edit-insert-sibling)
     (define-evil-tree-edit-verb "I" #'tree-edit-insert-child)
-    (define-evil-tree-edit-verb "s" #'tree-edit-avy-jump)
+    (define-evil-tree-edit-verb "s" #'evil-tree-edit-avy-jump)
     (define-evil-tree-edit-verb "e" #'tree-edit-exchange-node)
     (define-evil-tree-edit-verb "w" #'tree-edit-wrap-node t)
     (define-key evil-tree-state-map [escape] 'evil-normal-state)

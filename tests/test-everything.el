@@ -399,22 +399,22 @@ foo();[break;]// i'm a comment!
   (it "correctly wraps nodes"
     (expect (with-tree-test-buffer-avy "{[break;]}" 0
               (let ((tree-edit-syntax-snippets `((block . ("{" expression_statement "}")) . ,tree-edit-syntax-snippets)))
-                (tree-edit-wrap-node 'if_statement)))
+                (evil-tree-edit-wrap-node 'if_statement)))
             :to-have-buffer-contents "{[if(TREE)break;]}")
     (expect (with-tree-test-buffer-avy "{[break;]}" 1
               (let ((tree-edit-syntax-snippets `((block . ("{" expression_statement "}")) . ,tree-edit-syntax-snippets)))
-                (tree-edit-wrap-node 'if_statement)))
+                (evil-tree-edit-wrap-node 'if_statement)))
             :to-have-buffer-contents "{[if(TREE){break;}]}")
     (expect (with-tree-test-buffer "{[3 + 3];}"
               (let ((tree-edit-syntax-snippets `((argument_list . ("(" expression ")")) . ,tree-edit-syntax-snippets)))
-                (tree-edit-wrap-node 'method_invocation)))
+                (evil-tree-edit-wrap-node 'method_invocation)))
             :to-have-buffer-contents "{[TREE(3 + 3)];}"))
   (it "gracefully fails if node is unwrappable"
     (expect (with-tree-test-buffer "{[break;]}"
-              (ignore-errors (tree-edit-wrap-node 'method_invocation)))
+              (ignore-errors (evil-tree-edit-wrap-node 'method_invocation)))
             :to-have-buffer-contents "{[break;]}")
     (expect (with-tree-test-buffer "{[3 + 3];}"
-              (ignore-errors (tree-edit-wrap-node 'method_invocation)))
+              (ignore-errors (evil-tree-edit-wrap-node 'method_invocation)))
             :to-have-buffer-contents "{[3 + 3];}")))
 
 ;; (describe "modify node"
