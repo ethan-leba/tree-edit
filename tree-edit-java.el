@@ -1,4 +1,4 @@
-;;; tree-edit-java.el --- Description -*- lexical-binding: t; -*-
+;;; tree-edit-java.el --- Java configuration for tree-edit -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2021 Ethan Leba
 ;; Author: Ethan Leba <ethanleba5@gmail.com>
@@ -13,8 +13,6 @@
 ;;
 ;; This file contains key bindings and other configuration for `tree-edit' to
 ;; work with Java.
-;;
-;;
 ;;
 ;; This file is not part of GNU Emacs.
 ;;

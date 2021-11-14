@@ -1,4 +1,4 @@
-;;; tree-edit-view.el --- Description -*- lexical-binding: t; -*-
+;;; tree-edit-view.el --- Syntax tree visualization with tree-edit  -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) Ethan Leba <https://github.com/ethan-leba>
 ;;
