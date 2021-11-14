@@ -1,24 +1,173 @@
-#+TITLE: Tree-edit.el - Structural editing for any™ language!
+#+HTML: <p align="center">⚠ <b>Tree-edit is very much a work-in-progress.</b> Expect to run into bugs and breaking changes!</p>
+#+HTML: <p align="center"><img width="835" src="assets/demo.gif"></p>
 
-/Please check back late November (EmacsConf 2021)!/
+Every programming language has a formally defined structure, but most text
+editors are completely ignorant to it when editing code. As a result, editing
+can oftentimes devolve into a tedious exercise in character manipulation.
 
-#+begin_quote
-You want to change the structure of a program. You figure out what series of
-text editing operations, operations that manipulate a 2D grid of characters, are
-equivalent to the change in the code you desire. What a waste of time and
-energy.
-#+end_quote
+*Tree-edit provides editing operations that map directly to the structure of the
+language*, abstracting away the process of manually entering syntax. Leveraging
+the [[https://github.com/tree-sitter/tree-sitter][tree-sitter]] parser, tree-edit always has access to the precise state of the
+syntax tree -- and directly wields the grammars of supported languages in order
+to power it's editing capabilities.
 
-Tree-edit is an attempt to realize the dream of development based on the
-*intent* of the user, abstracting away the process of manually typing out
-syntax.
+* Table of Contents
+:PROPERTIES:
+:TOC:      :include all
+:END:
+:CONTENTS:
+- [[#table-of-contents][Table of Contents]]
+- [[#getting-started][Getting started]]
+- [[#usage][Usage]]
+  - [[#navigation][Navigation]]
+  - [[#editing-operations][Editing operations]]
+- [[#supported-languages][Supported languages]]
+- [[#customization][Customization]]
+- [[#limitations][Limitations]]
+- [[#contributing][Contributing]]
+- [[#related-projects][Related projects]]
+:END:
 
 
-* Transformations
-All transformations are performed on the current node.
+* Getting started
+tree-edit can be installed by using =straight.el= or cloning ([[https://github.com/melpa/melpa/pull/7792][MELPA PR pending]]).
 
-- Raise :: Replace the current node's parent with the current node.
-- Wrap :: Create a new node and insert the current one in it.
-- Exchange :: Exchange the current node with another.
-- Delete :: Delete the current node.
-- Insert :: Insert a new node.
+Then add hooks for any language you'd like tree-edit to automatically enable in.
+
+#+begin_src elisp
+(add-hook 'java-mode-hook #'tree-edit-mode)
+#+end_src
+
+It's also recommended to use tree-edit with an autoformatter in it's current
+state (see [[#limitations][limitations]]).
+#+begin_src elisp
+(add-hook 'tree-edit-after-change-hook #'my-format-buffer-command)
+#+end_src
+* Usage
+The concept of the *cursor*, a position in the 2D plane of text, is replaced by
+the *current node*, which is a position in the syntax tree in tree-edit. All
+operations unless otherwise specified are performed on the current node. To help
+visualize the syntax tree, tree-edit provides @@html:<kbd>@@M-x
+tree-edit-view-mode@@html:</kbd>@@ as seen in the demo GIF.
+
+Tree-edit adopts a vim-style approach to editing, where certain operators also
+require a noun. In vim's case, the nouns are text objects; In tree-edit's case,
+the nouns are node types. For example,
+@@html:<kbd>@@i@@html:</kbd>@@@@html:<kbd>@@v@@html:</kbd>@@ would insert a
+variable declaration. Due to the fact that most languages contain a large number
+of node types, and vary across languages, *using [[https://github.com/justbur/emacs-which-key][which-key]] with tree-edit is
+highly recommended.*
+
+To activate tree-edit from normal state, press @@html:<kbd>@@Q@@html:</kbd>@@,
+and to return to normal state press @@html:<kbd>@@ESC@@html:</kbd>@@.
+
+** Navigation
+The navigation primitives follow the tree structure of the language.
+
+| Operation            | Keybind                        | Description                                                                         |
+|----------------------+--------------------------------+-------------------------------------------------------------------------------------|
+| Next                 | @@html:<kbd>@@j@@html:</kbd>@@ | Move cursor to the next sibling.                                                    |
+| Previous             | @@html:<kbd>@@k@@html:</kbd>@@ | Move cursor to the previous sibling.                                                |
+| Inwards              | @@html:<kbd>@@f@@html:</kbd>@@ | Move cursor to the first child.                                                     |
+| Outwards             | @@html:<kbd>@@h@@html:</kbd>@@ | Move cursor to the parent.                                                          |
+| Jump to              | @@html:<kbd>@@s@@html:</kbd>@@ | Jump to a node of /node-type/ for a node inside the current.                        |
+| Outwards Significant | @@html:<kbd>@@A@@html:</kbd>@@ | Move outwards until a significant node (e.g. function or class declaration) is hit. |
+
+** Editing operations
+The most important feature of tree-edit: editing the syntax tree. For any
+editing operation, the syntax will be added or deleted at will based on the
+needs of the operation. Any transformations will be rejected if a syntactically
+valid result cannot be generated.
+
+| Operation | Keybind                        | Description                                                                                                            |
+|-----------+--------------------------------+------------------------------------------------------------------------------------------------------------------------|
+| Raise     | @@html:<kbd>@@r@@html:</kbd>@@ | Replace the current node's parent with the current node.                                                               |
+| Delete    | @@html:<kbd>@@d@@html:</kbd>@@ | Delete the current node.                                                                                               |
+| Change    | @@html:<kbd>@@c@@html:</kbd>@@ | Delete the current node and drop into insert state. Tree state will be re-entered on @@html:<kbd>@@ESC@@html:</kbd>@@. |
+| Wrap      | @@html:<kbd>@@w@@html:</kbd>@@ | Create a new node of /node-type/ and insert the current one in it.                                                     |
+| Exchange  | @@html:<kbd>@@e@@html:</kbd>@@ | Exchange the current node with a new node of /node-type/.                                                              |
+| Insert    | @@html:<kbd>@@i@@html:</kbd>@@ | Insert a new node of /node-type/ to the right of the current.                                                          |
+| Append    | @@html:<kbd>@@i@@html:</kbd>@@ | Insert a new node of /node-type/ to the left of the current.                                                           |
+| Slurp     | @@html:<kbd>@@>@@html:</kbd>@@ | Grow the current node to contain the nearest right-most element.                                                       |
+| Barf      | @@html:<kbd>@@<@@html:</kbd>@@ | Shrink the current node to place it's left-most element into the parent node.                                          |
+| Copy      | @@html:<kbd>@@y@@html:</kbd>@@ | Copy the text of the current node.                                                                                     |
+
+** Pasting
+Along with the standard node-types of the given language, tree-edit has a
+special node-type @@html:<kbd>@@p@@html:</kbd>@@ that will attempt to parse the
+type of the most recently copied text. If a type can be identified and the
+operation is valid, the copied text will be used.
+
+* Supported languages
+
+| Status | Language |
+|--------+----------|
+| 🔨     | Java     |
+
+Currently the list of supported languages is not very impressive, but /in
+theory/ it should be as simple as adding a new grammar and language file for a given
+language. In practice I expect this to unearth some language-specific
+assumptions in the tree-edit code base!
+
+* Customization
+
+Currently adding customization ontop of the preset language files requires a
+fair bit of boilerplate, but here's some code to get started.
+
+#+begin_src elisp
+(with-eval-after-load 'tree-edit-java
+  (with-mode-local java-mode
+    (setq-mode-local
+     java-mode
+
+     tree-edit-syntax-snippets
+     (append
+      ;; Put your snippets here
+      '((identifier . ("FOOBAR")))
+      tree-edit-syntax-snippets)
+
+     tree-edit-nodes
+     (append
+      ;; Put your nodes here
+      '((:type if_statement
+         :key "z"
+         :name "if-else statement"
+         :node-override '((if_statement . ("if" parenthesized_expression block "else" block)))))
+      tree-edit-nodes)))
+
+  (tree-edit--set-state-bindings 'java-mode))
+  #+end_src
+
+  See [[file:tree-edit-java.el]] and the docstrings of the accompanying variables
+  for more information.
+
+* Limitations
+
+A non-comprehensive list of some of the larger limitations that tree-edit currently has:
+
+- Formatting :: tree-edit does not currently make any attempts to produce code
+  in a well-formatted manner, and may change the formatting of adjacent nodes
+  during editing operations.
+
+- Impedance mismatch :: Most tree-sitter grammars were not designed with
+  tree-edit's usecase in mind, so some grammars may be structured inconveniently
+  for tree-edit's purposes.
+
+- Tree-sitter-langs :: Tree-edit currently depends on [[https://github.com/emacs-tree-sitter/tree-sitter-langs][tree-sitter-langs]] to power
+  the tree-sitter parsers, however tree-sitter-langs does always have the most
+  up-to-date grammars and is missing some languages. If this continues to be an
+  issue a fork may be needed.
+
+* Contributing
+
+Contributions are very much welcome! In particular, adding language files would
+be a great place to help. Otherwise, the issues are a good place to propose
+features or find ones to implement.
+
+Tests can be run using =./run-tests.sh= script.
+
+* Related projects
+- [[https://github.com/meain/evil-textobj-tree-sitter][evil-textobj-tree-sitter]] :: Evil mode text objects using tree-sitter queries.
+- [[https://github.com/abo-abo/lispy][lispy]] :: Lisp structural editing package -- big inspiration for tree-edit!
+- [[https://github.com/Fuco1/smartparens][smartparens]] :: Multilingual package with structural editing limited to matching delimiters.
+
