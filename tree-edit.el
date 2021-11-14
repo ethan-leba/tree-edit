@@ -1,4 +1,4 @@
-;;; tree-edit.el --- Description -*- lexical-binding: t; -*-
+;;; tree-edit.el --- Structural editing for any language! -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) Ethan Leba <https://github.com/ethan-leba>
 ;;
@@ -497,8 +497,6 @@ POSITION can be :before, :after, or nil."
     (tree-edit--restore-location tree-edit--return-to-tree-state 0)
     (setq tree-edit--return-to-tree-state nil)))
 
-(add-hook 'evil-normal-state-entry-hook #'tree-edit--re-enter-tree-state)
-
 (defun tree-edit-copy ()
   "Copy the current node."
   (interactive)
@@ -814,7 +812,7 @@ current, otherwise after."
   :init-value nil
   :group 'tree-edit
   :keymap tree-edit-mode-map
-  :lighter " TE "
+  :lighter " TE"
   (cond
    (tree-edit-mode
     (let ((language-file (alist-get major-mode tree-edit-language-alist)))
@@ -825,9 +823,11 @@ current, otherwise after."
     (tree-sitter-mode)
     ;; HACK: Above mode binding won't come into effect until the state is changed.
     (evil-normal-state)
-    (add-hook 'before-revert-hook #'tree-edit-teardown nil 'local))
+    (add-hook 'before-revert-hook #'tree-edit-teardown nil 'local)
+    (add-hook 'evil-normal-state-entry-hook #'tree-edit--re-enter-tree-state nil 'local))
    (t
-    (remove-hook 'before-revert-hook #'tree-edit-teardown 'local))))
+    (remove-hook 'before-revert-hook #'tree-edit-teardown 'local)
+    (remove-hook 'evil-normal-state-entry-hook #'tree-edit--re-enter-tree-state 'local))))
 
 (defun define-tree-edit-verb (key func &optional wrap)
   "Define a key command prefixed by KEY, calling FUNC.
