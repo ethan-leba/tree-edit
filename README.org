@@ -84,18 +84,19 @@ editing operation, the syntax will be added or deleted at will based on the
 needs of the operation. Any transformations will be rejected if a syntactically
 valid result cannot be generated.
 
-| Operation | Keybind                        | Description                                                                                                            |
-|-----------+--------------------------------+------------------------------------------------------------------------------------------------------------------------|
-| Raise     | @@html:<kbd>@@r@@html:</kbd>@@ | Replace the current node's parent with the current node.                                                               |
-| Delete    | @@html:<kbd>@@d@@html:</kbd>@@ | Delete the current node.                                                                                               |
-| Change    | @@html:<kbd>@@c@@html:</kbd>@@ | Delete the current node and drop into insert state. Tree state will be re-entered on @@html:<kbd>@@ESC@@html:</kbd>@@. |
-| Wrap      | @@html:<kbd>@@w@@html:</kbd>@@ | Create a new node of /node-type/ and insert the current one in it.                                                     |
-| Exchange  | @@html:<kbd>@@e@@html:</kbd>@@ | Exchange the current node with a new node of /node-type/.                                                              |
-| Insert    | @@html:<kbd>@@i@@html:</kbd>@@ | Insert a new node of /node-type/ to the right of the current.                                                          |
-| Append    | @@html:<kbd>@@i@@html:</kbd>@@ | Insert a new node of /node-type/ to the left of the current.                                                           |
-| Slurp     | @@html:<kbd>@@>@@html:</kbd>@@ | Grow the current node to contain the nearest right-most element.                                                       |
-| Barf      | @@html:<kbd>@@<@@html:</kbd>@@ | Shrink the current node to place it's left-most element into the parent node.                                          |
-| Copy      | @@html:<kbd>@@y@@html:</kbd>@@ | Copy the text of the current node.                                                                                     |
+| Operation    | Keybind                        | Description                                                                                                            |
+|--------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------|
+| Raise        | @@html:<kbd>@@r@@html:</kbd>@@ | Replace the current node's parent with the current node.                                                               |
+| Delete       | @@html:<kbd>@@d@@html:</kbd>@@ | Delete the current node.                                                                                               |
+| Change       | @@html:<kbd>@@c@@html:</kbd>@@ | Delete the current node and drop into insert state. Tree state will be re-entered on @@html:<kbd>@@ESC@@html:</kbd>@@. |
+| Wrap         | @@html:<kbd>@@w@@html:</kbd>@@ | Create a new node of /node-type/ and insert the current one in it.                                                     |
+| Exchange     | @@html:<kbd>@@e@@html:</kbd>@@ | Exchange the current node with a new node of /node-type/.                                                              |
+| Insert       | @@html:<kbd>@@i@@html:</kbd>@@ | Insert a new node of /node-type/ to the right of the current.                                                          |
+| Append       | @@html:<kbd>@@a@@html:</kbd>@@ | Insert a new node of /node-type/ to the left of the current.                                                           |
+| Insert Child | @@html:<kbd>@@I@@html:</kbd>@@ | Insert a new node of /node-type/ as a child of the current. Useful for nodes with no named children, i.e. ={}=         |
+| Slurp        | @@html:<kbd>@@>@@html:</kbd>@@ | Grow the current node to contain the nearest right-most element.                                                       |
+| Barf         | @@html:<kbd>@@<@@html:</kbd>@@ | Shrink the current node to place it's left-most element into the parent node.                                          |
+| Copy         | @@html:<kbd>@@y@@html:</kbd>@@ | Copy the text of the current node.                                                                                     |
 
 ** Pasting
 Along with the standard node-types of the given language, tree-edit has a
