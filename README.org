@@ -31,12 +31,16 @@ to power it's editing capabilities.
 
 
 * Getting started
-tree-edit can be installed by using =straight.el= or cloning ([[https://github.com/melpa/melpa/pull/7792][MELPA PR pending]]).
+Tree-edit is consists of two packages: *tree-edit*, a library for providing
+structural editing, and *evil-tree-edit*, a new evil tree state which exposes
+this functionality. The following sections of the README describe usage with
+*evil-tree-edit*.
 
-Then add hooks for any language you'd like tree-edit to automatically enable in.
+After installation, add hooks for any language you'd like tree-edit to
+automatically enable in.
 
 #+begin_src elisp
-(add-hook 'java-mode-hook #'tree-edit-mode)
+(add-hook 'java-mode-hook #'evil-tree-edit-mode)
 #+end_src
 
 It's also recommended to use tree-edit with an autoformatter in it's current
