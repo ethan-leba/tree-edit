@@ -141,7 +141,7 @@ fair bit of boilerplate, but here's some code to get started.
          :node-override '((if_statement . ("if" parenthesized_expression block "else" block)))))
       tree-edit-nodes)))
 
-  (tree-edit--set-state-bindings 'java-mode))
+  (evil-tree-edit--set-state-bindings 'java-mode))
   #+end_src
 
   See [[file:tree-edit-java.el]] and the docstrings of the accompanying variables
@@ -160,9 +160,9 @@ A non-comprehensive list of some of the larger limitations that tree-edit curren
   for tree-edit's purposes.
 
 - Tree-sitter-langs :: Tree-edit currently depends on [[https://github.com/emacs-tree-sitter/tree-sitter-langs][tree-sitter-langs]] to power
-  the tree-sitter parsers, however tree-sitter-langs does always have the most
-  up-to-date grammars and is missing some languages. If this continues to be an
-  issue a fork may be needed.
+  the tree-sitter parsers, however tree-sitter-langs does not always have the
+  most up-to-date grammars and is missing some languages. If this continues to
+  be an issue a fork may be needed.
 
 * Contributing
 
