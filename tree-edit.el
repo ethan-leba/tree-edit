@@ -247,12 +247,12 @@ Fragments should parse as one of the following structures:
           (supertype (tree-edit--relevant-types type parent-type)))
     (if-let (result (reazon-run 1 q
                       (reazon-fresh (tokens qr ql)
-                        (tree-edit-superpositiono right qr parent-type)
-                        (tree-edit-superpositiono left ql parent-type)
-                        (tree-edit-max-lengtho q 3)
+                        (tree-edit--superpositiono right qr parent-type)
+                        (tree-edit--superpositiono left ql parent-type)
+                        (tree-edit--max-lengtho q 3)
                         ;; FIXME: this should be limited to only 1 new named node, of the requested type
-                        (tree-edit-includes-typeo q supertype)
-                        (tree-edit-prefixpostfix ql q qr tokens)
+                        (tree-edit--includes-typeo q supertype)
+                        (tree-edit--prefixpostfixo ql q qr tokens)
                         (tree-edit-parseo grammar tokens '()))))
         ;; TODO: Put this in the query
         ;; Rejecting multi-node solutions
@@ -281,12 +281,12 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
           (supertype (tree-edit--relevant-types type parent-type)))
     (if-let (result (reazon-run 1 q
                       (reazon-fresh (tokens qr ql)
-                        (tree-edit-superpositiono right qr parent-type)
-                        (tree-edit-superpositiono left ql parent-type)
-                        (tree-edit-max-lengtho q 5)
-                        (tree-edit-prefixpostfix ql q qr tokens)
+                        (tree-edit--superpositiono right qr parent-type)
+                        (tree-edit--superpositiono left ql parent-type)
+                        (tree-edit--max-lengtho q 5)
+                        (tree-edit--prefixpostfixo ql q qr tokens)
                         ;; FIXME: this should be limited to only 1 new named node, of the requested type
-                        (tree-edit-includes-typeo q supertype)
+                        (tree-edit--includes-typeo q supertype)
                         (tree-edit-parseo grammar tokens '()))))
         (--reduce-from (-replace it type acc)
                        (car result)
@@ -326,11 +326,11 @@ delete, and what syntax needs to be inserted after, if any."
     ;;        the first thing reazon stumbles upon is syntax.
     (if-let ((result (reazon-run 1 q
                        (reazon-fresh (tokens qr ql)
-                         (tree-edit-superpositiono right qr parent-type)
-                         (tree-edit-superpositiono left ql parent-type)
+                         (tree-edit--superpositiono right qr parent-type)
+                         (tree-edit--superpositiono left ql parent-type)
                          ;; Prevent nodes from being 'deleted' by putting the exact same thing back
-                         (tree-edit-max-lengtho q (1- nodes-deleted))
-                         (tree-edit-prefixpostfix ql q qr tokens)
+                         (tree-edit--max-lengtho q (1- nodes-deleted))
+                         (tree-edit--prefixpostfixo ql q qr tokens)
                          (tree-edit-parseo grammar tokens '())))))
         (if (-every-p #'stringp (car result))
             `(,left-idx ,(1- right-idx) ,(car result))))))
@@ -583,15 +583,15 @@ current, otherwise after."
   "TOKENS are a valid prefix of a node in GRAMMAR and OUT is unused tokens in TOKENS."
   (reazon-disj
    (reazon-fresh (next)
-     (tree-edit-takeo 'comment tokens next)
+     (tree-edit--takeo 'comment tokens next)
      (tree-edit-parseo grammar next out))
    (pcase grammar
      (`((type . "STRING")
         (value . ,value))
-      (tree-edit-takeo value tokens out))
+      (tree-edit--takeo value tokens out))
      (`((type . "PATTERN")
         (value . ,_))
-      (tree-edit-takeo :regex tokens out))
+      (tree-edit--takeo :regex tokens out))
      (`((type . "BLANK"))
       (reazon-== tokens out))
      ((and `((type . ,type)
@@ -606,7 +606,7 @@ current, otherwise after."
       (tree-edit-parseo content tokens out))
      (`((type . "SEQ")
         (members . ,members))
-      (tree-edit-seqo members tokens out))
+      (tree-edit--seqo members tokens out))
      (`((type . "ALIAS")
         (content . ,content)
         (named . ,_)
@@ -614,23 +614,23 @@ current, otherwise after."
       (tree-edit-parseo content tokens out))
      (`((type . "REPEAT")
         (content . ,content))
-      (tree-edit-repeato content tokens out))
+      (tree-edit--repeato content tokens out))
      (`((type . "REPEAT1")
         (content . ,content))
-      (tree-edit-repeat1o content tokens out))
+      (tree-edit--repeat1o content tokens out))
      (`((type . "FIELD")
         (name . ,_)
         (content . ,content))
       (tree-edit-parseo content tokens out))
      (`((type . "SYMBOL")
         (name . ,name))
-      (tree-edit-takeo name tokens out))
+      (tree-edit--takeo name tokens out))
      (`((type . "CHOICE")
         (members . ,members))
-      (tree-edit-choiceo members tokens out))
+      (tree-edit--choiceo members tokens out))
      (_ (error "Bad data: %s" grammar)))))
 
-(reazon-defrel tree-edit-max-lengtho (ls len)
+(reazon-defrel tree-edit--max-lengtho (ls len)
   "LS contains at most LEN elements."
   (cond
    ((> len 0)
@@ -638,58 +638,58 @@ current, otherwise after."
      (reazon-nullo ls)
      (reazon-fresh (d)
        (reazon-cdro ls d)
-       (tree-edit-max-lengtho d (1- len)))))
+       (tree-edit--max-lengtho d (1- len)))))
    (t (reazon-nullo ls))))
 
-(reazon-defrel tree-edit-seqo (members tokens out)
+(reazon-defrel tree-edit--seqo (members tokens out)
   "TOKENS parse sequentially for each grammar in MEMBERS, with OUT as leftovers."
   (if members
       (reazon-fresh (next)
         (tree-edit-parseo (car members) tokens next)
-        (tree-edit-seqo (cdr members) next out))
+        (tree-edit--seqo (cdr members) next out))
     (reazon-== tokens out)))
 
-(reazon-defrel tree-edit-choiceo (members tokens out)
+(reazon-defrel tree-edit--choiceo (members tokens out)
   "TOKENS parse for each grammar in MEMBERS, with OUT as leftovers."
   (if members
       (reazon-disj
        (tree-edit-parseo (car members) tokens out)
-       (tree-edit-choiceo (cdr members) tokens out))
+       (tree-edit--choiceo (cdr members) tokens out))
     #'reazon-!U))
 
-(reazon-defrel tree-edit-repeato (grammar tokens out)
+(reazon-defrel tree-edit--repeato (grammar tokens out)
   "TOKENS parse for GRAMMAR an abritrary amount of times, with OUT as leftovers."
   (reazon-disj
    (reazon-== tokens out)
    (reazon-fresh (next)
      (tree-edit-parseo grammar tokens next)
-     (tree-edit-repeato grammar next out))))
+     (tree-edit--repeato grammar next out))))
 
-(reazon-defrel tree-edit-repeat1o (grammar tokens out)
+(reazon-defrel tree-edit--repeat1o (grammar tokens out)
   "TOKENS parse for GRAMMAR at least once, up to an abritrary amount of times, with OUT as leftovers."
   (reazon-fresh (next)
     (tree-edit-parseo grammar tokens next)
-    (tree-edit-repeato grammar next out)))
+    (tree-edit--repeato grammar next out)))
 
-(reazon-defrel tree-edit-takeo (expected tokens out)
+(reazon-defrel tree-edit--takeo (expected tokens out)
   "TOKENS is a cons, with car as EXPECTED and cdr as OUT."
   (reazon-conso expected out tokens))
 
-(reazon-defrel tree-edit-prefixpostfix (prefix middle postfix out)
+(reazon-defrel tree-edit--prefixpostfixo (prefix middle postfix out)
   "OUT is equivalent to (append PREFIX MIDDLE POSTFIX)."
   (reazon-fresh (tmp)
     (reazon-appendo prefix middle tmp)
     (reazon-appendo tmp postfix out)))
 
-(reazon-defrel tree-edit-includes-typeo (tokens supertypes)
+(reazon-defrel tree-edit--includes-typeo (tokens supertypes)
   "One of the types in SUPERTYPE appears in TOKENS."
   (reazon-fresh (a d)
     (reazon-conso a d tokens)
     (reazon-disj
      (reazon-membero a supertypes)
-     (tree-edit-includes-typeo d supertypes))))
+     (tree-edit--includes-typeo d supertypes))))
 
-(reazon-defrel tree-edit-superpositiono (tokens out parent-type)
+(reazon-defrel tree-edit--superpositiono (tokens out parent-type)
   "OUT is TOKENS where each token is either itself or any supertype occurring in PARENT-TYPE."
   (cond
    ((not tokens) (reazon-== out '()))
@@ -697,12 +697,12 @@ current, otherwise after."
     (reazon-fresh (a d)
       (reazon-conso a d out)
       (reazon-membero a (tree-edit--relevant-types (car tokens) parent-type))
-      (tree-edit-superpositiono (cdr tokens) d parent-type)))
+      (tree-edit--superpositiono (cdr tokens) d parent-type)))
    (t
     (reazon-fresh (a d)
       (reazon-conso a d out)
       (reazon-== a (car tokens))
-      (tree-edit-superpositiono (cdr tokens) d parent-type)))))
+      (tree-edit--superpositiono (cdr tokens) d parent-type)))))
 
 (provide 'tree-edit)
 ;;; tree-edit.el ends here
