@@ -1,0 +1,69 @@
+#+TITLE: Syntax generation implementation
+
+Tree-edit's syntax generation has a fairly novel implementation (as far as I
+know), and is also unfortunately complicated by some issues with the tree-sitter
+API and some concessions made for performance. So this document serves to both
+explain the high level architecture of =tree-edit= and some of the complications
+it faces. (which hopefully can result in upstream fixes!)
+
+* High level overview
+
+Tree-edit's syntax generation consists of three main phases:
+
+- Converting text into a syntax tree
+- Modifying tokens in a syntactically correct manner
+- Converting the changes back into text
+
+** Converting the buffer text into a syntax tree
+
+To convert the text of the buffer into a syntax tree, [[https://github.com/emacs-tree-sitter/elisp-tree-sitter][elisp-tree-sitter]] is used.
+
+** Performing modifications on a node
+
+To perform the syntax generation in tree-edit, [[https://github.com/nickdrozd/reazon][reazon]], an elisp implementation
+of the logic programming DSL [[http://minikanren.org/][miniKanren]] is used.
+
+TL;DR on miniKanren: you can build functions and then 'reverse' them. So
+tree-edit defines a parser which can be used in reverse to generate all possible
+correct set of tokens for a node type. Tree-sitter generates a JSON file that
+describes the grammar of the language under parse, which tree-edit uses. Using
+this reverse parser along with some additional constraints can enable us to
+create structural editing functions:
+
+- Insertion :: Insert a new node of /node-type/ before or after /node/. This
+  operation asserts that there are a number of new tokens to the left or right
+  of /node/, which contain /node-type/.
+- Deletion :: Delete /node/. This operation removes /node/, and all surrounding
+  syntax -- but syntax is allowed to repopulate if needed.
+- Replacement :: Replace /node/ with a new node of /node-type/. This operation
+  simply checks if swapping /node/'s token for /node-type/ still parses.
+
+Syntax is never explicitly dealt with, it is simply added by the parser to meet
+the constraints. For example, the only way to add another expression in an
+argument list is to add a comma first, so if we assert that a new expression
+should exist in an argument list it will naturally follow.
+
+These operations compose very well to construct more complex operations. For
+example, raise travels up the parents until it can find an ancestor that can be
+replaced with /node/, and then replaces it, Slurp/barf are composed of
+delete/insertion operations, etc.
+
+See [[file:parser-examples.org][here]] for some interactive examples.
+
+** Converting modified tokens back into text
+
+For newly inserted node, there's no singular way to represent it as text. An
+argument list could have 20 elements, or 0 -- either way it's an argument list!
+So =tree-edit-syntax-snippets= in the =tree-edit-<language>.el= files define how
+new nodes are represented.
+
+* WIP Generating grammar files
+
+The first step of the process is to take a tree-sitter grammar and parse it into
+something useable for tree-edit.
+[[https://github.com/ethan-leba/tree-edit/blob/main/dev/tree-edit-generate-grammars.el][dev/tree-edit-generate-grammars.el]] provides a script that can take a file path
+to a tree-sitter grammar.json.
+
+Tree-edit will parse the json, performing some precalculations.
+
+* WIP Complications

@@ -2,6 +2,8 @@
 ;;
 ;; Copyright (C) 2021 Ethan Leba
 ;;
+;; Example usage: cask emacs --script dev/tree-edit-generate-grammars.el ~/grammar.json python python-mode
+;;
 
 (require 'dash)
 (require 'json)

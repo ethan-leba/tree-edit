@@ -1,0 +1,82 @@
+#+TITLE: Implementation
+#+begin_quote
+Open this document in Emacs and type @@html:<kbd>@@C-c C-c@@html:</kbd>@@  to execute the code examples!
+#+end_quote
+
+
+#+begin_src elisp :results none
+(require 'reazon)
+(require 'tree-edit)
+(require 'tree-edit-java-grammar)
+
+(setq-local java-grammar
+            (with-mode-local java-mode tree-edit-grammar))
+#+end_src
+
+* A simple example
+
+#+begin_src elisp :results value list
+
+(reazon-run 10 (q)
+  (reazon-set-equalo q '(1 2 3 4)))
+#+end_src
+
+* Relational parser (try statement)
+#+begin_src elisp :results value list
+(reazon-run 5 (tokens)
+  ;; TOKENS is a list of tokens that parses as a 'try_statement'. (Ignore the '())
+  (tree-edit-parseo (alist-get 'try_statement java-grammar) tokens '()))
+#+end_src
+
+
+* Relational parser (function arguments)
+#+begin_src elisp :results value list
+(reazon-run 5 (tokens)
+  ;; TOKENS is a list of tokens that parses as a 'argument_list'.
+  (tree-edit-parseo (alist-get 'argument_list java-grammar) tokens '()))
+#+end_src
+
+
+* Inserting new tokens into a node (1)
+Insert an expression after =x= in =func(x)=
+
+#+begin_src elisp :results value list
+(reazon-run 1 (new-tokens)
+  (reazon-fresh (tokens)
+    ;; A token of type 'expression' exists in the new tokens
+    (reazon-membero 'expression new-tokens)
+    ;; NEW-TOKENS is preceeded by "(" and is followed by ")", where TOKENS is the entire list.
+    (tree-edit--prefixpostfixo '("(" expression) new-tokens '(")") tokens)
+    ;; TOKENS is a list of tokens that parses as a 'argument_list'.
+    (tree-edit-parseo (alist-get 'argument_list java-grammar) tokens '())))
+#+end_src
+
+
+* Inserting new tokens into a node (2)
+Insert an expression before =x= in =func(x)=
+
+#+begin_src elisp :results value list
+(reazon-run 1 (new-tokens)
+  (reazon-fresh (tokens)
+    ;; A token of type 'expression' exists in the new tokens
+    (reazon-membero 'expression new-tokens)
+    ;; NEW-TOKENS is preceeded by "(" and is followed by ")", where TOKENS is the entire list.
+    (tree-edit--prefixpostfixo '("(") new-tokens '(expression ")") tokens)
+    ;; TOKENS is a list of tokens that parses as a 'argument_list'.
+    (tree-edit-parseo (alist-get 'argument_list java-grammar) tokens '())))
+#+end_src
+
+* Inserting new tokens into a node (3)
+Insert another expression after =if (...) {...}=
+
+#+begin_src elisp :results value list
+(reazon-run 1 (new-tokens)
+  (reazon-fresh (tokens)
+    ;; TOKENS is a list of tokens that parses as a 'argument_list'.
+    (tree-edit-parseo (alist-get 'if_statement java-grammar) tokens '())
+    ;; NEW-TOKENS is preceeded by "(" and is followed by ")", where TOKENS is the entire list.
+    (tree-edit--prefixpostfixo '("if" parenthesized_expression statement) new-tokens '() tokens)
+    ;; A token of type 'expression' exists in the new tokens
+    (reazon-membero 'statement new-tokens)))
+#+end_src
+
