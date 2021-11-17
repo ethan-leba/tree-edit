@@ -3,14 +3,15 @@
 (require 'buttercup)
 (require 's)
 (require 'tree-sitter-langs)
+(require 'evil-tree-edit)
 
 (defvar-local tree-edit-test-mode #'java-mode)
 
 (defun buffer-status-as-string ()
   (if (equal evil-state 'tree)
       (progn
-        (let ((start (tsc-node-start-position tree-edit--current-node))
-              (end (tsc-node-end-position tree-edit--current-node)))
+        (let ((start (tsc-node-start-position evil-tree-edit-current-node))
+              (end (tsc-node-end-position evil-tree-edit-current-node)))
           (goto-char end)
           (insert "]")
           (goto-char start)
@@ -37,7 +38,7 @@
         (let ((temp-node (tsc-get-descendant-for-position-range
                           (tsc-root-node tree-sitter-tree) start (point))))
           (evil-tree-state)
-          (setq tree-edit--current-node temp-node)
+          (setq evil-tree-edit-current-node temp-node)
           (evil-tree-edit--update-overlay))))))
 
 (defmacro with-base-test-buffer (contents &rest test-forms)
@@ -48,8 +49,8 @@
      (-when-let (b (get-buffer "tree-edit-test-buffer"))
        (kill-buffer b))
      (let ((temp-buffer (get-buffer-create "tree-edit-test-buffer"))
-           tree-edit-after-change-hook
-           tree-edit-movement-hook)
+           evil-tree-edit-after-change-hook
+           evil-tree-edit-movement-hook)
        (save-window-excursion
          (switch-to-buffer temp-buffer)
          (funcall tree-edit-test-mode)

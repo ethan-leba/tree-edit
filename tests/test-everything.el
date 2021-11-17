@@ -53,43 +53,43 @@
 (describe "basic navigation"
   (it "can move between sibling nodes"
     (expect (with-tree-test-buffer "if ([foo] == 3) {}"
-              (tree-edit-goto-next-sibling))
+              (evil-tree-edit-goto-next-sibling))
             :to-have-buffer-contents "if (foo == [3]) {}")
     (expect (with-tree-test-buffer "if (foo == [3]) {}"
-              (tree-edit-goto-prev-sibling))
+              (evil-tree-edit-goto-prev-sibling))
             :to-have-buffer-contents "if ([foo] == 3) {}"))
   (it "can move between parent and children nodes"
     (expect (with-tree-test-buffer "if (foo == [3]) {}"
-              (tree-edit-goto-parent))
+              (evil-tree-edit-goto-parent))
             :to-have-buffer-contents "if ([foo == 3]) {}")
     (expect (with-tree-test-buffer "if (foo == [3]) {}"
-              (tree-edit-goto-parent)
-              (tree-edit-goto-parent))
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-goto-parent))
             :to-have-buffer-contents "if [(foo == 3)] {}")
     (expect (with-tree-test-buffer "if (foo == [3]) {}"
-              (tree-edit-goto-parent)
-              (tree-edit-goto-parent)
-              (tree-edit-goto-parent))
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-goto-parent))
             :to-have-buffer-contents "[if (foo == 3) {}]")
     (expect (with-tree-test-buffer "[if (foo == 3) {}]"
-              (tree-edit-goto-child))
+              (evil-tree-edit-goto-child))
             :to-have-buffer-contents "if [(foo == 3)] {}")
     (expect (with-tree-test-buffer "if ([foo == 3]) {}"
-              (tree-edit-goto-child))
+              (evil-tree-edit-goto-child))
             :to-have-buffer-contents "if ([foo] == 3) {}"))
   (it "can move to sig node"
     (expect (with-tree-test-buffer "{if (foo == [3]) {}}"
               (let ((tree-edit-significant-node-types '(block)))
-                (tree-edit-goto-sig-parent)))
+                (evil-tree-edit-goto-sig-parent)))
             :to-have-buffer-contents "[{if (foo == 3) {}}]")
     (expect (with-tree-test-buffer "{[{if (foo == 3) {}}]}"
               (let ((tree-edit-significant-node-types '(block)))
-                (tree-edit-goto-sig-parent)))
+                (evil-tree-edit-goto-sig-parent)))
             :to-have-buffer-contents "[{{if (foo == 3) {}}}]"))
   (it "sig node gracefully fails"
     (expect (with-tree-test-buffer "{[{if (foo == 3) {}}]}"
               (let ((tree-edit-significant-node-types '()))
-                (ignore-errors (tree-edit-goto-sig-parent))))
+                (ignore-errors (evil-tree-edit-goto-sig-parent))))
             :to-have-buffer-contents "{[{if (foo == 3) {}}]}")))
 
 (describe "entering tree state"
@@ -176,36 +176,36 @@ if (foo == 3) {
 (describe "raise node"
   (it "replaces the parent node with selected child"
     (expect (with-tree-test-buffer "{[foo] == 3;}"
-              (tree-edit-raise))
+              (evil-tree-edit-raise))
             :to-have-buffer-contents "{[foo];}")
     (expect (with-tree-test-buffer "{foo == [3];}"
-              (tree-edit-raise))
+              (evil-tree-edit-raise))
             :to-have-buffer-contents "{[3];}")
     ;; XXX: how to multi-select?
     (expect (with-tree-test-buffer "{if (foo) {[foo;]bar;baz;}}"
-              (tree-edit-raise))
+              (evil-tree-edit-raise))
             :to-have-buffer-contents "{if (foo) [foo;]}")
     (expect (with-tree-test-buffer "{if (foo) {[foo;]bar;baz;}}"
-              (tree-edit-raise)
-              (tree-edit-raise))
+              (evil-tree-edit-raise)
+              (evil-tree-edit-raise))
             :to-have-buffer-contents "{[foo;]}"))
   ;; XXX: there should be a limit to this...
   (it "travels up the syntax tree until a valid construction is found"
     (expect (with-tree-test-buffer "{foo([bar()]);}"
-              (tree-edit-raise))
+              (evil-tree-edit-raise))
             :to-have-buffer-contents "{[bar()];}")
     (expect (with-tree-test-buffer "{foo(bar([baz]));}"
-              (tree-edit-raise))
+              (evil-tree-edit-raise))
             :to-have-buffer-contents "{foo([baz]);}")
     (expect (with-tree-test-buffer "{foo(bar([baz], bomb));}"
-              (tree-edit-raise))
+              (evil-tree-edit-raise))
             :to-have-buffer-contents "{foo([baz]);}"))
   (it "errors if a node cannot be raised"
     (expect (with-tree-test-buffer "{[foo];}"
-              (tree-edit-raise))
+              (evil-tree-edit-raise))
             :to-throw 'user-error)
     (expect (with-tree-test-buffer "[{foo;}]"
-              (tree-edit-raise))
+              (evil-tree-edit-raise))
             :to-throw 'user-error)))
 
 (describe "change node"
@@ -240,54 +240,54 @@ if (foo == 3) {
 (describe "copy/paste node"
   (it "correctly replaces valid transformations"
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (tree-edit-copy)
-              (tree-edit-insert-sibling (car kill-ring)))
+              (evil-tree-edit-copy)
+              (evil-tree-edit-insert-sibling (car kill-ring)))
             :to-have-buffer-contents "{foo(x,[x]);}")
     ;; Regression: "foo.readl()" would parse as an expression_statement with a missing ";"
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (tree-edit-copy)
-              (tree-edit-insert-sibling "foo.readl()"))
+              (evil-tree-edit-copy)
+              (evil-tree-edit-insert-sibling "foo.readl()"))
             :to-have-buffer-contents "{foo(x,[foo.readl()]);}")
     (expect (with-tree-test-buffer "{[foo;]bar;}"
-              (tree-edit-copy)
-              (tree-edit-goto-next-sibling)
-              (tree-edit-exchange-node (car kill-ring)))
+              (evil-tree-edit-copy)
+              (evil-tree-edit-goto-next-sibling)
+              (evil-tree-edit-exchange-node (car kill-ring)))
             :to-have-buffer-contents "{foo;[foo;]}")
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (tree-edit-copy)
-              (tree-edit-goto-parent)
-              (tree-edit-goto-prev-sibling)
-              (tree-edit-exchange-node (car kill-ring)))
+              (evil-tree-edit-copy)
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-goto-prev-sibling)
+              (evil-tree-edit-exchange-node (car kill-ring)))
             :to-have-buffer-contents "{[x](x);}")))
 
 (describe "insert sibling"
   (it "correctly inserts sibling nodes"
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (tree-edit-insert-sibling 'identifier))
+              (evil-tree-edit-insert-sibling 'identifier))
             :to-have-buffer-contents "{foo(x,[TREE]);}")
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (tree-edit-insert-sibling 'method_invocation))
+              (evil-tree-edit-insert-sibling 'method_invocation))
             :to-have-buffer-contents "{foo(x,[TREE()]);}")
     (expect (with-tree-test-buffer "{[foo(x);]}"
-              (tree-edit-insert-sibling 'break_statement))
+              (evil-tree-edit-insert-sibling 'break_statement))
             :to-have-buffer-contents "{foo(x);[break;]}")
     (expect (with-tree-test-buffer "{if(TREE)[{}]}"
-              (tree-edit-insert-sibling 'if_statement))
+              (evil-tree-edit-insert-sibling 'if_statement))
             :to-have-buffer-contents "{if(TREE){}else [if(TREE){}]}")
     (expect (with-tree-test-buffer "{if(TREE)[{}]}"
-              (tree-edit-insert-sibling 'block))
+              (evil-tree-edit-insert-sibling 'block))
             :to-have-buffer-contents "{if(TREE){}else[{}]}")
     (expect (with-tree-test-buffer "{try{}[catch(Exception e) {}]}"
-              (tree-edit-insert-sibling 'catch_clause))
+              (evil-tree-edit-insert-sibling 'catch_clause))
             :to-have-buffer-contents "{try{}catch(Exception e) {}[catch(Exception e){}]}")
     (expect (with-tree-test-buffer "{try{}[catch(Exception e) {}]}"
-              (tree-edit-insert-sibling 'finally_clause))
+              (evil-tree-edit-insert-sibling 'finally_clause))
             :to-have-buffer-contents "{try{}catch(Exception e) {}[finally{}]}")
     (expect (with-tree-test-buffer "
 {
 [foo();]// i'm a comment!
 }"
-              (tree-edit-insert-sibling 'break_statement))
+              (evil-tree-edit-insert-sibling 'break_statement))
             :to-have-buffer-contents "
 {
 foo();[break;]// i'm a comment!
@@ -295,104 +295,104 @@ foo();[break;]// i'm a comment!
   (xit "can perform multi-node insertions"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer "{if(foo) [bar;]}"
-              (tree-edit-insert-sibling '("else" 'block)))
+              (evil-tree-edit-insert-sibling '("else" 'block)))
             :to-have-buffer-contents "{if(foo) bar;else{TREE;}}"))
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (tree-edit-insert-sibling 'break_statement))
+              (evil-tree-edit-insert-sibling 'break_statement))
             :to-throw 'user-error)
     ;; Only one else block
     (expect (with-tree-test-buffer "{if(TREE){}else[{}]}"
-              (tree-edit-insert-sibling 'block))
+              (evil-tree-edit-insert-sibling 'block))
             :to-throw 'user-error)
     ;; Only one finally clause
     (expect (with-tree-test-buffer "{try{}catch(Exception e) {}[finally{}]}"
-              (tree-edit-insert-sibling 'finally_clause))
+              (evil-tree-edit-insert-sibling 'finally_clause))
             :to-throw 'user-error)
     ;; Catch cannot go after finally
     (expect (with-tree-test-buffer "{try{}catch(Exception e) {}[finally{}]}"
-              (tree-edit-insert-sibling 'catch_clause))
+              (evil-tree-edit-insert-sibling 'catch_clause))
             :to-throw 'user-error)))
 
 (describe "insert child"
   (it "correctly inserts child nodes"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer "{if (TREE) [{}]}"
-              (tree-edit-insert-child 'break_statement))
+              (evil-tree-edit-insert-child 'break_statement))
             :to-have-buffer-contents "{if (TREE) {[break;]}}")
     (expect (with-tree-test-buffer "{foo[()];}"
-              (tree-edit-insert-child 'identifier))
+              (evil-tree-edit-insert-child 'identifier))
             :to-have-buffer-contents "{foo([TREE]);}"))
   (it "can insert text fragments"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer "{if (TREE) [{}]}"
-              (tree-edit-insert-child "break;"))
+              (evil-tree-edit-insert-child "break;"))
             :to-have-buffer-contents "{if (TREE) {[break;]}}")
     (expect (with-tree-test-buffer "{foo[()];}"
-              (tree-edit-insert-child "3 + 4"))
+              (evil-tree-edit-insert-child "3 + 4"))
             :to-have-buffer-contents "{foo([3 + 4]);}"))
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer "{foo[()];}"
-              (tree-edit-insert-child 'break_statement))
+              (evil-tree-edit-insert-child 'break_statement))
             :to-throw 'user-error)
     (expect (with-tree-test-buffer "{foo[()];}"
-              (tree-edit-insert-child "break;"))
+              (evil-tree-edit-insert-child "break;"))
             :to-throw 'user-error)))
 
 (describe "slurp"
   (it "correctly slurps nodes"
     (expect (with-tree-test-buffer "{if(foo)[{}]break;}"
-              (tree-edit-slurp))
+              (evil-tree-edit-slurp))
             :to-have-buffer-contents "{if(foo)[{break;}]}")
     (expect (with-tree-test-buffer "{if(foo)[{break;}]break;}"
-              (tree-edit-slurp))
+              (evil-tree-edit-slurp))
             :to-have-buffer-contents "{if(foo)[{break;break;}]}")
     (expect (with-tree-test-buffer "{if(foo)[{break;}] if(foobar){} else if (qwerty){}}"
-              (tree-edit-slurp))
+              (evil-tree-edit-slurp))
             :to-have-buffer-contents "{if(foo)[{break;if(foobar){} else if (qwerty){}}] }")
     (expect (with-tree-test-buffer "{foo(bar[()], x, y, z)}"
-              (tree-edit-slurp))
+              (evil-tree-edit-slurp))
             :to-have-buffer-contents "{foo(bar[(x)],y, z)}")
     (expect (with-tree-test-buffer "{foo(bar[(x)], y, z)}"
-              (tree-edit-slurp))
+              (evil-tree-edit-slurp))
             :to-have-buffer-contents "{foo(bar[(x,y)],z)}"))
   (it "gracefully fails if slurp is impossible"
     (expect (with-tree-test-buffer "{foo(bar[()])}"
-              (ignore-errors (tree-edit-slurp)))
+              (ignore-errors (evil-tree-edit-slurp)))
             :to-have-buffer-contents "{foo(bar[()])}")
     (expect (with-tree-test-buffer "{foo(bar[(x)])}"
-              (ignore-errors (tree-edit-slurp)))
+              (ignore-errors (evil-tree-edit-slurp)))
             :to-have-buffer-contents "{foo(bar[(x)])}")
     (expect (with-tree-test-buffer "{if(foo)[{}]}"
-              (ignore-errors (tree-edit-slurp)))
+              (ignore-errors (evil-tree-edit-slurp)))
             :to-have-buffer-contents "{if(foo)[{}]}")
     (expect (with-tree-test-buffer "{if(foo)[{break;}]}"
-              (ignore-errors (tree-edit-slurp)))
+              (ignore-errors (evil-tree-edit-slurp)))
             :to-have-buffer-contents "{if(foo)[{break;}]}")))
 
 (describe "barf"
   (it "correctly barfs nodes"
     (expect (with-tree-test-buffer "{if(foo)[{break;}]}"
-              (tree-edit-barf))
+              (evil-tree-edit-barf))
             :to-have-buffer-contents "{if(foo)[{}]break;}")
     (expect (with-tree-test-buffer "{if(foo)[{break;break;}]}"
-              (tree-edit-barf))
+              (evil-tree-edit-barf))
             :to-have-buffer-contents "{if(foo)[{break;}]break;}")
     (expect (with-tree-test-buffer "{if(foo)[{break;if(foobar){} else if (qwerty){}}] }"
-              (tree-edit-barf))
+              (evil-tree-edit-barf))
             :to-have-buffer-contents "{if(foo)[{break;}] if(foobar){} else if (qwerty){}}")
     (expect (with-tree-test-buffer "{foo(bar[(x)], y, z)}"
-              (tree-edit-barf))
+              (evil-tree-edit-barf))
             :to-have-buffer-contents "{foo(bar[()],x, y, z)}")
     (expect (with-tree-test-buffer "{foo(bar[(x,y)], z)}"
-              (tree-edit-barf))
+              (evil-tree-edit-barf))
             :to-have-buffer-contents "{foo(bar[(x)],y, z)}"))
   (it "gracefully fails if barf is impossible"
     (expect (with-tree-test-buffer "{foo(bar[()])}"
-              (ignore-errors (tree-edit-barf)))
+              (ignore-errors (evil-tree-edit-barf)))
             :to-have-buffer-contents "{foo(bar[()])}")
     (expect (with-tree-test-buffer "{if(foo)[{}]}"
-              (ignore-errors (tree-edit-barf)))
+              (ignore-errors (evil-tree-edit-barf)))
             :to-have-buffer-contents "{if(foo)[{}]}")))
 
 (describe "wrap node"
@@ -426,7 +426,7 @@ foo();[break;]// i'm a comment!
   (it "correctly replaces valid transformations"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "{foo[()];}")
     ;; TODO: Check tree-equals, I don't care about formatting
     (expect (with-tree-test-buffer "
@@ -434,7 +434,7 @@ class Main {
   [void foo() {}]
   void bar() {}
 }"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "
 class Main {[void bar() {}]
 }")
@@ -444,7 +444,7 @@ class Main {
   [void foo() {}]
   void bar() {}
 }"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "
 class Main {
   // should we delete this?
@@ -458,7 +458,7 @@ class Main {
   void bar() {}
   // here too
 }"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "
 class Main {
   // should we delete this?
@@ -472,7 +472,7 @@ class Main {
   [break;]
   break;
 }"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "
 {
   break;
@@ -482,37 +482,37 @@ class Main {
 class Main {[public] void main() {}
 }"
               ;; FIXME: Test selects anonymous keyword 'public', instead of 'modifiers
-              (tree-edit-goto-parent)
-              (tree-edit-delete-node))
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "
 class Main {[void] main() {}
 }")
     (expect (with-tree-test-buffer "{foo([x],y);}"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "{foo([y]);}")
     (expect (with-tree-test-buffer "{foo(x,[y]);}"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "{foo([x]);}")
 
     (expect (with-tree-test-buffer "{foo(x);[break;]}"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "{[foo(x);]}"))
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer "{[foo](x);}"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-throw 'user-error)
     (expect (with-tree-test-buffer "
 class Main {
   [void] main() {}
 }"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-throw 'user-error))
   (xit "can deal with comments in between relevant syntax"
     (expect (with-tree-test-buffer "{
 foo(x, // comment
     [y]);
 }"
-              (tree-edit-delete-node))
+              (evil-tree-edit-delete-node))
             :to-have-buffer-contents "{
 foo(x // comment
     );
