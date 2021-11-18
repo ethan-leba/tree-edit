@@ -97,10 +97,9 @@ More permissive than `tsc--node-from-steps' in that the parent
 will be selected if an only child is deleted and nearest sibling
 will be selected if the last one is deleted."
   (condition-case nil
-      (let* ((steps (car location))
-             (child-index (cdr location))
-             (recovered-parent (tsc--node-from-steps tree-sitter-tree steps))
-             (num-children (tsc-count-named-children recovered-parent)))
+      (-let* (((steps . child-index) location)
+              (recovered-parent (tsc--node-from-steps tree-sitter-tree steps))
+              (num-children (tsc-count-named-children recovered-parent)))
         (if (equal num-children 0) recovered-parent
           (tsc-get-nth-named-child recovered-parent
                                    (min child-index (1- num-children)))))
@@ -238,19 +237,14 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
 
 If successful, the return type will give a range of siblings to
 delete, and what syntax needs to be inserted after, if any."
-  (let* ((reazon-occurs-check nil)
-         (parent-type (tsc-node-type (tsc-get-parent node)))
-         (grammar (alist-get
-                   (tsc-node-type (tsc-get-parent node))
-                   tree-edit-grammar))
-         (current (tree-edit--get-parent-tokens node))
-         (split (tree-edit--remove-node-and-surrounding-syntax
-                 (car current) (cdr current)))
-         (left-idx (car split))
-         (left (-take left-idx (car current)))
-         (right-idx (cdr split))
-         (right (-drop right-idx (car current)))
-         (nodes-deleted (- right-idx left-idx)))
+  (-let* ((reazon-occurs-check nil)
+          (parent-type (tsc-node-type (tsc-get-parent node)))
+          (grammar (alist-get (tsc-node-type (tsc-get-parent node)) tree-edit-grammar))
+          ((children . index) (tree-edit--get-parent-tokens node))
+          ((left-idx . right-idx) (tree-edit--remove-node-and-surrounding-syntax children index))
+          (left (-take left-idx children))
+          (right (-drop right-idx children))
+          (nodes-deleted (- right-idx left-idx)))
     ;; FIXME: Q should be only string types, aka syntax -- we're banking that
     ;;        the first thing reazon stumbles upon is syntax.
     (if-let ((result (reazon-run 1 q
@@ -305,7 +299,7 @@ https://tree-sitter.github.io/tree-sitter/creating-parsers#keyword-extraction"
   "Combine TOKENS into a string, properly spacing as needed."
   (string-join
    (--mapcat
-    (pcase-let ((`(,prev . ,current) it))
+    (-let (((prev . current) it))
       (cond ((not current) '())
             ((and prev (tree-edit--needs-space-p prev current))
              `(" " ,current))
@@ -472,9 +466,8 @@ current, otherwise after."
 
 (defun tree-edit-delete-node (node)
   "Delete NODE, and any surrounding syntax that accompanies it."
-  (pcase-let ((`(,start ,end ,fragment)
-               (or (tree-edit--valid-deletions node)
-                   (user-error "Cannot delete the current node"))))
+  (-let [(start end fragment) (or (tree-edit--valid-deletions node)
+                                  (user-error "Cannot delete the current node"))]
     (tree-edit--replace-fragment fragment node start (1+ end))))
 
 ;;* Locals: Relational parser
