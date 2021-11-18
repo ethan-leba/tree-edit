@@ -90,10 +90,12 @@ Properties
   (cons (tsc--node-steps (tsc-get-parent node))
         (tree-edit--get-current-index node)))
 
-(defun tree-edit--restore-location (location movement)
-  "Restore the current node to LOCATION, moving MOVEMENT siblings.
+(defun tree-edit--restore-location (location)
+  "Restore the current node to LOCATION.
 
-If node no longer exists, the location will not be set."
+More permissive than `tsc--node-from-steps' in that the parent
+will be selected if an only child is deleted and nearest sibling
+will be selected if the last one is deleted."
   (condition-case nil
       (let* ((steps (car location))
              (child-index (cdr location))
@@ -101,7 +103,7 @@ If node no longer exists, the location will not be set."
              (num-children (tsc-count-named-children recovered-parent)))
         (if (equal num-children 0) recovered-parent
           (tsc-get-nth-named-child recovered-parent
-                                   (min (max (+ child-index movement) 0) (1- num-children)))))
+                                   (min child-index (1- num-children)))))
     (tsc--invalid-node-step (message "Tree-edit could not restore location"))))
 
 (defun tree-edit--apply-until-interesting (fun node)
@@ -390,7 +392,7 @@ the text."
       (delete-region (tsc-node-start-position ancestor-to-replace)
                      (tsc-node-end-position ancestor-to-replace))
       (insert node-text)
-      (tree-edit--restore-location ancestor-steps 0))))
+      (tree-edit--restore-location ancestor-steps))))
 
 (defun tree-edit-insert-sibling (type-or-text node &optional before)
   "Insert a node of the given TYPE-OR-TEXT next to NODE.
