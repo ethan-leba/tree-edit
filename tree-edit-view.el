@@ -34,11 +34,11 @@ NODE be displayed in bold if it matches `tree-edit--current-node', or in a
 lighter color if CHILD-OF-CURRENT-NODE is non-nil."
   (insert (make-string (* 2 depth) ?\ ))
   (let* ((current-nodep (with-current-buffer tree-edit-view--source-code-buffer
-                          (and tree-edit--current-node
+                          (and evil-tree-edit-current-node
                                (equal (tsc-node-range node)
-                                      (if (equal (tsc-count-named-children tree-edit--current-node) 0)
-                                          (tsc-node-range (tsc-get-parent tree-edit--current-node))
-                                        (tsc-node-range tree-edit--current-node))))))
+                                      (if (equal (tsc-count-named-children evil-tree-edit-current-node) 0)
+                                          (tsc-node-range (tsc-get-parent evil-tree-edit-current-node))
+                                        (tsc-node-range evil-tree-edit-current-node))))))
          (node-text (format "%s%s\n"
                             (tsc-node-type node)
                             (if (> (tsc-count-named-children node) 0) ":" ""))))
@@ -83,8 +83,12 @@ lighter color if CHILD-OF-CURRENT-NODE is non-nil."
       (buffer-disable-undo)
       (setq tree-edit-view--source-code-buffer source-buffer
             buffer-read-only t)))
+  ;; FIXME
+  (unless (bound-and-true-p evil-tree-edit-mode)
+    (tree-edit-view-mode -1)
+    (error "Sorry, I hardcoded this mode to only work with evil-tree-edit. Please remind me if I forgot!"))
   (add-hook 'tree-sitter-after-change-functions #'tree-edit-view--display-tree nil :local)
-  (add-hook 'tree-edit-movement-hook #'tree-edit-view--display-tree-no-arg nil :local)
+  (add-hook 'evil-tree-edit-movement-hook #'tree-edit-view--display-tree-no-arg nil :local)
   (add-hook 'kill-buffer-hook #'tree-edit-view--teardown nil :local)
   (display-buffer tree-edit-view--tree-buffer)
   (tree-edit-view--display-tree nil))
@@ -92,7 +96,7 @@ lighter color if CHILD-OF-CURRENT-NODE is non-nil."
 (defun tree-edit-view--teardown ()
   "Tear down syntax tree viewging in the current buffer."
   (remove-hook 'tree-sitter-after-change-functions #'tree-edit-view--display-tree :local)
-  (remove-hook 'tree-edit-movement-hook #'tree-edit-view--display-tree-no-arg :local)
+  (remove-hook 'evil-tree-edit-movement-hook #'tree-edit-view--display-tree-no-arg :local)
   (when (buffer-live-p tree-edit-view--tree-buffer)
     (kill-buffer tree-edit-view--tree-buffer)
     (setq tree-edit-view--tree-buffer nil)))
