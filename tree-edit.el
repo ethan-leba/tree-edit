@@ -129,28 +129,30 @@ Return cached result for TYPE and PARENT-TYPE, otherwise compute and return."
    (alist-get parent-type tree-edit--containing-types)))
 
 ;;* Locals: node transformations
-(defun tree-edit--get-only-child (node)
-  "Assert that NODE has exactly one child, and return it."
-  (if (equal (tsc-count-named-children node) 1)
-      (tsc-get-nth-named-child node 0)
-    (throw 'fragment-type nil)))
+
 
 ;; Error recovery seems to be a bit arbitrary:
 ;; - "foo.readl" in java parses as (program (expression_statement (...) (MISSING \";\")))
 ;; - "foo.read" in java parses as (program (ERROR (...)))
-(defun tree-edit--type-of-fragment (s)
-  "Try to identify the node-type of the fragment S.
+(defun tree-edit--type-of-fragment (fragment)
+  "Try to identify the node-type of the FRAGMENT.
 
 Fragments should parse as one of the following structures:
 - (program (type))
 - (program (ERROR (type))
 - (program (... (type) (MISSING ...))"
-  (catch 'fragment-type
-    (let ((first-node (tree-edit--get-only-child
-                       (tsc-root-node (tsc-parse-string tree-sitter-parser s)))))
-      (if (tsc-node-has-error-p first-node)
-          (tsc-node-type (tree-edit--get-only-child first-node))
-        (tsc-node-type first-node)))))
+  (cl-flet ((tree-edit--get-only-child
+             (lambda (node) (if (equal (tsc-count-named-children node) 1)
+                                (tsc-get-nth-named-child node 0)))))
+    (if-let ((first-node (->> fragment
+                              (tsc-parse-string tree-sitter-parser)
+                              (tsc-root-node)
+                              (tree-edit--get-only-child))))
+        (if (tsc-node-has-error-p first-node)
+            (-some-> first-node
+              (tree-edit--get-only-child)
+              (tsc-node-type))
+          (tsc-node-type first-node)))))
 
 (defun tree-edit--get-all-children (node)
   "Return all of NODE's children."
