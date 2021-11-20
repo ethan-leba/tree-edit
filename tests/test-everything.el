@@ -211,26 +211,26 @@ if (foo == 3) {
 (describe "change node"
   (it "enters insert mode after deleting the current node"
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (evil-tree-edit-change-node))
+              (evil-tree-edit-change))
             :to-have-buffer-contents "{foo(|);}"))
   (xit "re-enters tree mode on escape and reselects the node"
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (evil-tree-edit-change-node)
+              (evil-tree-edit-change)
               (insert "foo")
               (evil-normal-state))
             :to-have-buffer-contents "{foo([foo]);}")
     (expect (with-tree-test-buffer "{foo(x + [y]);}"
-              (evil-tree-edit-change-node)
+              (evil-tree-edit-change)
               (insert "z")
               (evil-normal-state))
             :to-have-buffer-contents "{foo(x + [z]);}"))
   ;; TODO
   (xit "only allows string nodes to be changed"
     (expect (with-tree-test-buffer "[{foo;}]"
-              (evil-tree-edit-change-node))
+              (evil-tree-edit-change))
             :to-throw 'user-error)
     (expect (with-tree-test-buffer "{[3 + 5];}"
-              (evil-tree-edit-change-node))
+              (evil-tree-edit-change))
             :to-throw 'user-error)))
 
 ;; (describe "exchange node"
@@ -251,13 +251,13 @@ if (foo == 3) {
     (expect (with-tree-test-buffer "{[foo;]bar;}"
               (evil-tree-edit-copy)
               (evil-tree-edit-goto-next-sibling)
-              (evil-tree-edit-exchange-node (car kill-ring)))
+              (evil-tree-edit-exchange (car kill-ring)))
             :to-have-buffer-contents "{foo;[foo;]}")
     (expect (with-tree-test-buffer "{foo([x]);}"
               (evil-tree-edit-copy)
               (evil-tree-edit-goto-parent)
               (evil-tree-edit-goto-prev-sibling)
-              (evil-tree-edit-exchange-node (car kill-ring)))
+              (evil-tree-edit-exchange (car kill-ring)))
             :to-have-buffer-contents "{[x](x);}")))
 
 (describe "insert sibling"
@@ -426,7 +426,7 @@ foo();[break;]// i'm a comment!
   (it "correctly replaces valid transformations"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer "{foo([x]);}"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "{foo[()];}")
     ;; TODO: Check tree-equals, I don't care about formatting
     (expect (with-tree-test-buffer "
@@ -434,7 +434,7 @@ class Main {
   [void foo() {}]
   void bar() {}
 }"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "
 class Main {[void bar() {}]
 }")
@@ -444,7 +444,7 @@ class Main {
   [void foo() {}]
   void bar() {}
 }"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "
 class Main {
   // should we delete this?
@@ -458,7 +458,7 @@ class Main {
   void bar() {}
   // here too
 }"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "
 class Main {
   // should we delete this?
@@ -472,7 +472,7 @@ class Main {
   [break;]
   break;
 }"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "
 {
   break;
@@ -483,36 +483,36 @@ class Main {[public] void main() {}
 }"
               ;; FIXME: Test selects anonymous keyword 'public', instead of 'modifiers
               (evil-tree-edit-goto-parent)
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "
 class Main {[void] main() {}
 }")
     (expect (with-tree-test-buffer "{foo([x],y);}"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "{foo([y]);}")
     (expect (with-tree-test-buffer "{foo(x,[y]);}"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "{foo([x]);}")
 
     (expect (with-tree-test-buffer "{foo(x);[break;]}"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "{[foo(x);]}"))
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer "{[foo](x);}"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-throw 'user-error)
     (expect (with-tree-test-buffer "
 class Main {
   [void] main() {}
 }"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-throw 'user-error))
   (xit "can deal with comments in between relevant syntax"
     (expect (with-tree-test-buffer "{
 foo(x, // comment
     [y]);
 }"
-              (evil-tree-edit-delete-node))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "{
 foo(x // comment
     );

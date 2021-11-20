@@ -102,7 +102,7 @@ moving the sibling index by the provided value."
   (evil-tree-edit--apply-movement #'evil-tree-edit--goto-sig-parent))
 
 ;;* Evil tree-edit functions
-(defun evil-tree-edit-change-node ()
+(defun evil-tree-edit-change ()
   "Change the current node."
   (interactive)
   (setq evil-tree-edit--return-to-tree-state (tree-edit--save-location evil-tree-edit-current-node))
@@ -149,29 +149,29 @@ NODE-TYPE can be a symbol or a list of symbol."
   "Wrap the current node in a node of selected TYPE."
   (evil-tree-edit--preserve-location
     (let ((node-text (tsc-node-text evil-tree-edit-current-node)))
-      (evil-tree-edit-exchange-node type)
+      (evil-tree-edit-exchange type)
       (unwind-protect
           (evil-tree-edit-avy-jump (alist-get type tree-edit--supertypes)
                                    (-lambda ((_ . node)) (tree-edit--valid-replacement-p type node)))
         ;; If avy fails, replace the old node back
-        (evil-tree-edit-exchange-node node-text)))))
+        (evil-tree-edit-exchange node-text)))))
 
-(defun evil-tree-edit-exchange-node (type-or-text)
+(defun evil-tree-edit-exchange (type-or-text)
   "Exchange current node for TYPE-OR-TEXT.
 
-See `tree-edit-exchange-node'."
+See `tree-edit-exchange'."
 
   (interactive)
   (evil-tree-edit--preserve-location
-    (tree-edit-exchange-node type-or-text evil-tree-edit-current-node)))
+    (tree-edit-exchange type-or-text evil-tree-edit-current-node)))
 
-(defun evil-tree-edit-delete-node ()
+(defun evil-tree-edit-delete ()
   "Delete the current node.
 
-See `tree-edit-delete-node'."
+See `tree-edit-delete'."
   (interactive)
   (evil-tree-edit--preserve-location
-    (tree-edit-delete-node evil-tree-edit-current-node)))
+    (tree-edit-delete evil-tree-edit-current-node)))
 
 (defun evil-tree-edit-raise ()
   "Move the current node up the syntax tree until a valid replacement is found.
@@ -333,7 +333,7 @@ each language will have it's own set of nouns."
     (define-evil-tree-edit-verb "a" #'evil-tree-edit-insert-sibling)
     (define-evil-tree-edit-verb "I" #'evil-tree-edit-insert-child)
     (define-evil-tree-edit-verb "s" #'evil-tree-edit-avy-jump)
-    (define-evil-tree-edit-verb "e" #'evil-tree-edit-exchange-node)
+    (define-evil-tree-edit-verb "e" #'evil-tree-edit-exchange)
     (define-evil-tree-edit-verb "w" #'evil-tree-edit-wrap-node t)
     (define-key evil-tree-state-map [escape] 'evil-normal-state)
     (define-key evil-tree-state-map ">" #'evil-tree-edit-slurp)
@@ -342,8 +342,8 @@ each language will have it's own set of nouns."
     (define-key evil-tree-state-map "k" #'evil-tree-edit-goto-prev-sibling)
     (define-key evil-tree-state-map "h" #'evil-tree-edit-goto-parent)
     (define-key evil-tree-state-map "f" #'evil-tree-edit-goto-child)
-    (define-key evil-tree-state-map "c" #'evil-tree-edit-change-node)
-    (define-key evil-tree-state-map "d" #'evil-tree-edit-delete-node)
+    (define-key evil-tree-state-map "c" #'evil-tree-edit-change)
+    (define-key evil-tree-state-map "d" #'evil-tree-edit-delete)
     (define-key evil-tree-state-map "r" #'evil-tree-edit-raise)
     (define-key evil-tree-state-map "y" #'evil-tree-edit-copy)
     (define-key evil-tree-state-map "A" #'evil-tree-edit-goto-sig-parent)))

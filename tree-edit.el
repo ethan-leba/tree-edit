@@ -363,7 +363,7 @@ POSITION can be :before, :after, or nil."
     (insert reconstructed-node)))
 
 ;;* Globals: Structural editing functions
-(defun tree-edit-exchange-node (type-or-text node)
+(defun tree-edit-exchange (type-or-text node)
   "Exchange NODE for TYPE-OR-TEXT.
 
 If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
@@ -426,7 +426,7 @@ current, otherwise after."
                            (tsc-node-text slurp-candidate)
                            (tsc-node-type node)))
              (let ((slurp-text (tsc-node-text slurp-candidate)))
-               (tree-edit-delete-node slurp-candidate)
+               (tree-edit-delete slurp-candidate)
                (tree-edit-insert-child slurp-text (tsc--node-from-steps tree-sitter-tree slurper)))))
           ;; Named children, use insert sibling
           (t
@@ -443,7 +443,7 @@ current, otherwise after."
                            (tsc-node-text slurp-candidate)
                            (tsc-node-type node)))
              (let ((slurp-text (tsc-node-text slurp-candidate)))
-               (tree-edit-delete-node slurp-candidate)
+               (tree-edit-delete slurp-candidate)
                (tree-edit-insert-sibling slurp-text (tsc--node-from-steps tree-sitter-tree slurper-steps))))))))
 
 (defun tree-edit-barf (node)
@@ -463,10 +463,10 @@ current, otherwise after."
                   (tsc-node-text barfer)
                   (tsc-node-type node)))
     (let ((barfee-text (tsc-node-text barfee)))
-      (tree-edit-delete-node barfee)
+      (tree-edit-delete barfee)
       (tree-edit-insert-sibling barfee-text (tsc--node-from-steps tree-sitter-tree barfer-steps)))))
 
-(defun tree-edit-delete-node (node)
+(defun tree-edit-delete (node)
   "Delete NODE, and any surrounding syntax that accompanies it."
   (-let [(start end fragment) (or (tree-edit--valid-deletions node)
                                   (user-error "Cannot delete the current node"))]
