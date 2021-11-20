@@ -121,9 +121,7 @@ TODO: Build queries and cursors once, then reuse them?"
              (tsc-query-captures query node #'tsc--buffer-substring-no-properties))))
 
 (defun tree-edit--relevant-types (type parent-type)
-  "Return a list of the TYPE and all it's supertypes that occur in PARENT-TYPE.
-
-Return cached result for TYPE and PARENT-TYPE, otherwise compute and return."
+  "Return a list of the TYPE and all it's supertypes that occur in PARENT-TYPE."
   (-intersection
    (alist-get type tree-edit--supertypes)
    (alist-get parent-type tree-edit--containing-types)))
@@ -135,7 +133,7 @@ Return cached result for TYPE and PARENT-TYPE, otherwise compute and return."
 ;; - "foo.readl" in java parses as (program (expression_statement (...) (MISSING \";\")))
 ;; - "foo.read" in java parses as (program (ERROR (...)))
 (defun tree-edit--type-of-fragment (fragment)
-  "Try to identify the node-type of the FRAGMENT.
+  "Return the node-type of the FRAGMENT, or nil if unparseable.
 
 Fragments should parse as one of the following structures:
 - (program (type))
@@ -169,7 +167,7 @@ Fragments should parse as one of the following structures:
 ;;* Globals: Syntax generation
 ;; TODO: Handle less restrictively by ripping out surrounding syntax (ie delete)
 (defun tree-edit--valid-replacement-p (type node)
-  "Return non-nil if the NODE can be replaced with a node of the provided TYPE."
+  "Return non-nil if NODE can be replaced with a node of TYPE."
   (-let* ((reazon-occurs-check nil)
           (parent-type (tsc-node-type (tsc-get-parent node)))
           (grammar (alist-get parent-type tree-edit-grammar))
@@ -278,15 +276,15 @@ Upstream patch?"
   (s-replace-all '(("\\p{L}" . "[:alpha:]")
                    ("\\p{Nd}" . "[:digit:]")) pcre))
 
-(defun tree-edit--generate-node (node-type rules &optional fragment)
+(defun tree-edit--generate-node (node-type rules &optional tokens)
   "Given a NODE-TYPE and a set of RULES, generate a node string.
 
-If FRAGMENT is passed in, that will be used as a basis for node
+If TOKENS is passed in, that will be used as a basis for node
 construction, instead of looking up the rules for node-type."
   (interactive)
   (--mapcat (if (symbolp it) (tree-edit--generate-node it rules) `(,it))
             ;; TODO: See if we can make it via. the parser?
-            (or fragment (alist-get node-type rules) (user-error "No node definition for %s" node-type))))
+            (or tokens (alist-get node-type rules) (user-error "No node definition for %s" node-type))))
 
 (defun tree-edit--needs-space-p (left right)
   "Check if the two tokens LEFT and RIGHT need a space between them.
@@ -321,7 +319,7 @@ Retrieves text from node's start until before the beginning of it's next sibling
                  siblings))
 
 (defun tree-edit--replace-fragment (fragment node l r)
-  "Replace the nodes between L and R with the FRAGMENT NODE."
+  "Replace the nodes between L and R with the FRAGMENT in the children of NODE."
   (-let* ((parent (tsc-get-parent node))
           (children (tree-edit--get-all-children parent))
           (children-text (tree-edit--node-text-with-whitespace children))
@@ -340,7 +338,7 @@ Retrieves text from node's start until before the beginning of it's next sibling
     (insert reconstructed-node)))
 
 (defun tree-edit--insert-fragment (fragment node position)
-  "Insert rendered FRAGMENT at NODE in the provided POSITION.
+  "Insert rendered FRAGMENT in the children of NODE in the provided POSITION.
 
 POSITION can be :before, :after, or nil."
   (-let* ((parent (tsc-get-parent node))
@@ -393,6 +391,9 @@ the text."
 (defun tree-edit-insert-sibling (type-or-text node &optional before)
   "Insert a node of the given TYPE-OR-TEXT next to NODE.
 
+If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
+the text.
+
 if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
   (let* ((type (if (symbolp type-or-text) type-or-text
@@ -402,7 +403,10 @@ current, otherwise after."
     (tree-edit--insert-fragment fragment node (if before :before :after))))
 
 (defun tree-edit-insert-child (type-or-text node)
-  "Insert a node of the given TYPE-OR-TEXT inside of NODE."
+  "Insert a node of the given TYPE-OR-TEXT inside of NODE.
+
+If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
+the text."
   (let* ((node (tsc-get-nth-child node 0))
          (type (if (symbolp type-or-text) type-or-text
                  (tree-edit--type-of-fragment type-or-text)))
