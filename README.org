@@ -3,14 +3,14 @@
 #+HTML: <p align="center"><img width="835" src="assets/demo.gif"></p>
 
 Every programming language has a formally defined structure, but most text
-editors are completely ignorant to it when editing code. As a result, editing
-can oftentimes devolve into a tedious exercise in character manipulation.
+editors are completely ignorant to it. As a result, editing can oftentimes
+devolve into a tedious exercise in character manipulation.
 
-*Tree-edit provides editing operations that map directly to the structure of the
-language*, abstracting away the process of manually entering syntax. Leveraging
-the [[https://github.com/tree-sitter/tree-sitter][tree-sitter]] parser, tree-edit always has access to the precise state of the
-syntax tree -- and directly wields the grammars of supported languages in order
-to power it's editing capabilities.
+*Tree-edit provides [[#supported-languages][language-agnostic]] editing operations that map directly to
+the structure of the language*, abstracting away the process of manually
+entering syntax. Leveraging the [[https://github.com/tree-sitter/tree-sitter][tree-sitter]] parser, tree-edit always has access
+to the precise state of the syntax tree -- and directly wields the grammars of
+the languages under edit to power it's editing capabilities.
 
 * Table of Contents
 :PROPERTIES:
@@ -32,8 +32,9 @@ to power it's editing capabilities.
 
 * Getting started
 Tree-edit is consists of two packages: *tree-edit*, a library for providing
-structural editing, and *evil-tree-edit*, a new evil tree state which exposes
-this functionality. The following sections of the README describe usage with
+structural editing, and *evil-tree-edit*, a package which exposes this
+functionality as evil state with preconfigured bindings and visualization (as
+seen above). The following sections of the README describe usage with
 *evil-tree-edit*.
 
 After installation, add hooks for any language you'd like tree-edit to
@@ -46,7 +47,7 @@ automatically enable in.
 It's also recommended to use tree-edit with an autoformatter in it's current
 state (see [[#limitations][limitations]]).
 #+begin_src elisp
-(add-hook 'tree-edit-after-change-hook #'my-format-buffer-command)
+(add-hook 'evil-tree-edit-after-change-hook #'my-format-buffer-command)
 #+end_src
 * Usage
 The concept of the *cursor*, a position in the 2D plane of text, is replaced by
@@ -79,10 +80,18 @@ The navigation primitives follow the tree structure of the language.
 | Outwards Significant | @@html:<kbd>@@A@@html:</kbd>@@ | Move outwards until a significant node (e.g. function or class declaration) is hit. |
 
 ** Editing operations
-The most important feature of tree-edit: editing the syntax tree. For any
-editing operation, the syntax will be added or deleted at will based on the
-needs of the operation. Any transformations will be rejected if a syntactically
-valid result cannot be generated.
+The most important feature of tree-edit: editing the syntax tree.
+
+For any editing operation, the syntax will be added or deleted based on the
+needs of the operation. For example, when adding an additional argument to a
+function, tree-edit can infer that a comma is needed based on the grammar of the
+language.
+
+`tree-edit-syntax-snippets` defines how node types will actually be represented
+upon insertion: see example [[https://github.com/ethan-leba/tree-edit/blob/main/tree-edit-java.el#L29][here]].
+
+Any transformations will be rejected if a syntactically valid result cannot be
+generated.
 
 | Operation    | Keybind                        | Description                                                                                                            |
 |--------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------|
@@ -110,10 +119,10 @@ operation is valid, the copied text will be used.
 |--------+----------|
 | 🔨     | Java     |
 
-Currently the list of supported languages is not very impressive, but /in
-theory/ it should be as simple as adding a new grammar and language file for a given
-language. In practice I expect this to unearth some language-specific
-assumptions in the tree-edit code base!
+Tree-edit is designed to be as language-agnostic as possible. Currently the list
+of supported languages is not very impressive, but /in theory/ it should be as
+simple as running a script to preprocess a grammar and adding a configuration
+file for the language.
 
 * Customization
 
