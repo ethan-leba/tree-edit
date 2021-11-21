@@ -72,7 +72,10 @@ moving the sibling index by the provided value."
   (let ((parent (tsc-get-parent node)))
     (cond
      ((not parent) (user-error "No significant node past the current!"))
-     ((member (tsc-node-type parent) tree-edit-significant-node-types) parent)
+     ((--any (member (tsc-node-type parent)
+                     (cons it (alist-get it tree-edit--subtypes '())))
+             tree-edit-significant-node-types)
+      parent)
      (t (evil-tree-edit--goto-sig-parent parent)))))
 
 ;;* Globals: navigation
