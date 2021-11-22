@@ -281,7 +281,7 @@ See `tree-edit-insert-sibling'."
         (user-error "Tree-edit does not support %s!" (symbol-name major-mode)))
       (unless (featurep language-file)
         (require language-file)
-        (evil-tree-edit--set-state-bindings major-mode)))
+        (evil-tree-edit-set-state-bindings major-mode)))
     (tree-sitter-mode)
     ;; HACK: Above mode binding won't come into effect until the state is changed.
     (evil-normal-state)
@@ -326,7 +326,7 @@ If WRAP is t, include :wrap-override."
   "Create a sparse keymap where keys default to undefined."
   (make-composed-keymap (make-sparse-keymap) evil-suppress-map))
 
-(defun evil-tree-edit--set-state-bindings (mode)
+(defun evil-tree-edit-set-state-bindings (mode)
   "Set keybindings for MODE in `evil-tree-state'.
 
 Should only be used in the context of mode-local bindings, as

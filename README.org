@@ -154,7 +154,7 @@ fair bit of boilerplate, but here's some code to get started.
          :node-override '((if_statement . ("if" parenthesized_expression block "else" block)))))
       tree-edit-nodes)))
 
-  (evil-tree-edit--set-state-bindings 'java-mode))
+  (evil-tree-edit-set-state-bindings 'java-mode))
   #+end_src
 
   See [[file:tree-edit-java.el]] and the docstrings of the accompanying variables
