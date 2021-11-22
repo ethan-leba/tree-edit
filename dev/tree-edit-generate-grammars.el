@@ -45,6 +45,9 @@
  tree-edit--subtypes
  %s
 
+ tree-edit--alias-map
+ %s
+
  tree-edit--containing-types
  %s)
 
@@ -134,6 +137,54 @@
     (`((type . "CHOICE")
        (members . ,members))
      (-mapcat #'tree-edit--extract-types members))
+    (_ '())))
+
+(defun tree-edit--generate-alias-names (grammar)
+  "Return an alist of a type to all the types it contained in it's GRAMMAR.
+
+Assumes that each node has only one alias. This may not be true!"
+  (--map `(,(car it) . ,(tree-edit--extract-aliases (cdr it))) grammar))
+
+(defun tree-edit--extract-aliases (grammar)
+  "Return a list of all the symbol types in GRAMMAR."
+  (pcase grammar
+    ((and `((type . ,type)
+            (value . ,_)
+            (content . ,content))
+          (guard (string-prefix-p "PREC" type)))
+     ;; Silence the foolish linter.
+     (ignore type)
+     (tree-edit--extract-aliases content))
+    (`((type . "SEQ")
+       (members . ,members))
+     (-mapcat #'tree-edit--extract-aliases members))
+    (`((type . "ALIAS")
+       (content . ((type . "SYMBOL")
+                   (name . ,name)))
+       (named . ,_)
+       (value . ,alias-name))
+     `((,name . ,alias-name)))
+    (`((type . "ALIAS")
+       (content . ,_)
+       (named . ,_)
+       (value . ,_))
+     '())
+    (`((type . "REPEAT")
+       (content . ,content))
+     (tree-edit--extract-aliases content))
+    (`((type . "REPEAT1")
+       (content . ,content))
+     (tree-edit--extract-aliases content))
+    (`((type . "FIELD")
+       (name . ,_)
+       (content . ,content))
+     (tree-edit--extract-aliases content))
+    (`((type . "SYMBOL")
+       (name . ,name))
+     '())
+    (`((type . "CHOICE")
+       (members . ,members))
+     (-mapcat #'tree-edit--extract-aliases members))
     (_ '())))
 
 (defun tree-edit--inline-type (node grammar)
@@ -262,6 +313,7 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
             (prin1-to-string (tree-edit--extract-word-regex raw-grammar))
             `',(prin1-to-string supertypes)
             `',(prin1-to-string (tree-edit--invert-supertypes supertypes))
+            `',(prin1-to-string (tree-edit--generate-alias-names grammar))
             `',(prin1-to-string (tree-edit--generate-containing-types grammar)))))
 
 (-let* (((path name mode) command-line-args-left)
