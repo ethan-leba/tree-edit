@@ -254,7 +254,7 @@ See `tree-edit-insert-sibling'."
     (tree-edit--restore-location evil-tree-edit--return-to-tree-state)
     (setq evil-tree-edit--return-to-tree-state nil)))
 
-(defun evil-tree-edit-teardown ()
+(defun evil-tree-edit--teardown ()
   "De-activate tree-edit state."
   (when evil-tree-edit--node-overlay
     (delete-overlay evil-tree-edit--node-overlay)))
@@ -285,12 +285,12 @@ See `tree-edit-insert-sibling'."
     (tree-sitter-mode)
     ;; HACK: Above mode binding won't come into effect until the state is changed.
     (evil-normal-state)
-    (add-hook 'before-revert-hook #'evil-tree-edit-teardown nil 'local)
+    (add-hook 'before-revert-hook #'evil-tree-edit--teardown nil 'local)
     ;; TODO: can we just run these on load?
     (add-hook 'evil-tree-edit-movement-hook #'evil-tree-edit--update-overlay nil 'local)
     (add-hook 'evil-normal-state-entry-hook #'evil-tree-edit--re-enter-tree-state nil 'local))
    (t
-    (remove-hook 'before-revert-hook #'evil-tree-edit-teardown 'local)
+    (remove-hook 'before-revert-hook #'evil-tree-edit--teardown 'local)
     (remove-hook 'evil-normal-state-entry-hook #'evil-tree-edit--re-enter-tree-state 'local))))
 
 (defun define-evil-tree-edit-verb (key func &optional wrap)
