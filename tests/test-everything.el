@@ -497,6 +497,13 @@ class Main {[void] main() {}
     (expect (with-tree-test-buffer "{foo(x);[break;]}"
               (evil-tree-edit-delete))
             :to-have-buffer-contents "{[foo(x);]}"))
+  (it "can delete nodes with aliased types"
+    ;; Should select bounds of new named node
+    (expect (with-tree-test-buffer "class Foo {[public] int bar;}"
+              ;; FIXME: selects unnamed node 'public', not modifiers node
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-delete))
+            :to-have-buffer-contents "class Foo {[int] bar;}"))
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer "{[foo](x);}"
               (evil-tree-edit-delete))
