@@ -36,6 +36,8 @@
   "A mapping from type to subtype, i.e. statement is subtyped by if_statement. Set by mode-local grammar file.")
 (defvar tree-edit--containing-types nil
   "A mapping from a type to all possible types that can exist as it's children. Set by mode-local grammar file.")
+(defvar tree-edit--alias-map nil
+  "A mapping from a type to a mapping from original name to aliased name. Set by mode-local grammar file.")
 (defvar tree-edit--identifier-regex nil
   "The regex used to determine if a string is an identifier. Set by mode-local grammar file.")
 (defvar tree-edit-significant-node-types nil
@@ -121,9 +123,13 @@ TODO: Build queries and cursors once, then reuse them?"
              (tsc-query-captures query node #'tsc--buffer-substring-no-properties))))
 
 (defun tree-edit--relevant-types (type parent-type)
-  "Return a list of the TYPE and all it's supertypes that occur in PARENT-TYPE."
+  "Return a list of the TYPE and all relevant types that occur in PARENT-TYPE.
+
+Relevant types are either supertypes of TYPE or alias names referring to TYPE."
   (-intersection
-   (alist-get type tree-edit--supertypes `(,type))
+   (-union
+    (alist-get type tree-edit--supertypes `(,type))
+    (alist-get type (alist-get parent-type tree-edit--alias-map)))
    (alist-get parent-type tree-edit--containing-types)))
 
 ;;* Locals: node transformations
