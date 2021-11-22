@@ -185,16 +185,51 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
        (members . ,(--map (tree-edit--inline-type it grammar) members))))
     (other other)))
 
-(defun tree-edit--process-grammar (obj)
-  "Convert strings to symbols in OBJ."
-  (-tree-map-nodes
-   #'-cons-pair-p
-   (lambda (it)
-     (pcase it
-       (`(name . ,name)
-        `(name . ,(intern name)))
-       (`(,a . ,d) `(,a . ,(tree-edit--process-grammar d)))))
-   obj))
+(defun tree-edit--process-grammar (node)
+  "Convert node types to symbols in NODE."
+  (pcase node
+    ((and `((type . ,type)
+            (value . ,value)
+            (content . ,content))
+          (guard (string-prefix-p "PREC" type)))
+     `((type . ,type)
+       (value . ,value)
+       (content . ,(tree-edit--process-grammar content))))
+    (`((type . "SEQ")
+       (members . ,members))
+     `((type . "SEQ")
+       (members . ,(-map #'tree-edit--process-grammar members))))
+    (`((type . "ALIAS")
+       (content . ,content)
+       (named . ,named)
+       (value . ,value))
+     `((type . "ALIAS")
+       (content . ,(tree-edit--process-grammar content))
+       (named . ,named)
+       (value . ,(intern value))))
+    (`((type . "REPEAT")
+       (content . ,content))
+     `((type . "REPEAT")
+       (content . ,(tree-edit--process-grammar content))))
+    (`((type . "REPEAT1")
+       (content . ,content))
+     `((type . "REPEAT1")
+       (content . ,(tree-edit--process-grammar content))))
+    (`((type . "FIELD")
+       (name . ,name)
+       (content . ,content))
+     `((type . "FIELD")
+       (name . ,name)
+       (content . ,(tree-edit--process-grammar content))))
+    (`((type . "SYMBOL")
+       (name . ,name))
+     `((type . "SYMBOL")
+       (name . ,(intern name))))
+    (`((type . "CHOICE")
+       (members . ,members))
+     `((type . "CHOICE")
+       (members . ,(-map #'tree-edit--process-grammar members))))
+    (other other)))
 
 (defun tree-edit--extract-word-regex (grammar)
   "Extract regex for words in GRAMMAR."
@@ -205,16 +240,19 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
       (_ (error "Expected regex node, found %s" identifier-node)))))
 
 
-(defun tree-edit--extract-grammar (raw-grammar)
-  "Retrieve and format grammar rules for RAW-GRAMMAR."
-  (let ((grammar (alist-get 'rules raw-grammar)))
-    (map-apply (lambda (node node-grammar) (cons node (tree-edit--inline-type node-grammar grammar))) grammar)))
+(defun tree-edit--extract-grammar (grammar)
+  "Retrieve and format grammar rules for GRAMMAR."
+  (map-apply (lambda (node node-grammar) (cons node (tree-edit--inline-type node-grammar grammar))) grammar))
 
 (defun tree-edit--generate-grammar-file (path name mode)
   "Generate file contents based on the grammar at PATH for NAME and MODE."
-  (let* ((raw-grammar (tree-edit--process-grammar
-                       (let ((json-array-type 'list)) (json-read-file path))))
-         (grammar (tree-edit--extract-grammar raw-grammar))
+  (let* ((raw-grammar
+          (let ((json-array-type 'list))
+            (json-read-file path)))
+         (grammar
+          (map-apply (lambda (type node) (cons type (tree-edit--process-grammar node)))
+                     (alist-get 'rules raw-grammar)))
+         (grammar (tree-edit--extract-grammar grammar))
          (supertypes (tree-edit--generate-supertypes grammar)))
     ;; FIXME: Formatting this huge string is very slow
     (format tree-edit--grammar-template
