@@ -185,16 +185,6 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
        (members . ,(--map (tree-edit--inline-type it grammar) members))))
     (other other)))
 
-(defun tree-edit--process-node-type (obj)
-  "Convert vectors to lists and strings to symbols in OBJ."
-  (-tree-map-nodes
-   #'-cons-pair-p
-   (lambda (it) (pcase it
-             (`(type . ,type)
-              `(type . ,(intern type)))
-             (_ it)))
-   obj))
-
 (defun tree-edit--process-grammar (obj)
   "Convert strings to symbols in OBJ."
   (-tree-map-nodes
