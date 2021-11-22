@@ -153,12 +153,12 @@ NODE-TYPE can be a symbol or a list of symbol."
   (evil-tree-edit--preserve-location
    (let* ((node-type (tsc-node-type evil-tree-edit-current-node))
           (node-text (tsc-node-text evil-tree-edit-current-node)))
-      (evil-tree-edit-exchange type)
-      (unwind-protect
-          (evil-tree-edit-avy-jump (alist-get node-type tree-edit--supertypes)
-                                   (-lambda ((_ . node)) (tree-edit--valid-replacement-p type node)))
-        ;; If avy fails, replace the old node back
-        (evil-tree-edit-exchange node-text)))))
+     (evil-tree-edit-exchange type)
+     (unwind-protect
+         (evil-tree-edit-avy-jump (alist-get node-type tree-edit--supertypes)
+                                  (-lambda ((_ . node)) (tree-edit--valid-replacement-p type node)))
+       ;; If avy fails, replace the old node back
+       (evil-tree-edit-exchange node-text)))))
 
 (defun evil-tree-edit-exchange (type-or-text)
   "Exchange current node for TYPE-OR-TEXT.
@@ -167,7 +167,7 @@ See `tree-edit-exchange'."
 
   (interactive)
   (evil-tree-edit--preserve-location
-    (tree-edit-exchange type-or-text evil-tree-edit-current-node)))
+   (tree-edit-exchange type-or-text evil-tree-edit-current-node)))
 
 (defun evil-tree-edit-delete ()
   "Delete the current node.
@@ -175,7 +175,7 @@ See `tree-edit-exchange'."
 See `tree-edit-delete'."
   (interactive)
   (evil-tree-edit--preserve-location
-    (tree-edit-delete evil-tree-edit-current-node)))
+   (tree-edit-delete evil-tree-edit-current-node)))
 
 (defun evil-tree-edit-raise ()
   "Move the current node up the syntax tree until a valid replacement is found.
@@ -194,7 +194,7 @@ current, otherwise after.
 See `tree-edit-insert-sibling'."
   (interactive)
   (evil-tree-edit--preserve-location
-    (tree-edit-insert-sibling type-or-text evil-tree-edit-current-node before))
+   (tree-edit-insert-sibling type-or-text evil-tree-edit-current-node before))
   (unless before
     (evil-tree-edit-goto-next-sibling)))
 
@@ -206,20 +206,20 @@ See `tree-edit-insert-sibling'."
   "Insert a node of the given TYPE-OR-TEXT inside of the current node."
   (interactive)
   (evil-tree-edit--preserve-location
-    (tree-edit-insert-child type-or-text evil-tree-edit-current-node))
+   (tree-edit-insert-child type-or-text evil-tree-edit-current-node))
   (evil-tree-edit-goto-child))
 
 (defun evil-tree-edit-slurp ()
   "Transform current node's next sibling into it's leftmost child, if possible."
   (interactive)
   (evil-tree-edit--preserve-location
-    (tree-edit-slurp evil-tree-edit-current-node)))
+   (tree-edit-slurp evil-tree-edit-current-node)))
 
 (defun evil-tree-edit-barf ()
   "Transform current node's leftmost child into it's next sibling, if possible."
   (interactive)
   (evil-tree-edit--preserve-location
-      (tree-edit-barf evil-tree-edit-current-node)))
+   (tree-edit-barf evil-tree-edit-current-node)))
 
 ;;* Mode and evil state definitions
 (defun evil-tree-edit--update-overlay ()
