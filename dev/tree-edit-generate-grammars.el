@@ -112,7 +112,7 @@
      (tree-edit--extract-types content))
     (`((type . "SEQ")
        (members . ,members))
-     (-mapcat #'tree-edit--extract-types (append members '())))
+     (-mapcat #'tree-edit--extract-types members))
     (`((type . "ALIAS")
        (content . ,_)
        (named . ,_)
