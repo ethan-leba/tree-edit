@@ -151,10 +151,11 @@ NODE-TYPE can be a symbol or a list of symbol."
 (defun evil-tree-edit-wrap-node (type)
   "Wrap the current node in a node of selected TYPE."
   (evil-tree-edit--preserve-location
-    (let ((node-text (tsc-node-text evil-tree-edit-current-node)))
+   (let* ((node-type (tsc-node-type evil-tree-edit-current-node))
+          (node-text (tsc-node-text evil-tree-edit-current-node)))
       (evil-tree-edit-exchange type)
       (unwind-protect
-          (evil-tree-edit-avy-jump (alist-get type tree-edit--supertypes)
+          (evil-tree-edit-avy-jump (alist-get node-type tree-edit--supertypes)
                                    (-lambda ((_ . node)) (tree-edit--valid-replacement-p type node)))
         ;; If avy fails, replace the old node back
         (evil-tree-edit-exchange node-text)))))
