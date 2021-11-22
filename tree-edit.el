@@ -123,7 +123,7 @@ TODO: Build queries and cursors once, then reuse them?"
 (defun tree-edit--relevant-types (type parent-type)
   "Return a list of the TYPE and all it's supertypes that occur in PARENT-TYPE."
   (-intersection
-   (alist-get type tree-edit--supertypes)
+   (alist-get type tree-edit--supertypes `(,type))
    (alist-get parent-type tree-edit--containing-types)))
 
 ;;* Locals: node transformations
