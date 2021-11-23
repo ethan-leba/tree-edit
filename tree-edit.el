@@ -127,9 +127,9 @@ TODO: Build queries and cursors once, then reuse them?"
 
 Relevant types are either supertypes of TYPE or alias names referring to TYPE."
   (-intersection
-   (-union
-    (alist-get type tree-edit--supertypes `(,type))
-    (alist-get type (alist-get parent-type tree-edit--alias-map)))
+   (cons
+    (alist-get type (alist-get parent-type tree-edit--alias-map))
+    (alist-get type tree-edit--supertypes `(,type)))
    (alist-get parent-type tree-edit--containing-types)))
 
 ;;* Locals: node transformations
@@ -180,20 +180,20 @@ Fragments should parse as one of the following structures:
           ((children . index) (tree-edit--get-parent-tokens node))
           ;; removing the selected element
           ((left (_ . right)) (-split-at index children))
-          (supertype (tree-edit--relevant-types type parent-type)))
+          (relevant-types (tree-edit--relevant-types type parent-type)))
     (if-let (result (reazon-run 1 q
                       (reazon-fresh (tokens qr ql)
                         (tree-edit--superpositiono right qr parent-type)
                         (tree-edit--superpositiono left ql parent-type)
                         (tree-edit--max-lengtho q 3)
                         ;; FIXME: this should be limited to only 1 new named node, of the requested type
-                        (tree-edit--includes-typeo q supertype)
+                        (tree-edit--includes-typeo q relevant-types)
                         (tree-edit--prefixpostfixo ql q qr tokens)
                         (tree-edit-parseo grammar tokens '()))))
         ;; TODO: Put this in the query
         ;; Rejecting multi-node solutions
         (if (equal (length (car result)) 1)
-            (--reduce-from (-replace it type acc) (car result) supertype)))))
+            (--reduce-from (-replace it type acc) (car result) relevant-types)))))
 
 (defun tree-edit--find-raise-ancestor (ancestor child-type)
   "Find a suitable ANCESTOR to be replaced with a node of CHILD-TYPE."
@@ -213,7 +213,7 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
           (grammar (alist-get parent-type tree-edit-grammar))
           ((children . index) (tree-edit--get-parent-tokens node))
           ((left right) (-split-at (+ index (if after 1 0)) children))
-          (supertype (tree-edit--relevant-types type parent-type)))
+          (relevant-types (tree-edit--relevant-types type parent-type)))
     (if-let (result (reazon-run 1 q
                       (reazon-fresh (tokens qr ql)
                         (tree-edit--superpositiono right qr parent-type)
@@ -221,11 +221,11 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
                         (tree-edit--max-lengtho q 5)
                         (tree-edit--prefixpostfixo ql q qr tokens)
                         ;; FIXME: this should be limited to only 1 new named node, of the requested type
-                        (tree-edit--includes-typeo q supertype)
+                        (tree-edit--includes-typeo q relevant-types)
                         (tree-edit-parseo grammar tokens '()))))
         (--reduce-from (-replace it type acc)
                        (car result)
-                       supertype)
+                       relevant-types)
       (user-error "Cannot insert %s" type))))
 
 (defun tree-edit--remove-node-and-surrounding-syntax (tokens idx)
@@ -585,16 +585,16 @@ the text."
     (reazon-appendo prefix middle tmp)
     (reazon-appendo tmp postfix out)))
 
-(reazon-defrel tree-edit--includes-typeo (tokens supertypes)
-  "One of the types in SUPERTYPE appears in TOKENS."
+(reazon-defrel tree-edit--includes-typeo (tokens relevant-types)
+  "One of the types in RELEVANT-TYPES appears in TOKENS."
   (reazon-fresh (a d)
     (reazon-conso a d tokens)
     (reazon-disj
-     (reazon-membero a supertypes)
-     (tree-edit--includes-typeo d supertypes))))
+     (reazon-membero a relevant-types)
+     (tree-edit--includes-typeo d relevant-types))))
 
 (reazon-defrel tree-edit--superpositiono (tokens out parent-type)
-  "OUT is TOKENS where each token is either itself or any supertype occurring in PARENT-TYPE."
+  "OUT is TOKENS where each token is either itself or any relevant type occurring in PARENT-TYPE."
   (cond
    ((not tokens) (reazon-== out '()))
    ((and (not (equal (car tokens) 'comment)) (symbolp (car tokens)))
