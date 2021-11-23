@@ -183,7 +183,8 @@ See `tree-edit-delete'."
 See `tree-edit-raise'."
   (interactive)
   (let ((raised-node (tree-edit-raise evil-tree-edit-current-node)))
-    (setq evil-tree-edit-current-node raised-node)))
+    (setq evil-tree-edit-current-node raised-node))
+  (evil-tree-edit--update-overlay))
 
 (defun evil-tree-edit-insert-sibling (type-or-text &optional before)
   "Insert a node of the given TYPE-OR-TEXT next to the current node.
