@@ -233,9 +233,13 @@ if (foo == 3) {
               (evil-tree-edit-change))
             :to-throw 'user-error)))
 
-;; (describe "exchange node"
-;;   (it "correctly replaces valid transformations")
-;;   (xit "does not allow invalid transformations"))
+;; TODO: add proper tests
+(describe "exchange node"
+  (it "correctly replaces valid transformations"
+    (expect (with-tree-test-buffer "{[foo.bar] x;}"
+              (evil-tree-edit-exchange 'identifier)
+              :to-have-buffer-contents "{[TREE] x;}")))
+  (xit "does not allow invalid transformations"))
 
 (describe "copy/paste node"
   (it "correctly replaces valid transformations"
