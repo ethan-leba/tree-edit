@@ -22,9 +22,11 @@ the languages under edit to power it's editing capabilities.
 - [[#usage][Usage]]
   - [[#navigation][Navigation]]
   - [[#editing-operations][Editing operations]]
+  - [[#pasting][Pasting]]
 - [[#supported-languages][Supported languages]]
 - [[#customization][Customization]]
 - [[#limitations][Limitations]]
+- [[#implementation][Implementation]]
 - [[#contributing][Contributing]]
 - [[#related-projects][Related projects]]
 :END:
