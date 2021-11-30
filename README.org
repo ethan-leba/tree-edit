@@ -34,8 +34,10 @@ the languages under edit to power it's editing capabilities.
 Tree-edit is consists of two packages: *tree-edit*, a library for providing
 structural editing, and *evil-tree-edit*, a package which exposes this
 functionality as evil state with preconfigured bindings and visualization (as
-seen above). The following sections of the README describe usage with
-*evil-tree-edit*.
+seen above). To get an overview of tree-edit's full capabilities, check out the
+[[https://emacsconf.org/2021/talks/structural/][EmacsConf talk]]!
+
+The following sections of the README describe usage with *evil-tree-edit*.
 
 After installation, add hooks for any language you'd like tree-edit to
 automatically enable in.
@@ -172,6 +174,12 @@ A non-comprehensive list of some of the larger limitations that tree-edit curren
   the tree-sitter parsers, however tree-sitter-langs does not always have the
   most up-to-date grammars and is missing some languages. If this continues to
   be an issue a fork may be needed.
+
+* Implementation
+
+To learn more about how tree-edit works under the hood, see [[file:doc/implementation.org][this high-level
+overview]] or check out this [[file:doc/parser-examples.org][org doc with executable code examples]] demonstrating
+how the syntax generation works.
 
 * Contributing
 
