@@ -182,7 +182,8 @@ features or find ones to implement.
 Tests can be run using =./run-tests.sh= script.
 
 * Related projects
+- [[https://github.com/mickeynp/combobulate][combobulate]] :: Structural navigation and limited structural editing
+- [[https://github.com/manateelazycat/grammatical-edit][grammatical-edit]] :: Smartparens-like using tree-sitter (?)
 - [[https://github.com/meain/evil-textobj-tree-sitter][evil-textobj-tree-sitter]] :: Evil mode text objects using tree-sitter queries.
 - [[https://github.com/abo-abo/lispy][lispy]] :: Lisp structural editing package -- big inspiration for tree-edit!
 - [[https://github.com/Fuco1/smartparens][smartparens]] :: Multilingual package with structural editing limited to matching delimiters.
-
