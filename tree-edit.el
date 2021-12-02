@@ -305,9 +305,11 @@ construction, instead of looking up the rules for node-type."
 
 https://tree-sitter.github.io/tree-sitter/creating-parsers#keyword-extraction"
   (let ((regex (tree-edit--adhoc-pcre-to-rx tree-edit--identifier-regex)))
-    (< (length (s-matched-positions-all regex (string-join `(,left ,right))))
-       (+ (length (s-matched-positions-all regex left))
-          (length (s-matched-positions-all regex right))))))
+    (and (stringp left)
+         (stringp right)
+         (< (length (s-matched-positions-all regex (string-join `(,left ,right))))
+            (+ (length (s-matched-positions-all regex left))
+               (length (s-matched-positions-all regex right)))))))
 
 (defun tree-edit--render-node (tokens)
   "Combine TOKENS into a string, properly spacing as needed."
