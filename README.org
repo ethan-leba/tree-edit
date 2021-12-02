@@ -91,7 +91,7 @@ needs of the operation. For example, when adding an additional argument to a
 function, tree-edit can infer that a comma is needed based on the grammar of the
 language.
 
-`tree-edit-syntax-snippets` defines how node types will actually be represented
+=tree-edit-syntax-snippets= defines how node types will actually be represented
 upon insertion: see example [[https://github.com/ethan-leba/tree-edit/blob/main/tree-edit-java.el#L29][here]].
 
 Any transformations will be rejected if a syntactically valid result cannot be
