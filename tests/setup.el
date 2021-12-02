@@ -67,7 +67,7 @@
 (defmacro with-test-buffer (mode contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
   https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
-  (declare (indent 1))
+  (declare (indent 2))
   `(with-base-test-buffer ,mode ,contents
      (when (search-forward "|")
        (backward-delete-char 1))
@@ -76,7 +76,7 @@
 (defmacro with-tree-test-buffer (mode contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
   https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
-  (declare (indent 1))
+  (declare (indent 2))
   `(with-base-test-buffer ,mode ,contents
      (select-node)
      ,@test-forms))
