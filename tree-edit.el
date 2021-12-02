@@ -85,7 +85,8 @@ The following keywords are valid whitespace rules:
   "Structural editing library for tree-sitter languages."
   :group 'bindings
   :prefix "tree-edit-")
-(defcustom tree-edit-language-alist '((java-mode . tree-edit-java))
+(defcustom tree-edit-language-alist '((java-mode . tree-edit-java)
+                                      (python-mode . tree-edit-python))
   "Mapping from mode to language file."
   :type '(alist :key-type symbol :value-type symbol)
   :group 'tree-edit)
