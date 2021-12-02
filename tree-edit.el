@@ -481,9 +481,7 @@ the text."
                               (tsc-node-type node))))
     (let ((node-text (tsc-node-text node))
           (ancestor-steps (tree-edit--save-location ancestor-to-replace)))
-      (delete-region (tsc-node-start-position ancestor-to-replace)
-                     (tsc-node-end-position ancestor-to-replace))
-      (insert node-text)
+      (tree-edit-exchange node-text ancestor-to-replace)
       (tree-edit--restore-location ancestor-steps))))
 
 (defun tree-edit-insert-sibling (type-or-text node &optional before)

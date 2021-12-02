@@ -52,6 +52,17 @@ if foo:
 bar()
 baz()")))
 
+(describe "raise"
+  (it "correctly indents"
+    (expect (with-tree-test-buffer #'python-mode "
+if foo:
+    [with gumbo:
+        eat()]"
+              (evil-tree-edit-raise))
+            :to-have-buffer-contents "
+[with gumbo:
+    eat()]")))
+
 (describe "copy/paste node"
   (xit "can copy blocks"
     (expect (with-tree-test-buffer #'python-mode
