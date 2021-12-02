@@ -40,6 +40,15 @@
   "A mapping from a type to a mapping from original name to aliased name. Set by mode-local grammar file.")
 (defvar tree-edit--identifier-regex nil
   "The regex used to determine if a string is an identifier. Set by mode-local grammar file.")
+(defvar tree-edit--hidden-node-types nil
+  "Nodes which are hidden by tree-sitter. Set by mode-local grammar file.
+
+Unfortunately tree-sitter allows certain nodes to be hidden from
+the syntax tree, which will throw off tree-edit's parser. The
+best we can do for now is pretend that these nodes don't exist at
+all.
+
+https://tree-sitter.github.io/tree-sitter/creating-parsers#hiding-rules")
 (defvar tree-edit-significant-node-types nil
   "List of nodes that are considered significant, like methods or classes. Set by mode-local grammar file.")
 (defvar tree-edit-syntax-snippets nil
@@ -538,7 +547,9 @@ the text."
       (tree-edit-parseo content tokens out))
      (`((type . "SYMBOL")
         (name . ,name))
-      (tree-edit--takeo name tokens out))
+      (if (member name tree-edit--hidden-node-types)
+          (reazon-== tokens out)
+        (tree-edit--takeo name tokens out)))
      (`((type . "CHOICE")
         (members . ,members))
       (tree-edit--choiceo members tokens out))
