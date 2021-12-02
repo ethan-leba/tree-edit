@@ -138,7 +138,7 @@ Relevant types are either supertypes of TYPE or alias names referring to TYPE."
 ;; Error recovery seems to be a bit arbitrary:
 ;; - "foo.readl" in java parses as (program (expression_statement (...) (MISSING \";\")))
 ;; - "foo.read" in java parses as (program (ERROR (...)))
-(defun tree-edit--type-of-fragment (fragment)
+(defun tree-edit--parse-fragment (fragment)
   "Return the node-type of the FRAGMENT, or nil if unparseable.
 
 Fragments should parse as one of the following structures:
@@ -154,9 +154,17 @@ Fragments should parse as one of the following structures:
                               (tree-edit--get-only-child))))
         (if (tsc-node-has-error-p first-node)
             (-some-> first-node
-              (tree-edit--get-only-child)
-              (tsc-node-type))
-          (tsc-node-type first-node)))))
+              (tree-edit--get-only-child))
+          first-node))))
+
+(defun tree-edit--type-of-fragment (fragment)
+  "Return the node-type of the FRAGMENT, or nil if unparseable.
+
+Fragments should parse as one of the following structures:
+- (program (type))
+- (program (ERROR (type))
+- (program (... (type) (MISSING ...))"
+  (-some-> fragment (tree-edit--parse-fragment) (tsc-node-type)))
 
 (defun tree-edit--get-all-children (node)
   "Return all of NODE's children."
