@@ -55,6 +55,9 @@
    (formal_parameter . ("int" "TREE"))
    (import_declaration . ("import" "TREE" ";")))
 
+ tree-edit-whitespace-rules
+ '((comment . (nil . (:newline))))
+
  tree-edit-significant-node-types
  '(block class_body)
 

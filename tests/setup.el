@@ -1,11 +1,10 @@
+;; -*- lexical-binding: t; -*-
 (require 'dash)
 (require 'mode-local)
 (require 'buttercup)
 (require 's)
 (require 'tree-sitter-langs)
 (require 'evil-tree-edit)
-
-(defvar-local tree-edit-test-mode #'java-mode)
 
 (defun buffer-status-as-string ()
   (if (equal evil-state 'tree)
@@ -41,10 +40,10 @@
           (setq evil-tree-edit-current-node temp-node)
           (evil-tree-edit--update-overlay))))))
 
-(defmacro with-base-test-buffer (contents &rest test-forms)
+(defmacro with-base-test-buffer (mode contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
   https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
-  (declare (indent 1))
+  (declare (indent 2))
   `(progn
      (-when-let (b (get-buffer "tree-edit-test-buffer"))
        (kill-buffer b))
@@ -53,7 +52,7 @@
            evil-tree-edit-movement-hook)
        (save-window-excursion
          (switch-to-buffer temp-buffer)
-         (funcall tree-edit-test-mode)
+         (funcall ,mode)
          (evil-mode)
          (tree-sitter-mode)
          (evil-tree-edit-mode)
@@ -65,22 +64,22 @@
 
          temp-buffer))))
 
-(defmacro with-test-buffer (contents &rest test-forms)
+(defmacro with-test-buffer (mode contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
   https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
   (declare (indent 1))
-  `(with-base-test-buffer ,contents
-       (when (search-forward "|")
-         (backward-delete-char 1))
-       ,@test-forms))
+  `(with-base-test-buffer ,mode ,contents
+     (when (search-forward "|")
+       (backward-delete-char 1))
+     ,@test-forms))
 
-(defmacro with-tree-test-buffer (contents &rest test-forms)
+(defmacro with-tree-test-buffer (mode contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
   https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
   (declare (indent 1))
-  `(with-base-test-buffer ,contents
-       (select-node)
-       ,@test-forms))
+  `(with-base-test-buffer ,mode ,contents
+     (select-node)
+     ,@test-forms))
 
 (buttercup-define-matcher :to-have-buffer-contents (test-buffer
                                                     expected-contents)
@@ -94,10 +93,10 @@
                          contents
                          expected-contents))))))
 
-(defmacro with-tree-test-buffer-avy (contents avy-index &rest test-forms)
+(defmacro with-tree-test-buffer-avy (mode contents avy-index &rest test-forms)
   "If AVY-INDEX is out of bounds a 'user-ptr' error will appear."
-  (declare (indent 2))
-  `(with-tree-test-buffer ,contents
+  (declare (indent 3))
+  `(with-tree-test-buffer ,mode ,contents
      (cl-letf (((symbol-function 'avy-process)
                 (lambda (positions) (funcall avy-action (nth ,avy-index positions)))))
        ,@test-forms)))
