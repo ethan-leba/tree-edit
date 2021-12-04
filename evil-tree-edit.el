@@ -294,14 +294,14 @@ See `tree-edit-insert-sibling'."
     (remove-hook 'before-revert-hook #'evil-tree-edit--teardown 'local)
     (remove-hook 'evil-normal-state-entry-hook #'evil-tree-edit--re-enter-tree-state 'local))))
 
-(defun define-evil-tree-edit-verb (key func &optional wrap)
+(defun define-evil-tree-edit-verb (keymap key func &optional wrap)
   "Define a key command prefixed by KEY, calling FUNC.
 
 FUNC must take two arguments, a symbol of the node type.
 If WRAP is t, include :wrap-override."
   (dolist (node tree-edit-nodes)
     (define-key
-      evil-tree-state-map
+      keymap
       (string-join (list key (plist-get node :key)))
       (cons
        ;; emacs-which-key integration
@@ -315,7 +315,7 @@ If WRAP is t, include :wrap-override."
             (,func ',(plist-get node :type)))))))
   ;; Can this be integrated into the loop?
   (define-key
-    evil-tree-state-map
+    keymap
     (string-join (list key "p"))
     (cons
      "kill-ring"
@@ -333,25 +333,30 @@ If WRAP is t, include :wrap-override."
 Should only be used in the context of mode-local bindings, as
 each language will have it's own set of nouns."
   (with-mode-local-symbol mode
-    (mode-local-bind `((evil-tree-state-map . ,(evil-tree-edit--make-suppressed-keymap))) nil mode)
-    (define-evil-tree-edit-verb "i" #'evil-tree-edit-insert-sibling-before)
-    (define-evil-tree-edit-verb "a" #'evil-tree-edit-insert-sibling)
-    (define-evil-tree-edit-verb "I" #'evil-tree-edit-insert-child)
-    (define-evil-tree-edit-verb "s" #'evil-tree-edit-avy-jump)
-    (define-evil-tree-edit-verb "e" #'evil-tree-edit-exchange)
-    (define-evil-tree-edit-verb "w" #'evil-tree-edit-wrap-node t)
-    (define-key evil-tree-state-map [escape] 'evil-normal-state)
-    (define-key evil-tree-state-map ">" #'evil-tree-edit-slurp)
-    (define-key evil-tree-state-map "<" #'evil-tree-edit-barf)
-    (define-key evil-tree-state-map "j" #'evil-tree-edit-goto-next-sibling)
-    (define-key evil-tree-state-map "k" #'evil-tree-edit-goto-prev-sibling)
-    (define-key evil-tree-state-map "h" #'evil-tree-edit-goto-parent)
-    (define-key evil-tree-state-map "f" #'evil-tree-edit-goto-child)
-    (define-key evil-tree-state-map "c" #'evil-tree-edit-change)
-    (define-key evil-tree-state-map "d" #'evil-tree-edit-delete)
-    (define-key evil-tree-state-map "r" #'evil-tree-edit-raise)
-    (define-key evil-tree-state-map "y" #'evil-tree-edit-copy)
-    (define-key evil-tree-state-map "A" #'evil-tree-edit-goto-sig-parent)))
+    (let ((mode-local-keymap (evil-tree-edit--make-suppressed-keymap)))
+      (define-evil-tree-edit-verb mode-local-keymap "i" #'evil-tree-edit-insert-sibling-before)
+      (define-evil-tree-edit-verb mode-local-keymap "a" #'evil-tree-edit-insert-sibling)
+      (define-evil-tree-edit-verb mode-local-keymap "I" #'evil-tree-edit-insert-child)
+      (define-evil-tree-edit-verb mode-local-keymap "s" #'evil-tree-edit-avy-jump)
+      (define-evil-tree-edit-verb mode-local-keymap "e" #'evil-tree-edit-exchange)
+      (define-evil-tree-edit-verb mode-local-keymap "w" #'evil-tree-edit-wrap-node t)
+      (define-key mode-local-keymap [escape] 'evil-normal-state)
+      (define-key mode-local-keymap ">" #'evil-tree-edit-slurp)
+      (define-key mode-local-keymap "<" #'evil-tree-edit-barf)
+      (define-key mode-local-keymap "j" #'evil-tree-edit-goto-next-sibling)
+      (define-key mode-local-keymap "k" #'evil-tree-edit-goto-prev-sibling)
+      (define-key mode-local-keymap "h" #'evil-tree-edit-goto-parent)
+      (define-key mode-local-keymap "f" #'evil-tree-edit-goto-child)
+      (define-key mode-local-keymap "c" #'evil-tree-edit-change)
+      (define-key mode-local-keymap "d" #'evil-tree-edit-delete)
+      (define-key mode-local-keymap "r" #'evil-tree-edit-raise)
+      (define-key mode-local-keymap "y" #'evil-tree-edit-copy)
+      (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
+      ;; `setq-mode-local' macroexpanded, since it doesn't accept symbols
+      (mode-local-bind `((evil-tree-state-map . ,mode-local-keymap)) '(mode-variable-flag t) mode)
+      (mode-local-map-mode-buffers
+       (lambda () (set (make-local-variable 'evil-tree-state-map) mode-local-keymap))
+       mode))))
 
 ;; TODO: allow configuring/disabling this
 (evil-define-key 'normal evil-tree-edit-mode-map "Q" #'evil-tree-state)

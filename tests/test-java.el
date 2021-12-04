@@ -28,12 +28,14 @@
             (tree-edit-nodes
              '((:type if_statement
                 :key "i"))))
-        (define-evil-tree-edit-verb "t" #'dummy-verb)
+        (define-evil-tree-edit-verb evil-tree-state-map "t" #'dummy-verb)
         (evil-tree-state)
         (expect (key-binding "ti"))
         (expect (not (key-binding "tq")))
         (execute-kbd-macro "ti")
-        (expect 'dummy-verb :to-have-been-called-with 'if_statement))))
+        (expect 'dummy-verb :to-have-been-called-with 'if_statement)
+        (prog-mode)
+        (expect (not (key-binding "ti"))))))
 
   ;; TODO
   (xit "uses node overrides"))
