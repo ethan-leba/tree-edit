@@ -453,7 +453,7 @@ POSITION can be :before, :after, or nil."
       `(,(tsc-node-type node) .
         ,(-map #'tree-edit--split-node-for-insertion (tree-edit--get-all-children node))))))
 
-(defun tree-edit--text-to-insertable-node (text)
+(defun tree-edit--text-to-insertable-node (node text)
   "Parse TEXT and convert into insertable node."
   (cl-letf (((symbol-function 'tsc-node-text)
              (lambda (node)
@@ -461,10 +461,7 @@ POSITION can be :before, :after, or nil."
                 ;; XXX: Byte and position aren't the same thing, apparently. Maybe this will break?
                 (pcase-let ((`(,beg . ,end) (tsc-node-byte-range node)))
                   (substring-no-properties text (1- beg) (if end (1- end) (length text))))))))
-    (or (-some-> text
-          tree-edit--parse-fragment
-          tree-edit--split-node-for-insertion)
-        (user-error "Could not parse %s" text))))
+    (tree-edit--split-node-for-insertion node)))
 
 ;;* Globals: Structural editing functions
 (defun tree-edit-exchange (type-or-text node)
