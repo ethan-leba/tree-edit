@@ -91,7 +91,21 @@ if foo:
     bar()
 [elif TREE:
     TREE]
-baz()")))
+baz()"))
+  (it "can handle ambiguous fragments"
+    ;; Could be identifier, or expression statement
+    (expect (with-tree-test-buffer #'python-mode "foo([x])"
+              (evil-tree-edit-insert-sibling "y"))
+            :to-have-buffer-contents "foo(x,[y])")
+    (expect (with-tree-test-buffer #'python-mode "
+if TREE:
+    [x]"
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-insert-sibling "y"))
+            :to-have-buffer-contents "
+if TREE:
+    x
+    [y]")))
 
 (describe "delete node"
   (xit "doesn't allow empty blocks (manual grammar edit)"
