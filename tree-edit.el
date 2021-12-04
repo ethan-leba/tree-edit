@@ -160,12 +160,16 @@ Relevant types are either supertypes of TYPE or alias names referring to TYPE."
 ;; - "foo.readl" in java parses as (program (expression_statement (...) (MISSING \";\")))
 ;; - "foo.read" in java parses as (program (ERROR (...)))
 (defun tree-edit--parse-fragment (fragment)
-  "Return the node-type of the FRAGMENT, or nil if unparseable.
+  "Return the possible nodes of FRAGMENT, or nil if unparseable.
+
+For example, `foo()` in Python parses as an expression_statement
+with a call inside. Depending on the context, we may want either:
+so we return both.
 
 Fragments should parse as one of the following structures:
-- (program (type))
-- (program (ERROR (type))
-- (program (... (type) (MISSING ...))"
+- (program (type ...)
+- (program (ERROR (type ...))
+- (program (... (type ...) (MISSING ...))"
   (cl-flet ((tree-edit--get-only-child
              (lambda (node) (if (equal (tsc-count-named-children node) 1)
                                 (tsc-get-nth-named-child node 0)))))
@@ -173,10 +177,15 @@ Fragments should parse as one of the following structures:
                               (tsc-parse-string tree-sitter-parser)
                               (tsc-root-node)
                               (tree-edit--get-only-child))))
-        (if (tsc-node-has-error-p first-node)
-            (-some-> first-node
-              (tree-edit--get-only-child))
-          first-node))))
+        (if-let (node (if (tsc-node-has-error-p first-node)
+                          (-some-> first-node
+                            (tree-edit--get-only-child))
+                        first-node))
+            (let (result)
+              (while node
+                (push node result)
+                (setq node (tree-edit--get-only-child node)))
+              (reverse result))))))
 
 (defun tree-edit--type-of-fragment (fragment)
   "Return the node-type of the FRAGMENT, or nil if unparseable.
