@@ -552,13 +552,7 @@ current, otherwise after."
 
 If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
 the text."
-  (let* ((node (tsc-get-nth-child node 0))
-         (type (if (symbolp type-or-text) type-or-text
-                 (tree-edit--type-of-fragment type-or-text)))
-         (fragment (tree-edit--valid-insertions type t node))
-         (fragment (if (symbolp type-or-text) fragment
-                     (-replace-first type (tree-edit--text-to-insertable-node type-or-text) fragment))))
-    (tree-edit--insert-fragment fragment node :after)))
+  (tree-edit-insert-sibling type-or-text (tsc-get-nth-child node 0)))
 
 (defun tree-edit-slurp (node)
   "Transform NODE's next sibling into it's leftmost child, if possible."
