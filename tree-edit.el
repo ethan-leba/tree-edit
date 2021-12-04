@@ -254,8 +254,7 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
                         (tree-edit-parseo grammar tokens '()))))
         (--reduce-from (-replace it type acc)
                        (car result)
-                       relevant-types)
-      (user-error "Cannot insert %s" type))))
+                       relevant-types))))
 
 (defun tree-edit--remove-node-and-surrounding-syntax (tokens idx)
   "Return a pair of indices to remove the node at IDX in TOKENS and all surrounding syntax."
