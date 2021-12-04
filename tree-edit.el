@@ -469,15 +469,37 @@ POSITION can be :before, :after, or nil."
 
 If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
 the text."
-  (let ((type (if (symbolp type-or-text) type-or-text
-                (tree-edit--type-of-fragment type-or-text))))
-    (unless (tree-edit--valid-replacement-p type node)
-      (user-error "Cannot replace the current node with type %s!" type))
-    (delete-region (tsc-node-start-position node)
-                   (tsc-node-end-position node))
-    (if (symbolp type-or-text)
-        (tree-edit-make-node type tree-edit-syntax-snippets)
-      (tree-edit--render-node (tree-edit--text-to-insertable-node type-or-text)))))
+  (if (stringp type-or-text)
+      (tree-edit--exchange-fragment type-or-text node)
+    (tree-edit--exchange-snippet type-or-text node)))
+
+(defun tree-edit--exchange-snippet (type node)
+  "Insert a node of the given TYPE next to NODE.
+
+if BEFORE is t, the sibling node will be inserted before the
+current, otherwise after."
+  (unless (tree-edit--valid-replacement-p type node)
+    (user-error "Cannot replace the current node with type %s!" type))
+  (delete-region (tsc-node-start-position node)
+                 (tsc-node-end-position node))
+  (tree-edit-make-node type tree-edit-syntax-snippets))
+
+(defun tree-edit--exchange-fragment (text node)
+  "Insert a node of the given TEXT next to NODE.
+
+if BEFORE is t, the sibling node will be inserted before the
+current, otherwise after."
+  (cl-block nil
+    (dolist (fragment-node (tree-edit--parse-fragment text))
+      (let ((type (tsc-node-type fragment-node)))
+        (when (tree-edit--valid-replacement-p type node)
+          (delete-region (tsc-node-start-position node)
+                         (tsc-node-end-position node))
+          (-> fragment-node
+              (tree-edit--text-to-insertable-node text)
+              (tree-edit--render-node))
+          (cl-return))))
+    (user-error "Cannot replace the current node with '%s'!" text)))
 
 (defun tree-edit-raise (node)
   "Move NODE up the syntax tree until a valid replacement is found."
@@ -497,12 +519,33 @@ the text.
 
 if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
-  (let* ((type (if (symbolp type-or-text) type-or-text
-                 (tree-edit--type-of-fragment type-or-text)))
-         (fragment (tree-edit--valid-insertions type (not before) node))
-         (fragment (if (symbolp type-or-text) fragment
-                     (-replace-first type (tree-edit--text-to-insertable-node type-or-text) fragment))))
-    (tree-edit--insert-fragment fragment node (if before :before :after))))
+  (if (stringp type-or-text)
+      (tree-edit--insert-fragment-sibling type-or-text node before)
+    (tree-edit--insert-snippet-sibling type-or-text node before)))
+
+(defun tree-edit--insert-snippet-sibling (type node &optional before)
+  "Insert a node of the given TYPE next to NODE.
+
+if BEFORE is t, the sibling node will be inserted before the
+current, otherwise after."
+  (if-let (tokens (tree-edit--valid-insertions type (not before) node))
+      (tree-edit--insert-fragment tokens node (if before :before :after))
+    (user-error "Cannot insert node of type %s!" node)))
+
+(defun tree-edit--insert-fragment-sibling (text node &optional before)
+  "Insert a node of the given TEXT next to NODE.
+
+if BEFORE is t, the sibling node will be inserted before the
+current, otherwise after."
+  (cl-block nil
+    (dolist (fragment-node (tree-edit--parse-fragment text))
+      (if-let ((type (tsc-node-type fragment-node))
+               (tokens (tree-edit--valid-insertions type (not before) node)))
+          (--> tokens
+               (-replace-first type (tree-edit--text-to-insertable-node fragment-node text) it)
+               (tree-edit--insert-fragment it node (if before :before :after))
+               (cl-return))))
+    (user-error "Cannot insert '%s'!" text)))
 
 (defun tree-edit-insert-child (type-or-text node)
   "Insert a node of the given TYPE-OR-TEXT inside of NODE.
