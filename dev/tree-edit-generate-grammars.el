@@ -7,6 +7,7 @@
 
 (require 'dash)
 (require 'json)
+(require 'cl-extra)
 (require 'tree-edit)
 
 (defvar tree-edit--grammar-template
@@ -295,6 +296,12 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
   "Retrieve and format grammar rules for GRAMMAR."
   (map-apply (lambda (node node-grammar) (cons node (tree-edit--inline-type node-grammar grammar))) grammar))
 
+(defun tree-edit--pretty-print (sexp)
+  "Prettyprint SEXP to a string."
+  (with-temp-buffer
+    (cl-prettyprint sexp)
+    (buffer-string)))
+
 (defun tree-edit--generate-grammar-file (path name mode)
   "Generate file contents based on the grammar at PATH for NAME and MODE."
   (let* ((raw-grammar
@@ -309,12 +316,12 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
     (format tree-edit--grammar-template
             name
             mode
-            `',(prin1-to-string grammar)
-            (prin1-to-string (tree-edit--extract-word-regex raw-grammar))
-            `',(prin1-to-string supertypes)
-            `',(prin1-to-string (tree-edit--invert-supertypes supertypes))
-            `',(prin1-to-string (tree-edit--generate-alias-names grammar))
-            `',(prin1-to-string (tree-edit--generate-containing-types grammar)))))
+            `',(tree-edit--pretty-print grammar)
+            (tree-edit--pretty-print (tree-edit--extract-word-regex raw-grammar))
+            `',(tree-edit--pretty-print supertypes)
+            `',(tree-edit--pretty-print (tree-edit--invert-supertypes supertypes))
+            `',(tree-edit--pretty-print (tree-edit--generate-alias-names grammar))
+            `',(tree-edit--pretty-print (tree-edit--generate-containing-types grammar)))))
 
 (-let* (((path name mode) command-line-args-left)
         (file-name (format "tree-edit-%s-grammar.el" name)))
