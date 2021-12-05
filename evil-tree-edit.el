@@ -222,13 +222,32 @@ See `tree-edit-insert-sibling'."
   (evil-tree-edit--preserve-location
    (tree-edit-barf evil-tree-edit-current-node)))
 
+(defun evil-tree-edit--ambiguous-node-range-p (node-a node-b)
+  (and node-a node-b
+       (equal (tsc-node-start-position node-a)
+              (tsc-node-start-position node-b))
+       (equal (tsc-node-end-position node-a)
+              (tsc-node-end-position node-b))))
+
 ;;* Mode and evil state definitions
 (defun evil-tree-edit--update-overlay ()
   "Update the display of the current selected node, and move the cursor."
   (move-overlay evil-tree-edit--node-overlay
                 (tsc-node-start-position evil-tree-edit-current-node)
                 (tsc-node-end-position evil-tree-edit-current-node))
-  (goto-char (tsc-node-start-position evil-tree-edit-current-node)))
+  (goto-char (tsc-node-start-position evil-tree-edit-current-node))
+  (if (or (evil-tree-edit--ambiguous-node-range-p
+           (tsc-get-parent evil-tree-edit-current-node)
+           evil-tree-edit-current-node)
+          (evil-tree-edit--ambiguous-node-range-p
+           (tsc-get-nth-child evil-tree-edit-current-node 0)
+           evil-tree-edit-current-node))
+      (overlay-put evil-tree-edit--node-overlay 'after-string
+                   (propertize
+                    (let ((type (tsc-node-type evil-tree-edit-current-node)))
+                      (s-concat " " (if (stringp type) type (symbol-name type))))
+                    'face '(italic :foreground "dark gray")))
+    (overlay-put evil-tree-edit--node-overlay 'after-string "")))
 
 (defun evil-tree-edit--enter-tree-state ()
   "Activate tree-edit state."
@@ -246,6 +265,7 @@ See `tree-edit-insert-sibling'."
 (defun evil-tree-edit--exit-tree-state ()
   "De-activate tree-edit state."
   (when evil-tree-edit--node-overlay
+    (overlay-put evil-tree-edit--node-overlay 'after-string "")
     (overlay-put evil-tree-edit--node-overlay 'face '())))
 
 (defun evil-tree-edit--re-enter-tree-state ()
