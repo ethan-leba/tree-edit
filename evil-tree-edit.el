@@ -71,7 +71,7 @@ moving the sibling index by the provided value."
   "Move NODE to the next (interesting) named sibling."
   (let ((parent (tsc-get-parent node)))
     (cond
-     ((not parent) (user-error "No significant node past the current!"))
+     ((tsc-node-eq parent (tsc-root-node tree-sitter-tree)) node)
      ((--any (member (tsc-node-type parent)
                      (cons it (alist-get it tree-edit--subtypes '())))
              tree-edit-significant-node-types)

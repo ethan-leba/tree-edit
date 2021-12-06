@@ -85,11 +85,11 @@
               (let ((tree-edit-significant-node-types '(block)))
                 (evil-tree-edit-goto-sig-parent)))
             :to-have-buffer-contents "[{{if (foo == 3) {}}}]"))
-  (it "sig node gracefully fails"
-    (expect (with-tree-test-buffer #'java-mode "{[{if (foo == 3) {}}]}"
+  (it "will go to top most (excluding root) if no sig node found"
+    (expect (with-tree-test-buffer #'java-mode "{{if (foo == [3]) {}}}"
               (let ((tree-edit-significant-node-types '()))
-                (ignore-errors (evil-tree-edit-goto-sig-parent))))
-            :to-have-buffer-contents "{[{if (foo == 3) {}}]}")))
+                (evil-tree-edit-goto-sig-parent)))
+            :to-have-buffer-contents "[{{if (foo == 3) {}}}]")))
 
 (describe "entering tree state"
   (it "will select the smallest node at point"
