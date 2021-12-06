@@ -39,7 +39,8 @@ functionality as evil state with preconfigured bindings and visualization (as
 seen above). To get an overview of tree-edit's full capabilities, check out the
 [[https://emacsconf.org/2021/talks/structural/][EmacsConf talk]]!
 
-The following sections of the README describe usage with *evil-tree-edit*.
+The following sections of the README describe usage with *evil-tree-edit*. See
+[[file:doc/using-tree-edit.org][here]] for a short guide on using the library.
 
 After installation, add hooks for any language you'd like tree-edit to
 automatically enable in.

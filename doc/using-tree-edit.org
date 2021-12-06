@@ -1,0 +1,47 @@
+#+TITLE: Rolling your own tree-edit commands
+
+More documentation coming...
+
+* Evil style
+Something like a [[https://github.com/noctuid/lispyville][lispyville]] may be of interest for those who prefer to be in
+normal mode. Here's some simple examples of how you could implement that:
+
+#+begin_src elisp
+(evil-define-operator my/tree-edit-delete (beg end)
+  "Delete node between BEG and END, if possible."
+  (let ((node (tsc-get-named-descendant-for-position-range
+               (tsc-root-node tree-sitter-tree) beg end)))
+    (tree-edit-delete node)))
+
+(evil-define-operator my/tree-edit-raise (beg end)
+  "Raise node between BEG and END, if possible."
+  (let ((node (tsc-get-named-descendant-for-position-range
+               (tsc-root-node tree-sitter-tree) beg end)))
+    (tree-edit-raise node)))
+
+(evil-define-key '(normal visual) global-map "gk" #'my/tree-edit-delete)
+(evil-define-key '(normal visual) global-map "g/" #'my/tree-edit-raise)
+#+end_src
+
+#+RESULTS:
+
+One thing to be careful of is whitespace: for example if you want to raise an
+identifier, typing =g/w= on a word would include the whitespace and would select
+the surrounding node instead (So =g/e= should be used). Similarly with text
+objects selecting the entire line.
+
+* Emacs style
+
+#+begin_src elisp
+(defun my/tree-edit-raise-word ()
+  (interactive)
+  (pcase-let* ((`(,beg . ,end) (bounds-of-thing-at-point 'word))
+               (node (tsc-get-named-descendant-for-position-range
+                      (tsc-root-node tree-sitter-tree) beg end)))
+    (tree-edit-raise node)))
+
+(define-key (current-global-map) (kbd "M-r") #'my/tree-edit-raise-word)
+#+end_src
+
+#+RESULTS:
+: my/tree-edit-raise-word
