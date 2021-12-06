@@ -1,10 +1,10 @@
-#+TITLE: Syntax generation implementation
+#+TITLE: Notes on the implementation
 
 Tree-edit's syntax generation has a fairly novel implementation (as far as I
 know), and is also unfortunately complicated by some issues with the tree-sitter
 API and some concessions made for performance. So this document serves to both
 explain the high level architecture of =tree-edit= and some of the complications
-it faces. (which hopefully can result in upstream fixes!)
+it faces, which hopefully can result in upstream fixes!
 
 * High level overview
 
@@ -17,6 +17,8 @@ Tree-edit's syntax generation consists of three main phases:
 ** Converting the buffer text into a syntax tree
 
 To convert the text of the buffer into a syntax tree, [[https://github.com/emacs-tree-sitter/elisp-tree-sitter][elisp-tree-sitter]] is used.
+Tree-sitter only offers a way one way conversion from text to syntax tree, so
+the rest is handled by tree-edit.
 
 ** Performing modifications on a node
 
@@ -57,13 +59,28 @@ argument list could have 20 elements, or 0 -- either way it's an argument list!
 So =tree-edit-syntax-snippets= in the =tree-edit-<language>.el= files define how
 new nodes are represented.
 
-* WIP Generating grammar files
+** Language files & mode-local variables
 
-The first step of the process is to take a tree-sitter grammar and parse it into
-something useable for tree-edit.
-[[https://github.com/ethan-leba/tree-edit/blob/main/dev/tree-edit-generate-grammars.el][dev/tree-edit-generate-grammars.el]] provides a script that can take a file path
-to a tree-sitter grammar.json.
+Tree-edit interacts with different languages by using mode-local variables for
+each language, defined in the =tree-edit-<language>= files.
 
-Tree-edit will parse the json, performing some precalculations.
+** Generating grammar files
+
+While tree-sitter emits JSON files, we don't use them directly -- instead we
+preprocess the JSON and output it to a =tree-edit-<language>-grammar.el= file.
+This is handled by [[https://github.com/ethan-leba/tree-edit/blob/main/dev/tree-edit-generate-grammars.el][dev/tree-edit-generate-grammars.el]]. It performs some
+transformations on the grammar for better use with the relational parser, and
+performs some precalculations, like what node types show up for a given node,
+supertypes and subtypes, etc.
 
 * WIP Complications
+
+** Hidden nodes
+Tree-sitter allows nodes to be hidden by prefixing their names with =_=. This
+can be disastrous for tree-edit in that it provides a false view of the tokens
+for a given node, causing a seemingly correct node to fail to parse. Tree-edit
+simply ignores the existence of these nodes in the parser.
+
+For example, =_newline=, =_indent=, and =_dedent= are [[https://github.com/tree-sitter/tree-sitter-python/issues/136][hidden in the Python
+grammar]]. Tree-edit hacks around this by using the whitespace rules, which works
+fine for the most part.
