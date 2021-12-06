@@ -232,13 +232,18 @@ Fragments should parse as one of the following structures:
         (if (equal (length (car result)) 1)
             (--reduce-from (-replace it type acc) (car result) relevant-types)))))
 
-(defun tree-edit--find-raise-ancestor (ancestor child-type)
-  "Find a suitable ANCESTOR to be replaced with a node of CHILD-TYPE."
+(defun tree-edit--find-raise-ancestor (ancestor child)
+  "Find a suitable ANCESTOR to be replaced with CHILD."
   (interactive)
-  (cond
-   ((not (and ancestor (tsc-get-parent ancestor))) (user-error "Can't raise node!"))
-   ((tree-edit--valid-replacement-p child-type ancestor) ancestor)
-   (t (tree-edit--find-raise-ancestor (tsc-get-parent ancestor) child-type))))
+  (let ((child-type (tsc-node-type child)))
+    (cond
+     ((not (and ancestor (tsc-get-parent ancestor))) (user-error "Can't raise node!"))
+     ;; XXX: For cases like (expression_statement (call)), where both represent the same text.
+     ;;      This might only apply to Python.
+     ((equal (tsc-node-byte-range ancestor) (tsc-node-byte-range child))
+      (tree-edit--find-raise-ancestor (tsc-get-parent ancestor) child))
+     ((tree-edit--valid-replacement-p child-type ancestor) ancestor)
+     (t (tree-edit--find-raise-ancestor (tsc-get-parent ancestor) child)))))
 
 ;; TODO: Refactor commonalities between syntax generators
 (defun tree-edit--valid-insertions (type after node)
@@ -502,9 +507,7 @@ current, otherwise after."
 
 (defun tree-edit-raise (node)
   "Move NODE up the syntax tree until a valid replacement is found."
-  (let ((ancestor-to-replace (tree-edit--find-raise-ancestor
-                              (tsc-get-parent node)
-                              (tsc-node-type node))))
+  (let ((ancestor-to-replace (tree-edit--find-raise-ancestor (tsc-get-parent node) node)))
     (let ((node-text (tsc-node-text node))
           (ancestor-steps (tree-edit--save-location ancestor-to-replace)))
       (tree-edit-exchange node-text ancestor-to-replace)
