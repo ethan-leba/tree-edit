@@ -265,9 +265,7 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
                         ;; FIXME: this should be limited to only 1 new named node, of the requested type
                         (tree-edit--includes-typeo q relevant-types)
                         (tree-edit-parseo grammar tokens '()))))
-        (--reduce-from (-replace it type acc)
-                       (car result)
-                       relevant-types))))
+        (car result))))
 
 (defun tree-edit--remove-node-and-surrounding-syntax (tokens idx)
   "Return a pair of indices to remove the node at IDX in TOKENS and all surrounding syntax."
@@ -531,7 +529,10 @@ current, otherwise after."
 if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
   (if-let (tokens (tree-edit--valid-insertions type (not before) node))
-      (tree-edit--insert-fragment tokens node (if before :before :after))
+      (let* ((used-type (-first #'symbolp tokens))
+             (tree-edit-syntax-snippets
+              `((,used-type . ,(alist-get type tree-edit-syntax-snippets)) . ,tree-edit-syntax-snippets)))
+        (tree-edit--insert-fragment tokens node (if before :before :after)))
     (user-error "Cannot insert node of type %s!" node)))
 
 (defun tree-edit--insert-fragment-sibling (text node &optional before)
@@ -544,7 +545,7 @@ current, otherwise after."
       (if-let ((type (tsc-node-type fragment-node))
                (tokens (tree-edit--valid-insertions type (not before) node)))
           (--> tokens
-               (-replace-first type (tree-edit--text-to-insertable-node fragment-node text) it)
+               (-replace-first (-first #'symbolp tokens) (tree-edit--text-to-insertable-node fragment-node text) it)
                (tree-edit--insert-fragment it node (if before :before :after))
                (cl-return))))
     (user-error "Cannot insert '%s'!" text)))

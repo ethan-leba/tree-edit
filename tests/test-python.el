@@ -91,7 +91,18 @@ if foo:
     bar()
 [elif TREE:
     TREE]
-baz()"))
+baz()")
+    (expect (with-tree-test-buffer #'python-mode "
+if foo:
+    [foo()]
+    bar()"
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-insert-sibling 'call))
+            :to-have-buffer-contents "
+if foo:
+    foo()
+    [TREE()]
+    bar()"))
   (it "can handle ambiguous fragments"
     ;; Could be identifier, or expression statement
     (expect (with-tree-test-buffer #'python-mode "foo([x])"
