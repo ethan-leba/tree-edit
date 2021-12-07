@@ -140,7 +140,7 @@ for FOO in BAR:
     [return hi]")))
 
 (describe "delete node"
-  (xit "doesn't allow empty blocks (manual grammar edit)"
+  (it "doesn't allow empty blocks (manual grammar edit)"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer #'python-mode "
 if foo:
