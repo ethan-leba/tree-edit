@@ -30,8 +30,20 @@
 
  tree-edit-syntax-snippets
  '((if_statement . ("if" expression ":" block))
+   (for_statement . ("for" identifier "in" expression ":" block))
    (elif_clause . ("elif" expression ":" block))
-   (else_clause . ("else" expression ":" block))
+   (return_statement . ("return"))
+   (assignment . (identifier "=" expression))
+   (list_comprehension . ("[" expression "for" identifier "in" identifier "]"))
+   (else_clause . ("else" ":" block))
+   (assert_statement . ("assert" expression))
+   (function_definition . ("def" identifier parameters ":" block))
+   (decorated_definition . (decorator function_definition))
+   (call . (primary_expression argument_list))
+   (decorator . ("@" primary_expression))
+   (primary_expression . (identifier))
+   (argument_list . ("(" ")"))
+   (parameters . ("(" ")"))
    (block . (expression_statement))
    (expression_statement . (expression))
    (expression . (identifier))
@@ -40,12 +52,14 @@
  tree-edit-whitespace-rules
  '((block . ((:newline :indent) . (:dedent :newline)))
    (expression . (nil . nil))
+   (comment . (nil . (:newline)))
+   (decorator . (nil . (:newline)))
    (_simple_statement . (nil . (:newline)))
    (elif_clause . (nil . (:newline)))
    (_compound_statement . (nil . (:newline))))
 
  tree-edit-significant-node-types
- '(block class_body)
+ '(block decorated_definition function_definition class_definition)
 
  ;; TODO: this should be auto-generated in the grammar file
  tree-edit--hidden-node-types
@@ -54,10 +68,37 @@
  tree-edit-nodes
  '((:type if_statement
     :key "i")
+   (:type list_comprehension
+    :key "l")
+   (:type identifier
+    :key "a")
+   (:type return_statement
+    :key "r"
+    :wrap-override '((return_statement . ("return" expression))))
    (:type elif_clause
     :key "I")
    (:type else_clause
-    :key "e")))
+    :key "E")
+   (:type expression_statement
+    :key "e")
+   (:type for_statement
+    :key "f")
+   (:type function_definition
+    :key "d")
+   (:type assignment
+    :key "v"
+    :name "variable declaration")
+   (:type call
+    :key "c"
+    :wrap-override '((argument_list . ("(" expression ")"))))
+   (:type decorated_definition
+    :key "D")
+   (:type assert_statement
+    :key "A")
+   (:type binary_operator
+    :key "o="
+    :name "== operator"
+    :node-override '((binary_operator . (expression "==" expression))))))
 
 
 (provide 'tree-edit-python)
