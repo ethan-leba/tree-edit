@@ -119,27 +119,26 @@ moving the sibling index by the provided value."
   (kill-ring-save (tsc-node-start-position evil-tree-edit-current-node)
                   (tsc-node-end-position evil-tree-edit-current-node)))
 
-(defun evil-tree-edit-avy-jump (node-type &optional pred)
-  "Avy jump to a node with the NODE-TYPE and filter the node with PRED.
+(defun evil-tree-edit-avy-jump (node-type)
+  "Avy jump to a node with the NODE-TYPE.
 
-PRED will receive a pair of (position . node).
 NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
-  (let* ((node-type (if (listp node-type) node-type `(,node-type)))
-         ;; Querying needs a @name for unknown reasons
-         (query-string
-          (format "[%s] @foo"
-                  (-as-> node-type %
-                         (-mapcat (lambda (x) (alist-get x tree-edit--subtypes)) %)
-                         (-uniq %)
-                         (--remove (string-prefix-p "_" (symbol-name it)) %)
-                         (--map (format "(%s)" it) %)
-                         (string-join % " "))))
-         (position->node
-          (-filter (or pred (-const t))
-                   (-remove-first (-lambda ((pos . _))
-                                    (equal pos (tsc-node-start-position evil-tree-edit-current-node)))
-                                  (tree-edit-query query-string evil-tree-edit-current-node))))
+  (let* ((nodes
+          (-as-> (if (listp node-type) node-type `(,node-type)) %
+                 (-mapcat (lambda (x) (alist-get x tree-edit--subtypes)) %)
+                 (-uniq %)
+                 (--remove (string-prefix-p "_" (symbol-name it)) %)
+                 (--map (format "(%s)" it) %)
+                 (string-join % " ")
+                 (format "[%s] @foo" %)
+                 (tree-edit-query % evil-tree-edit-current-node))))
+    (evil-tree-edit--avy-jump nodes)))
+
+(defun evil-tree-edit--avy-jump (nodes)
+  "Avy jump to one of NODES."
+  (interactive)
+  (let* ((position->node (--map (cons (tsc-node-start-position it) it) nodes))
          ;; avy-action declares what should be done with the result of avy-process
          (avy-action (lambda (pos)
                        (setq evil-tree-edit-current-node (alist-get pos position->node))

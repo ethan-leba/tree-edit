@@ -140,8 +140,7 @@ will be selected if the last one is deleted."
 
 TODO: Build queries and cursors once, then reuse them?"
   (let* ((query (tsc-make-query tree-sitter-language patterns)))
-    (seq-map (lambda (capture) (cons (tsc-node-start-position (cdr capture)) (cdr capture)))
-             (tsc-query-captures query node #'tsc--buffer-substring-no-properties))))
+    (-map #'cdr (tsc-query-captures query node #'tsc--buffer-substring-no-properties))))
 
 (defun tree-edit--relevant-types (type parent-type)
   "Return a list of the TYPE and all relevant types that occur in PARENT-TYPE.
