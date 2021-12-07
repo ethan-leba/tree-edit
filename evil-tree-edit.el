@@ -147,6 +147,17 @@ NODE-TYPE can be a symbol or a list of symbol."
           ((equal (length position->node) 1) (funcall avy-action (caar position->node)))
           (t (avy-process (-map #'car position->node))))))
 
+(defun evil-tree-edit--all-named-descendants (node)
+  "Retrieve all named descendants of NODE."
+  ;; Use cursor for efficiency?
+  (let (result (stack `(,node)))
+    (while stack
+      (let* ((item (pop stack))
+             (children (tree-edit--get-all-children item)))
+        (setq stack (append children stack))
+        (setq result (append result children))))
+    result))
+
 (defun evil-tree-edit-wrap-node (type)
   "Wrap the current node in a node of selected TYPE."
   (evil-tree-edit--preserve-location
@@ -154,8 +165,10 @@ NODE-TYPE can be a symbol or a list of symbol."
           (node-text (tsc-node-text evil-tree-edit-current-node)))
      (evil-tree-edit-exchange type)
      (unwind-protect
-         (evil-tree-edit-avy-jump (alist-get node-type tree-edit--supertypes)
-                                  (-lambda ((_ . node)) (tree-edit--valid-replacement-p type node)))
+         (evil-tree-edit--avy-jump
+          (-filter (lambda (node) (--any (tree-edit--valid-replacement-p (tsc-node-type it) node)
+                                    (tree-edit--parse-fragment node-text)))
+                   (evil-tree-edit--all-named-descendants evil-tree-edit-current-node)))
        ;; If avy fails, replace the old node back
        (evil-tree-edit-exchange node-text)))))
 

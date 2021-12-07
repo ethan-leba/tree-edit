@@ -107,6 +107,27 @@ if TREE:
     x
     [y]")))
 
+(describe "wrap"
+  (it "works"
+    (expect (with-tree-test-buffer #'python-mode "
+[for FOO in BAR:
+    hi]"
+              (evil-tree-edit-wrap-node 'for_statement))
+            :to-have-buffer-contents "
+[for TREE in TREE:
+    for FOO in BAR:
+        hi]")
+    (expect (with-tree-test-buffer #'python-mode "
+for FOO in BAR:
+    [hi]"
+              (evil-tree-edit-goto-parent)
+              (let ((tree-edit-syntax-snippets
+                     `((return_statement . ("return" expression)) . ,tree-edit-syntax-snippets)))
+                (evil-tree-edit-wrap-node 'return_statement)))
+            :to-have-buffer-contents "
+for FOO in BAR:
+    [return hi]")))
+
 (describe "delete node"
   (xit "doesn't allow empty blocks (manual grammar edit)"
     ;; Should select bounds of new named node
