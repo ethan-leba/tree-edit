@@ -229,8 +229,7 @@ Fragments should parse as one of the following structures:
                         (tree-edit-parseo grammar tokens '()))))
         ;; TODO: Put this in the query
         ;; Rejecting multi-node solutions
-        (if (equal (length (car result)) 1)
-            (--reduce-from (-replace it type acc) (car result) relevant-types)))))
+        (and result (equal (length (car result)) 1)))))
 
 (defun tree-edit--find-raise-ancestor (ancestor child)
   "Find a suitable ANCESTOR to be replaced with CHILD."
