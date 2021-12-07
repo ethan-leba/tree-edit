@@ -135,14 +135,17 @@ NODE-TYPE can be a symbol or a list of symbol."
                  (tree-edit-query % evil-tree-edit-current-node))))
     (evil-tree-edit--avy-jump nodes)))
 
+(defun evil-tree-edit--goto-node (node)
+  "Set current node to NODE and run hooks."
+  (setq evil-tree-edit-current-node node)
+  (run-hooks 'evil-tree-edit-movement-hook))
+
 (defun evil-tree-edit--avy-jump (nodes)
   "Avy jump to one of NODES."
   (interactive)
   (let* ((position->node (--map (cons (tsc-node-start-position it) it) nodes))
          ;; avy-action declares what should be done with the result of avy-process
-         (avy-action (lambda (pos)
-                       (setq evil-tree-edit-current-node (alist-get pos position->node))
-                       (run-hooks 'evil-tree-edit-movement-hook))))
+         (avy-action (lambda (pos) (evil-tree-edit--goto-node (alist-get pos position->node)))))
     (cond ((not position->node) (user-error "Nothing to jump to!"))
           ((equal (length position->node) 1) (funcall avy-action (caar position->node)))
           (t (avy-process (-map #'car position->node))))))
