@@ -61,6 +61,9 @@
  tree-edit-significant-node-types
  '(block decorated_definition function_definition class_definition)
 
+ tree-edit-placeholder-node-type
+ 'identifier
+
  ;; TODO: this should be auto-generated in the grammar file
  tree-edit--hidden-node-types
  '(_newline _indent _dedent)

@@ -237,6 +237,20 @@ See `tree-edit-insert-sibling'."
   (evil-tree-edit--preserve-location
    (tree-edit-barf evil-tree-edit-current-node)))
 
+(defun evil-tree-edit-goto-next-placeholder ()
+  "Transform current node's leftmost child into it's next sibling, if possible."
+  (interactive)
+  (unless tree-edit-placeholder-node-type
+    (user-error "`tree-edit-placeholder-node-type' not set!"))
+  (pcase (tree-edit-query
+          (format "((%s) @node (.eq? @node %s))"
+                  tree-edit-placeholder-node-type
+                  ;; XXX: Assuming the placeholder type is a singleton list containing a string
+                  (car (alist-get tree-edit-placeholder-node-type tree-edit-syntax-snippets)))
+          evil-tree-edit-current-node)
+    (`(,first . ,_) (evil-tree-edit--goto-node first))
+    (_ (user-error "No placeholders contained in the current!"))))
+
 (defun evil-tree-edit--ambiguous-node-range-p (node-a node-b)
   (and node-a node-b
        (equal (tsc-node-start-position node-a)
@@ -382,6 +396,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "k" #'evil-tree-edit-goto-prev-sibling)
       (define-key mode-local-keymap "h" #'evil-tree-edit-goto-parent)
       (define-key mode-local-keymap "f" #'evil-tree-edit-goto-child)
+      (define-key mode-local-keymap "n" #'evil-tree-edit-goto-next-placeholder)
       (define-key mode-local-keymap "c" #'evil-tree-edit-change)
       (define-key mode-local-keymap "d" #'evil-tree-edit-delete)
       (define-key mode-local-keymap "r" #'evil-tree-edit-raise)

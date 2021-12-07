@@ -82,6 +82,10 @@ The following keywords are valid whitespace rules:
   :newline      insert a newline before the next text
   :indent       increase the indentation by 4 for the next newline
   :dedent       decrease the indentation by 4 for the next newline")
+(defvar tree-edit-placeholder-node-type nil
+  "Node considered a placeholder. Set by mode-local grammar file.
+
+Typically an identifier, but can conceivably be any type of node.")
 
 ;;* User settings
 (defgroup tree-edit nil

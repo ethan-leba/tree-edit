@@ -139,6 +139,23 @@ for FOO in BAR:
 for FOO in BAR:
     [return hi]")))
 
+(describe "goto next placeholder"
+  (it "works"
+    (expect (with-tree-test-buffer #'python-mode "
+[for TREE in BAR:
+    TREE]"
+              (evil-tree-edit-goto-next-placeholder))
+            :to-have-buffer-contents "
+for [TREE] in BAR:
+    TREE")
+    (expect (with-tree-test-buffer #'python-mode "
+[for qwer in BAR:
+    TREE]"
+              (evil-tree-edit-goto-next-placeholder))
+            :to-have-buffer-contents "
+for qwer in BAR:
+    [TREE]")))
+
 (describe "delete node"
   (it "doesn't allow empty blocks (manual grammar edit)"
     ;; Should select bounds of new named node
