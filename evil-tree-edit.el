@@ -126,9 +126,6 @@ NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
   (let* ((nodes
           (-as-> (if (listp node-type) node-type `(,node-type)) %
-                 (-mapcat (lambda (x) (alist-get x tree-edit--subtypes)) %)
-                 (-uniq %)
-                 (--remove (string-prefix-p "_" (symbol-name it)) %)
                  (--map (format "(%s)" it) %)
                  (string-join % " ")
                  (format "[%s] @foo" %)
