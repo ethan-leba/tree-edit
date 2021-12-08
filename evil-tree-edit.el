@@ -341,9 +341,9 @@ See `tree-edit-insert-sibling'."
     (remove-hook 'evil-normal-state-entry-hook #'evil-tree-edit--re-enter-tree-state 'local))))
 
 (defun define-evil-tree-edit-verb (keymap key func &optional wrap)
-  "Define a key command prefixed by KEY, calling FUNC.
+  "Define a key command in KEYMAP prefixed by KEY calling FUNC.
 
-FUNC must take two arguments, a symbol of the node type.
+FUNC must take one argument, a symbol of the node type.
 If WRAP is t, include :wrap-override."
   (dolist (node tree-edit-nodes)
     (define-key
