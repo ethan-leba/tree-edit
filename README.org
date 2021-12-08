@@ -23,6 +23,7 @@ the languages under edit to power it's editing capabilities.
   - [[#navigation][Navigation]]
   - [[#editing-operations][Editing operations]]
   - [[#pasting][Pasting]]
+  - [[#a-note-on-raise-vs-delete-wrap-vs-insert][A note on raise vs. delete, wrap vs. insert]]
 - [[#supported-languages][Supported languages]]
 - [[#customization][Customization]]
 - [[#limitations][Limitations]]
@@ -119,6 +120,34 @@ Along with the standard node-types of the given language, tree-edit has a
 special node-type @@html:<kbd>@@p@@html:</kbd>@@ that will attempt to parse the
 type of the most recently copied text. If a type can be identified and the
 operation is valid, the copied text will be used.
+
+** A note on raise vs. delete, wrap vs. insert
+
+Both of the following definition for argument list produce the same result on a
+textual level:
+
+#+begin_src
+argument_list = expression | seq[expression "," argument_list]
+argument_list = seq[expression, repeat["," expression]]
+#+end_src
+
+However, at the tree level, these two constructions result in different ways to
+modify the node.
+
+For the first construction, you'd need to use raise/wrap to add and remove expressions:
+#+begin_src
+(foo, [bar]) ==raise==> (foo)
+([foo])      ===wrap==> (foo, bar)
+#+end_src
+
+While for the second, you can use insert/delete.
+#+begin_src
+(foo, [bar]) ==delete=> (foo)
+([foo])      ==insert=> (foo, bar)
+#+end_src
+This is something you may need to be aware of if you're running trying to
+perform an operation that you think should work, but doesn't! In doubt, check
+the =grammar.js= of the language.
 
 * Supported languages
 
