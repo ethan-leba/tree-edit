@@ -71,6 +71,16 @@ Properties
                   :type if left unset
   :node-override  overrides syntax snippets for the verb
   :wrap-override  overrides syntax snippets for the verb when wrapping")
+(defvar tree-edit-query-nodes nil
+  "Nodes that users can query for jumping. Set by mode-local grammar file.
+
+Must be a list of plists, with the following properties:
+
+Properties
+  :type           the node's type, or a list of types
+  :key            the keybinding for the given node
+  :name           human readable name for which-key, defaults to
+                  :type if left unset")
 (defvar tree-edit-whitespace-rules nil
   "Rules for formatting nodes. Set by mode-local grammar file.
 

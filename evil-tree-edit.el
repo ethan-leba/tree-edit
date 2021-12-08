@@ -340,6 +340,21 @@ See `tree-edit-insert-sibling'."
     (remove-hook 'before-revert-hook #'evil-tree-edit--teardown 'local)
     (remove-hook 'evil-normal-state-entry-hook #'evil-tree-edit--re-enter-tree-state 'local))))
 
+(defun define-evil-tree-edit-avy-jump (keymap key func)
+  "Define a key command in KEYMAP prefixed by KEY calling FUNC.
+
+FUNC must take one argument, a symbol of the node type."
+  (dolist (node (append tree-edit-nodes tree-edit-query-nodes))
+    (define-key
+      keymap
+      (string-join (list key (plist-get node :key)))
+      (cons
+       ;; emacs-which-key integration
+       (or (plist-get node :name) (s-replace "_" " " (symbol-name (plist-get node :type))))
+       `(lambda ()
+          (interactive)
+          (,func ',(plist-get node :type)))))))
+
 (defun define-evil-tree-edit-verb (keymap key func &optional wrap)
   "Define a key command in KEYMAP prefixed by KEY calling FUNC.
 
@@ -383,9 +398,9 @@ each language will have it's own set of nouns."
       (define-evil-tree-edit-verb mode-local-keymap "i" #'evil-tree-edit-insert-sibling-before)
       (define-evil-tree-edit-verb mode-local-keymap "a" #'evil-tree-edit-insert-sibling)
       (define-evil-tree-edit-verb mode-local-keymap "I" #'evil-tree-edit-insert-child)
-      (define-evil-tree-edit-verb mode-local-keymap "s" #'evil-tree-edit-avy-jump)
       (define-evil-tree-edit-verb mode-local-keymap "e" #'evil-tree-edit-exchange)
       (define-evil-tree-edit-verb mode-local-keymap "w" #'evil-tree-edit-wrap-node t)
+      (define-evil-tree-edit-avy-jump mode-local-keymap "s" #'evil-tree-edit-avy-jump)
       (define-key mode-local-keymap [escape] 'evil-normal-state)
       (define-key mode-local-keymap ">" #'evil-tree-edit-slurp)
       (define-key mode-local-keymap "<" #'evil-tree-edit-barf)
