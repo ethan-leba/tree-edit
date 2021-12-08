@@ -55,7 +55,10 @@ https://tree-sitter.github.io/tree-sitter/creating-parsers#hiding-rules")
   "Snippets for constructing nodes. Set by mode-local grammar file.
 
 Must be an alist of node type (as a symbol) to list, where the list can
-contain any string or a symbol referencing another node type in the alist.")
+contain any string or a symbol referencing another node type in the alist.
+
+The syntax snippets are intended to mirror the grammar constructions
+of the tree-sitter grammar, but is currently not validated by tree-edit.")
 (defvar tree-edit-nodes nil
   "Nodes that a user can create via tree-edit. Set by mode-local grammar file.
 
