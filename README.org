@@ -156,6 +156,11 @@ the =grammar.js= of the language.
 | 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/34][Java]]     |
 | 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/33][Python]]   |
 
+
+| ✅ | Supported               |
+| 🔶 | Requires custom grammar |
+| 🔨 | Under development       |
+
 Tree-edit is designed to be as language-agnostic as possible. Currently the list
 of supported languages is not very impressive, but /in theory/ it should be as
 simple as running a script to preprocess a grammar and adding a configuration
