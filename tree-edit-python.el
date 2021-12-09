@@ -95,6 +95,7 @@
    (except_clause . (nil . (:newline)))
    (finally_clause . (nil . (:newline)))
    (elif_clause . (nil . (:newline)))
+   (else_clause . (nil . (:newline)))
    (_compound_statement . (nil . (:newline))))
 
  tree-edit-significant-node-types
