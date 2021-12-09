@@ -248,6 +248,23 @@ See `tree-edit-insert-sibling'."
     (`(,first . ,_) (evil-tree-edit--goto-node first))
     (_ (user-error "No placeholders contained in the current!"))))
 
+(defun evil-tree-edit-preview-node ()
+  "Preview the different variations of the current node."
+  (interactive)
+  (let ((reazon-occurs-check nil)
+        (reazon-timeout 0.1)
+        (tree-edit-parse-comments nil))
+    (--> evil-tree-edit-current-node
+         (tsc-node-type it)
+         (alist-get it tree-edit-grammar)
+         ;; TODO: Parametrize
+         (reazon-run 10 q (tree-edit-parseo it q '()))
+         ;; Sometime parser returns repeats, not sure if that's expected
+         (-uniq it)
+         ;; TODO: Prettier print
+         (message (string-join (-map #'prin1-to-string it) "\n")))))
+
+
 (defun evil-tree-edit--ambiguous-node-range-p (node-a node-b)
   (and node-a node-b
        (equal (tsc-node-start-position node-a)
@@ -414,6 +431,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "r" #'evil-tree-edit-raise)
       (define-key mode-local-keymap "y" #'evil-tree-edit-copy)
       (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
+      (define-key mode-local-keymap "?" #'evil-tree-edit-preview-node)
       ;; `setq-mode-local' macroexpanded, since it doesn't accept symbols
       (mode-local-bind `((evil-tree-state-map . ,mode-local-keymap)) '(mode-variable-flag t) mode)
       (mode-local-map-mode-buffers
