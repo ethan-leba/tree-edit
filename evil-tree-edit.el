@@ -119,6 +119,12 @@ moving the sibling index by the provided value."
   (kill-ring-save (tsc-node-start-position evil-tree-edit-current-node)
                   (tsc-node-end-position evil-tree-edit-current-node)))
 
+(defun evil-tree-edit-undo (count)
+  "Undo COUNT actions while saving the cursor position."
+  (interactive "*p")
+  (evil-tree-edit--preserve-location
+   (evil-undo count)))
+
 (defun evil-tree-edit-avy-jump (node-type)
   "Avy jump to a node with the NODE-TYPE.
 
@@ -430,6 +436,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "d" #'evil-tree-edit-delete)
       (define-key mode-local-keymap "r" #'evil-tree-edit-raise)
       (define-key mode-local-keymap "y" #'evil-tree-edit-copy)
+      (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
       (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
       (define-key mode-local-keymap "?" #'evil-tree-edit-preview-node)
       ;; `setq-mode-local' macroexpanded, since it doesn't accept symbols
