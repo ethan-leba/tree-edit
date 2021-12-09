@@ -49,6 +49,11 @@ best we can do for now is pretend that these nodes don't exist at
 all.
 
 https://tree-sitter.github.io/tree-sitter/creating-parsers#hiding-rules")
+(defvar tree-edit-parse-comments t
+  "If non-nil, allow abritrary 'comment' nodes when parsing.
+
+This should be enabled when using parser for insertions, but
+seeing the comments is unnecessary when previewing the parser.")
 (defvar tree-edit-significant-node-types nil
   "List of nodes that are considered significant, like methods or classes. Set by mode-local grammar file.")
 (defvar tree-edit-syntax-snippets nil
@@ -639,9 +644,12 @@ the text."
 (reazon-defrel tree-edit-parseo (grammar tokens out)
   "TOKENS are a valid prefix of a node in GRAMMAR and OUT is unused tokens in TOKENS."
   (reazon-disj
-   (reazon-fresh (next)
-     (tree-edit--takeo 'comment tokens next)
-     (tree-edit-parseo grammar next out))
+   (if tree-edit-parse-comments
+       (reazon-fresh (next)
+         ;; FIXME: Should use the `extras` field from grammar
+         (tree-edit--takeo 'comment tokens next)
+         (tree-edit-parseo grammar next out))
+     #'reazon-!U)
    (pcase grammar
      (`((type . "STRING")
         (value . ,value))
