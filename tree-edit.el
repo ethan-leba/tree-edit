@@ -554,7 +554,7 @@ current, otherwise after."
              (tree-edit-syntax-snippets
               `((,used-type . ,(alist-get type tree-edit-syntax-snippets)) . ,tree-edit-syntax-snippets)))
         (tree-edit--insert-fragment tokens node (if before :before :after)))
-    (user-error "Cannot insert node of type %s!" node)))
+    (user-error "Cannot insert node of type %s!" type)))
 
 (defun tree-edit--insert-fragment-sibling (text node &optional before)
   "Insert a node of the given TEXT next to NODE.
