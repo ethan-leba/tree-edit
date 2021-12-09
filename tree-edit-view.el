@@ -35,10 +35,7 @@ lighter color if CHILD-OF-CURRENT-NODE is non-nil."
   (insert (make-string (* 2 depth) ?\ ))
   (let* ((current-nodep (with-current-buffer tree-edit-view--source-code-buffer
                           (and evil-tree-edit-current-node
-                               (equal (tsc-node-range node)
-                                      (if (equal (tsc-count-named-children evil-tree-edit-current-node) 0)
-                                          (tsc-node-range (tsc-get-parent evil-tree-edit-current-node))
-                                        (tsc-node-range evil-tree-edit-current-node))))))
+                               (tsc-node-eq node evil-tree-edit-current-node))))
          (node-text (format "%s%s\n"
                             (tsc-node-type node)
                             (if (> (tsc-count-named-children node) 0) ":" ""))))
