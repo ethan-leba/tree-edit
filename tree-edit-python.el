@@ -201,6 +201,47 @@
     :name "subscript slice"
     :node-override '((subscript . (identifier "[" slice "]"))))
 
+   ;; Augmented assignment
+   (:type augmented_assignment
+    :key "=-"
+    :name "-"
+    :node-override '((augmented_assignment . (expression "-=" expression))))
+   (:type augmented_assignment
+    :key "=+"
+    :name "+"
+    :node-override '((augmented_assignment . (expression "+=" expression))))
+   (:type augmented_assignment
+    :key "=*"
+    :name "*"
+    :node-override '((augmented_assignment . (expression "*=" expression))))
+   (:type augmented_assignment
+    :key "=@"
+    :name "@"
+    :node-override '((augmented_assignment . (expression "@=" expression))))
+   (:type augmented_assignment
+    :key "=/"
+    :name "/"
+    :node-override '((augmented_assignment . (expression "/=" expression))))
+   (:type augmented_assignment
+    :key "=\\"
+    :name "//"
+    :node-override '((augmented_assignment . (expression "//=" expression))))
+   (:type augmented_assignment
+    :key "=%"
+    :name "%"
+    :node-override '((augmented_assignment . (expression "%=" expression))))
+   (:type augmented_assignment
+    :key "=e"
+    :name "**"
+    :node-override '((augmented_assignment . (expression "**=" expression))))
+   (:type augmented_assignment
+    :key "=|"
+    :name "|"
+    :node-override '((augmented_assignment . (expression "|=" expression))))
+   (:type augmented_assignment
+    :key "=&"
+    :name "&"
+    :node-override '((augmented_assignment . (expression "&=" expression))))
    ;; Operators
    (:type binary_operator
     :key "o-"
