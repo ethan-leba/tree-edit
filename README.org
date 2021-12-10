@@ -235,6 +235,10 @@ Contributions are very much welcome! In particular, adding language files would
 be a great place to help. Otherwise, the issues are a good place to propose
 features or find ones to implement.
 
+The project is fairly complex and the documentation is still in progress, so
+feel free to open a discussion if you're interested in helping out but you're
+not sure where to start!
+
 Tests can be run using =./run-tests.sh= script.
 
 * Related projects
