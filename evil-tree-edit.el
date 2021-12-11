@@ -105,10 +105,13 @@ moving the sibling index by the provided value."
   (evil-tree-edit--apply-movement #'evil-tree-edit--get-sig-parent))
 
 ;;* Evil tree-edit functions
-(defun evil-tree-edit-change ()
-  "Change the current node."
+(defun evil-tree-edit-change (&optional return-location)
+  "Change the current node, and return to RETURN-LOCATION on exit.
+
+If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
   (interactive)
-  (setq evil-tree-edit--return-to-tree-state (tree-edit--save-location evil-tree-edit-current-node))
+  (setq evil-tree-edit--return-to-tree-state
+        (or return-location (tree-edit--save-location evil-tree-edit-current-node)))
   (delete-region (tsc-node-start-position evil-tree-edit-current-node)
                  (tsc-node-end-position evil-tree-edit-current-node))
   (evil-change-state 'insert))
@@ -278,6 +281,13 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
           evil-tree-edit-current-node)
     (`(,first . ,_) (evil-tree-edit--goto-node first))
     (_ (user-error "No placeholders contained in the current!"))))
+
+(defun evil-tree-edit-change-next-placeholder ()
+  "Move cursor to the next placeholder node and change it."
+  (interactive)
+  (let ((current-location (tree-edit--save-location evil-tree-edit-current-node)))
+    (evil-tree-edit-goto-next-placeholder)
+    (evil-tree-edit-change current-location)))
 
 (defun evil-tree-edit-preview-node ()
   "Preview the different variations of the current node."
@@ -459,6 +469,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "h" #'evil-tree-edit-goto-parent)
       (define-key mode-local-keymap "f" #'evil-tree-edit-goto-child)
       (define-key mode-local-keymap "n" #'evil-tree-edit-goto-next-placeholder)
+      (define-key mode-local-keymap "N" #'evil-tree-edit-change-next-placeholder)
       (define-key mode-local-keymap "c" #'evil-tree-edit-change)
       (define-key mode-local-keymap "d" #'evil-tree-edit-delete)
       (define-key mode-local-keymap "r" #'evil-tree-edit-raise)
