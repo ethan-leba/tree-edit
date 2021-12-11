@@ -30,8 +30,8 @@
   "The current node to apply editing commands to.")
 (defvar-local evil-tree-edit--node-overlay nil
   "The display overlay to show the current node.")
-(defvar-local evil-tree-edit--return-to-tree-state nil
-  "Whether tree state should be returned to after exiting insert mode.")
+(defvar-local evil-tree-edit--return-position nil
+  "The location that the cursor should be returned to after exiting insert mode, if set.")
 
 (defgroup evil-tree-edit nil
   "Evil structural editing for tree-sitter languages."
@@ -110,7 +110,7 @@ moving the sibling index by the provided value."
 
 If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
   (interactive)
-  (setq evil-tree-edit--return-to-tree-state
+  (setq evil-tree-edit--return-position
         (or return-location (tree-edit--save-location evil-tree-edit-current-node)))
   (delete-region (tsc-node-start-position evil-tree-edit-current-node)
                  (tsc-node-end-position evil-tree-edit-current-node))
@@ -355,11 +355,11 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
 
 (defun evil-tree-edit--re-enter-tree-state ()
   "Change the current node."
-  (when evil-tree-edit--return-to-tree-state
+  (when evil-tree-edit--return-position
     (evil-tree-state)
     (evil-tree-edit--goto-node
-     (tree-edit--restore-location evil-tree-edit--return-to-tree-state))
-    (setq evil-tree-edit--return-to-tree-state nil)))
+     (tree-edit--restore-location evil-tree-edit--return-position))
+    (setq evil-tree-edit--return-position nil)))
 
 (defun evil-tree-edit--teardown ()
   "De-activate tree-edit state."
