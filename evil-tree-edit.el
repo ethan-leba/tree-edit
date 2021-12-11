@@ -357,7 +357,8 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
   "Change the current node."
   (when evil-tree-edit--return-to-tree-state
     (evil-tree-state)
-    (tree-edit--restore-location evil-tree-edit--return-to-tree-state)
+    (evil-tree-edit--goto-node
+     (tree-edit--restore-location evil-tree-edit--return-to-tree-state))
     (setq evil-tree-edit--return-to-tree-state nil)))
 
 (defun evil-tree-edit--teardown ()
