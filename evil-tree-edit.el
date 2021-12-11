@@ -137,7 +137,7 @@ NODE-TYPE can be a symbol or a list of symbol."
        (format "[%s] @foo" it)))
 
 (defun evil-tree-edit-avy-jump (node-type)
-  "Avy jump to a node with the NODE-TYPE.
+  "Avy jump to a node with NODE-TYPE under the current node.
 
 NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
@@ -249,7 +249,9 @@ See `tree-edit-insert-sibling'."
    (tree-edit-barf evil-tree-edit-current-node)))
 
 (defun evil-tree-edit-goto-next-placeholder ()
-  "Transform current node's leftmost child into it's next sibling, if possible."
+  "Move cursor to the next placeholder node.
+
+Placeholder is defined by `tree-edit-placeholder-node-type'."
   (interactive)
   (unless tree-edit-placeholder-node-type
     (user-error "`tree-edit-placeholder-node-type' not set!"))
@@ -280,6 +282,7 @@ See `tree-edit-insert-sibling'."
 
 
 (defun evil-tree-edit--ambiguous-node-range-p (node-a node-b)
+  "Do NODE-A and NODE-B share the same range?"
   (and node-a node-b
        (equal (tsc-node-start-position node-a)
               (tsc-node-start-position node-b))
