@@ -125,8 +125,8 @@ moving the sibling index by the provided value."
   (evil-tree-edit--preserve-location
    (evil-undo count)))
 
-(defun evil-tree-edit-avy-jump (node-type)
-  "Avy jump to a node with the NODE-TYPE.
+(defun evil-tree-edit--format-query-string (node-type)
+  "Format a query string for NODE-TYPE.
 
 NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
@@ -134,9 +134,17 @@ NODE-TYPE can be a symbol or a list of symbol."
        (-map (lambda (type) (format "(%s)" type)) it)
        (string-join it " ")
        ;; Query string needs an @name here, or it won't return any results
-       (format "[%s] @foo" it)
-       (tree-edit-query it evil-tree-edit-current-node)
-       (evil-tree-edit--avy-jump it)))
+       (format "[%s] @foo" it)))
+
+(defun evil-tree-edit-avy-jump (node-type)
+  "Avy jump to a node with the NODE-TYPE.
+
+NODE-TYPE can be a symbol or a list of symbol."
+  (interactive)
+  (-> node-type
+      (evil-tree-edit--format-query-string)
+      (tree-edit-query evil-tree-edit-current-node)
+      (evil-tree-edit--avy-jump)))
 
 (defun evil-tree-edit--goto-node (node)
   "Set current node to NODE and run hooks."
