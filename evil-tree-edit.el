@@ -130,13 +130,13 @@ moving the sibling index by the provided value."
 
 NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
-  (let* ((nodes
-          (-as-> (if (listp node-type) node-type `(,node-type)) %
-                 (--map (format "(%s)" it) %)
-                 (string-join % " ")
-                 (format "[%s] @foo" %)
-                 (tree-edit-query % evil-tree-edit-current-node))))
-    (evil-tree-edit--avy-jump nodes)))
+  (--> (if (listp node-type) node-type `(,node-type))
+       (-map (lambda (type) (format "(%s)" type)) it)
+       (string-join it " ")
+       ;; Query string needs an @name here, or it won't return any results
+       (format "[%s] @foo" it)
+       (tree-edit-query it evil-tree-edit-current-node)
+       (evil-tree-edit--avy-jump it)))
 
 (defun evil-tree-edit--goto-node (node)
   "Set current node to NODE and run hooks."
