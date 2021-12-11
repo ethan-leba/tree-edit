@@ -65,7 +65,10 @@
    (dictionary . ("{" "}"))
    (dictionary_comprehension . ("{" pair for_in_clause "}"))
    (dictionary_splat . ("**" expression))
+   (not_operator . ("not" expression))
    (pair . (identifier ":" identifier))
+   (keyword_argument . (identifier "=" identifier))
+   (pattern_list . (identifier "," identifier))
    ;; Set can't be empty, otherwise it's a dict
    (set . ("{" identifier "}"))
    (set_comprehension . ("{" expression for_in_clause "}"))
@@ -77,6 +80,9 @@
    (lambda_parameters . (identifier))
    (call . (primary_expression argument_list))
    (argument_list . ("(" ")"))
+   (true . ("True"))
+   (false . ("False"))
+   (none . ("None"))
    (attribute . (primary_expression "." identifier))
    (primary_expression . (identifier))
    (subscript . (identifier "[" expression "]"))
@@ -140,9 +146,9 @@
     :name "variable declaration")
    ;; *shrug*
    (:type import_statement
-    :key "n")
+    :key "q")
    (:type import_from_statement
-    :key "N")
+    :key "Q")
 
    ;; Expressions
    (:type attribute
@@ -164,15 +170,24 @@
     :key "D")
    (:type identifier
     :key "a")
+   (:type not_operator
+    :key "n")
    (:type call
     :key "c"
     :wrap-override '((argument_list . ("(" expression ")"))))
    (:type conditional_expression
     :key "T"
     :name "ternary conditional")
-   (:type lambda
+   (:type pair
     :key ":")
-
+   (:type keyword_argument
+    :key "K")
+   (:type unary_operator
+    :key "-"
+    :name "negation"
+    :node-override '((unary_operator . ("-" expression))))
+   (:type pattern_list
+    :key ",")
    ;; Uncommon nodes and nodes that are only valid in specific contexts
    (:type list_splat
     :key "m*")
@@ -200,6 +215,14 @@
     :key "mS"
     :name "subscript slice"
     :node-override '((subscript . (identifier "[" slice "]"))))
+   (:type lambda
+    :key "mL")
+   (:type true
+    :key "mt")
+   (:type false
+    :key "mn")
+   (:type none
+    :key "mN")
 
    ;; Augmented assignment
    (:type augmented_assignment
