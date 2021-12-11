@@ -67,7 +67,7 @@ moving the sibling index by the provided value."
     (setq evil-tree-edit-current-node new-pos)
     (run-hooks 'evil-tree-edit-movement-hook)))
 
-(defun evil-tree-edit--goto-sig-parent (node)
+(defun evil-tree-edit--get-sig-parent (node)
   "Move NODE to the next (interesting) named sibling."
   (let ((parent (tsc-get-parent node)))
     (cond
@@ -76,7 +76,7 @@ moving the sibling index by the provided value."
                      (cons it (alist-get it tree-edit--subtypes '())))
              tree-edit-significant-node-types)
       parent)
-     (t (evil-tree-edit--goto-sig-parent parent)))))
+     (t (evil-tree-edit--get-sig-parent parent)))))
 
 ;;* Globals: navigation
 (defun evil-tree-edit-goto-next-sibling ()
@@ -102,7 +102,7 @@ moving the sibling index by the provided value."
 (defun evil-tree-edit-goto-sig-parent ()
   "Move to the next (interesting) named sibling."
   (interactive)
-  (evil-tree-edit--apply-movement #'evil-tree-edit--goto-sig-parent))
+  (evil-tree-edit--apply-movement #'evil-tree-edit--get-sig-parent))
 
 ;;* Evil tree-edit functions
 (defun evil-tree-edit-change ()
