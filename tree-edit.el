@@ -391,34 +391,35 @@ Text nodes (likely from the `kill-ring') are not assumed to be
 formatted correctly and thus decomposed by
 `tree-edit--text-to-insertable-node' into chunks where formatting
 matters (i.e. expressions are left alone but blocks are split)."
-  (-let* ((indentation (current-indentation))
-          (prev nil)
-          (stack tokens)
-          (deferred-newline nil))
-    (while stack
-      (-let ((current (pop stack)))
-        ;; TODO: use `pcase'
-        (cond ((not current) '())
-              ((consp current)
-               (setq stack (append (tree-edit--add-whitespace-rules-to-tokens
-                                    (car current) (cdr current))
-                                   stack)))
-              ((equal current :newline)
-               (setq deferred-newline t))
-              ((equal current :indent)
-               (setq indentation (+ indentation 4)))
-              ((equal current :dedent)
-               (setq indentation (- indentation 4)))
-              ((stringp current)
-               (when deferred-newline
-                 (newline)
-                 (indent-line-to indentation)
-                 (setq deferred-newline nil))
-               (if (tree-edit--needs-space-p prev current)
-                   (insert " " current)
-                 (insert current))))
-        (unless (consp current)
-          (setq prev current))))))
+  (combine-after-change-calls
+    (-let* ((indentation (current-indentation))
+            (prev nil)
+            (stack tokens)
+            (deferred-newline nil))
+      (while stack
+        (-let ((current (pop stack)))
+          ;; TODO: use `pcase'
+          (cond ((not current) '())
+                ((consp current)
+                 (setq stack (append (tree-edit--add-whitespace-rules-to-tokens
+                                      (car current) (cdr current))
+                                     stack)))
+                ((equal current :newline)
+                 (setq deferred-newline t))
+                ((equal current :indent)
+                 (setq indentation (+ indentation 4)))
+                ((equal current :dedent)
+                 (setq indentation (- indentation 4)))
+                ((stringp current)
+                 (when deferred-newline
+                   (newline)
+                   (indent-line-to indentation)
+                   (setq deferred-newline nil))
+                 (if (tree-edit--needs-space-p prev current)
+                     (insert " " current)
+                   (insert current))))
+          (unless (consp current)
+            (setq prev current)))))))
 
 (defun tree-edit--text-and-type (node)
   "Return a pair of NODE and it's text."
