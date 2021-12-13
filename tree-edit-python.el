@@ -25,6 +25,11 @@
 (require 'tree-edit-python-grammar)
 (require 'tree-edit)
 
+(defun tree-edit-python-block-deletion-override (node)
+  "Allow deletion of NODE in block, unless it's the only node."
+  (-let [(tokens . index) (tree-edit--get-parent-tokens node)]
+    (if (> (length tokens) 1) `(,index ,index nil))))
+
 (setq-mode-local
  python-mode
 
@@ -109,6 +114,18 @@
 
  tree-edit-placeholder-node-type
  'identifier
+
+ tree-edit-node-deletion-override
+ '((block . tree-edit-python-block-deletion-override)
+   (module . tree-edit-simple-delete-override))
+
+ tree-edit-node-replacement-override
+ '((block . tree-edit-simple-replacement-override)
+   (module . tree-edit-simple-replacement-override))
+
+ tree-edit-node-insertion-override
+ '((block . tree-edit-simple-insertion-override)
+   (module . tree-edit-simple-insertion-override))
 
  ;; TODO: this should be auto-generated in the grammar file
  tree-edit--hidden-node-types
