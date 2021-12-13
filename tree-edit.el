@@ -268,6 +268,22 @@ Fragments should parse as one of the following structures:
     (cons (-map #'tsc-node-type children)
           (--find-index (equal (tsc-node-position-range node) (tsc-node-position-range it)) children))))
 
+(defun tree-edit-simple-delete-override (node)
+  "Allow deletion of NODE."
+  (-let [(_ . index) (tree-edit--get-parent-tokens node)]
+    `(,index ,index nil)))
+
+(defun tree-edit-simple-insertion-override (type node)
+  "Allow insertion of TYPE if it appears in NODE's parent's grammar."
+  (when-let (types (tree-edit--relevant-types
+                    type (-> node (tsc-get-parent) (tsc-node-type))))
+    `(,(car types))))
+
+(defun tree-edit-simple-replacement-override (type node)
+  "Allow replacement of NODE by TYPE if it appears in NODE's parent's grammar."
+  (tree-edit--relevant-types type (-> node (tsc-get-parent) (tsc-node-type))))
+
+
 ;;* Globals: Syntax generation
 ;; TODO: Handle less restrictively by ripping out surrounding syntax (ie delete)
 (defun tree-edit--valid-replacement-p (type node)
