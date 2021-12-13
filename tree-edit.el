@@ -54,6 +54,45 @@ https://tree-sitter.github.io/tree-sitter/creating-parsers#hiding-rules")
 
 This should be enabled when using parser for insertions, but
 seeing the comments is unnecessary when previewing the parser.")
+(defvar tree-edit-node-insertion-override nil
+  "A mapping from type to function, overriding `tree-edit--valid-insertions'.
+
+Set by mode-local grammar file.
+
+This should only be used in one of the following cases:
+
+1. Performance, i.e. blocks or compound statements, where there
+is no syntax between nodes, and the amount of nodes present can
+be very high.
+
+2. Nodes containing tree-sitter externals, so the JSON grammar
+may not truly capture what qualifies as a valid node.")
+(defvar tree-edit-node-deletion-override nil
+  "A mapping from type to function, overriding `tree-edit--valid-deletions'.
+
+Set by mode-local grammar file.
+
+This should only be used in one of the following cases:
+
+1. Performance, i.e. blocks or compound statements, where there
+is no syntax between nodes, and the amount of nodes present can
+be very high.
+
+2. Nodes containing tree-sitter externals, so the JSON grammar
+may not truly capture what qualifies as a valid node.")
+(defvar tree-edit-node-replacement-override nil
+  "A mapping from type to function, overriding `tree-edit--valid-replacement-p'.
+
+Set by mode-local grammar file.
+
+This should only be used in one of the following cases:
+
+1. Performance, i.e. blocks or compound statements, where there
+is no syntax between nodes, and the amount of nodes present can
+be very high.
+
+2. Nodes containing tree-sitter externals, so the JSON grammar
+may not truly capture what qualifies as a valid node.")
 (defvar tree-edit-significant-node-types nil
   "List of nodes that are considered significant, like methods or classes. Set by mode-local grammar file.")
 (defvar tree-edit-syntax-snippets nil
@@ -233,25 +272,27 @@ Fragments should parse as one of the following structures:
 ;; TODO: Handle less restrictively by ripping out surrounding syntax (ie delete)
 (defun tree-edit--valid-replacement-p (type node)
   "Return non-nil if NODE can be replaced with a node of TYPE."
-  (-let* ((reazon-occurs-check nil)
-          (parent-type (tsc-node-type (tsc-get-parent node)))
-          (grammar (alist-get parent-type tree-edit-grammar))
-          ((children . index) (tree-edit--get-parent-tokens node))
-          ;; removing the selected element
-          ((left (_ . right)) (-split-at index children))
-          (relevant-types (tree-edit--relevant-types type parent-type)))
-    (if-let (result (reazon-run 1 q
-                      (reazon-fresh (tokens qr ql)
-                        (tree-edit--superpositiono right qr parent-type)
-                        (tree-edit--superpositiono left ql parent-type)
-                        (tree-edit--max-lengtho q 3)
-                        ;; FIXME: this should be limited to only 1 new named node, of the requested type
-                        (tree-edit--includes-typeo q relevant-types)
-                        (tree-edit--prefixpostfixo ql q qr tokens)
-                        (tree-edit-parseo grammar tokens '()))))
-        ;; TODO: Put this in the query
-        ;; Rejecting multi-node solutions
-        (and result (equal (length (car result)) 1)))))
+  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
+    (if-let (override (alist-get parent-type tree-edit-node-replacement-override))
+        (funcall override type node)
+      (-let* ((reazon-occurs-check nil)
+              (grammar (alist-get parent-type tree-edit-grammar))
+              ((children . index) (tree-edit--get-parent-tokens node))
+              ;; removing the selected element
+              ((left (_ . right)) (-split-at index children))
+              (relevant-types (tree-edit--relevant-types type parent-type)))
+        (if-let (result (reazon-run 1 q
+                          (reazon-fresh (tokens qr ql)
+                            (tree-edit--superpositiono right qr parent-type)
+                            (tree-edit--superpositiono left ql parent-type)
+                            (tree-edit--max-lengtho q 3)
+                            ;; FIXME: this should be limited to only 1 new named node, of the requested type
+                            (tree-edit--includes-typeo q relevant-types)
+                            (tree-edit--prefixpostfixo ql q qr tokens)
+                            (tree-edit-parseo grammar tokens '()))))
+            ;; TODO: Put this in the query
+            ;; Rejecting multi-node solutions
+            (and result (equal (length (car result)) 1)))))))
 
 (defun tree-edit--find-raise-ancestor (ancestor child)
   "Find a suitable ANCESTOR to be replaced with CHILD."
@@ -271,22 +312,24 @@ Fragments should parse as one of the following structures:
   "Return a valid sequence of tokens containing the provided TYPE, or nil.
 
 If AFTER is t, generate the tokens after NODE, otherwise before."
-  (-let* ((reazon-occurs-check nil)
-          (parent-type (tsc-node-type (tsc-get-parent node)))
-          (grammar (alist-get parent-type tree-edit-grammar))
-          ((children . index) (tree-edit--get-parent-tokens node))
-          ((left right) (-split-at (+ index (if after 1 0)) children))
-          (relevant-types (tree-edit--relevant-types type parent-type)))
-    (if-let (result (reazon-run 1 q
-                      (reazon-fresh (tokens qr ql)
-                        (tree-edit--superpositiono right qr parent-type)
-                        (tree-edit--superpositiono left ql parent-type)
-                        (tree-edit--max-lengtho q 5)
-                        (tree-edit--prefixpostfixo ql q qr tokens)
-                        ;; FIXME: this should be limited to only 1 new named node, of the requested type
-                        (tree-edit--includes-typeo q relevant-types)
-                        (tree-edit-parseo grammar tokens '()))))
-        (car result))))
+  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
+    (if-let (override (alist-get parent-type tree-edit-node-insertion-override))
+        (funcall override type node)
+      (-let* ((reazon-occurs-check nil)
+              (grammar (alist-get parent-type tree-edit-grammar))
+              ((children . index) (tree-edit--get-parent-tokens node))
+              ((left right) (-split-at (+ index (if after 1 0)) children))
+              (relevant-types (tree-edit--relevant-types type parent-type)))
+        (if-let (result (reazon-run 1 q
+                          (reazon-fresh (tokens qr ql)
+                            (tree-edit--superpositiono right qr parent-type)
+                            (tree-edit--superpositiono left ql parent-type)
+                            (tree-edit--max-lengtho q 5)
+                            (tree-edit--prefixpostfixo ql q qr tokens)
+                            ;; FIXME: this should be limited to only 1 new named node, of the requested type
+                            (tree-edit--includes-typeo q relevant-types)
+                            (tree-edit-parseo grammar tokens '()))))
+            (car result))))))
 
 (defun tree-edit--remove-node-and-surrounding-syntax (tokens idx)
   "Return a pair of indices to remove the node at IDX in TOKENS and all surrounding syntax."
@@ -303,26 +346,29 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
 
 If successful, the return type will give a range of siblings to
 delete, and what syntax needs to be inserted after, if any."
-  (-let* ((reazon-occurs-check nil)
-          (parent-type (tsc-node-type (tsc-get-parent node)))
-          (grammar (alist-get (tsc-node-type (tsc-get-parent node)) tree-edit-grammar))
-          ((children . index) (tree-edit--get-parent-tokens node))
-          ((left-idx . right-idx) (tree-edit--remove-node-and-surrounding-syntax children index))
-          (left (-take left-idx children))
-          (right (-drop right-idx children))
-          (nodes-deleted (- right-idx left-idx)))
-    ;; FIXME: Q should be only string types, aka syntax -- we're banking that
-    ;;        the first thing reazon stumbles upon is syntax.
-    (if-let ((result (reazon-run 1 q
-                       (reazon-fresh (tokens qr ql)
-                         (tree-edit--superpositiono right qr parent-type)
-                         (tree-edit--superpositiono left ql parent-type)
-                         ;; Prevent nodes from being 'deleted' by putting the exact same thing back
-                         (tree-edit--max-lengtho q (1- nodes-deleted))
-                         (tree-edit--prefixpostfixo ql q qr tokens)
-                         (tree-edit-parseo grammar tokens '())))))
-        (if (-every-p #'stringp (car result))
-            `(,left-idx ,(1- right-idx) ,(car result))))))
+  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
+    (if-let (override (alist-get parent-type tree-edit-node-deletion-override))
+        (funcall override node)
+      (-let* ((reazon-occurs-check nil)
+              (parent-type (tsc-node-type (tsc-get-parent node)))
+              (grammar (alist-get (tsc-node-type (tsc-get-parent node)) tree-edit-grammar))
+              ((children . index) (tree-edit--get-parent-tokens node))
+              ((left-idx . right-idx) (tree-edit--remove-node-and-surrounding-syntax children index))
+              (left (-take left-idx children))
+              (right (-drop right-idx children))
+              (nodes-deleted (- right-idx left-idx)))
+        ;; FIXME: Q should be only string types, aka syntax -- we're banking that
+        ;;        the first thing reazon stumbles upon is syntax.
+        (if-let ((result (reazon-run 1 q
+                           (reazon-fresh (tokens qr ql)
+                             (tree-edit--superpositiono right qr parent-type)
+                             (tree-edit--superpositiono left ql parent-type)
+                             ;; Prevent nodes from being 'deleted' by putting the exact same thing back
+                             (tree-edit--max-lengtho q (1- nodes-deleted))
+                             (tree-edit--prefixpostfixo ql q qr tokens)
+                             (tree-edit-parseo grammar tokens '())))))
+            (if (-every-p #'stringp (car result))
+                `(,left-idx ,(1- right-idx) ,(car result))))))))
 
 ;;* Globals: node rendering
 (defun tree-edit-make-node (node-type rules &optional fragment)
