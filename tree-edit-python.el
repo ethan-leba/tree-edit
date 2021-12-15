@@ -69,6 +69,7 @@
    (list_comprehension . ("[" expression for_in_clause "]"))
    (dictionary . ("{" "}"))
    (dictionary_comprehension . ("{" pair for_in_clause "}"))
+   (tuple . ("(" expression "," ")"))
    (dictionary_splat . ("**" expression))
    (not_operator . ("not" expression))
    (pair . (identifier ":" identifier))
@@ -147,7 +148,7 @@
    (:type break_statement
     :key "b")
    (:type try_statement
-    :key "t")
+    :key "T")
    (:type expression_statement
     :key "e")
    (:type for_statement
@@ -185,6 +186,8 @@
     :key "d")
    (:type dictionary_comprehension
     :key "D")
+   (:type tuple
+    :key "t")
    (:type identifier
     :key "a")
    (:type not_operator
@@ -193,7 +196,7 @@
     :key "c"
     :wrap-override '((argument_list . ("(" expression ")"))))
    (:type conditional_expression
-    :key "T"
+    :key "I"
     :name "ternary conditional")
    (:type pair
     :key ":")
@@ -415,7 +418,9 @@
            nonlocal_statement
            exec_statement)
     :name "statement"
-    :key "k")))
+    :key "k")
+   (:type block
+    :key "B")))
 
 
 (provide 'tree-edit-python)
