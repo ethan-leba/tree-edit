@@ -180,7 +180,7 @@ if (foo == 3) {
     ;; XXX: how to multi-select?
     (expect (with-tree-test-buffer #'java-mode "{if (foo) {[foo;]bar;baz;}}"
               (evil-tree-edit-raise))
-            :to-have-buffer-contents "{if (foo) [foo;]}")
+            :to-have-buffer-contents "{if (foo)[foo;]}")
     (expect (with-tree-test-buffer #'java-mode "{if (foo) {[foo;]bar;baz;}}"
               (evil-tree-edit-raise)
               (evil-tree-edit-raise))
@@ -350,7 +350,7 @@ if (foo == 3) {
             :to-have-buffer-contents "{if(foo)[{break;if(foobar){} else if (qwerty){}}]}")
     (expect (with-tree-test-buffer #'java-mode "{foo(bar[()], x, y, z)}"
               (evil-tree-edit-slurp))
-            :to-have-buffer-contents "{foo(bar[(x)],y,z)}")
+            :to-have-buffer-contents "{foo(bar[(x)],y, z)}")
     (expect (with-tree-test-buffer #'java-mode "{foo(bar[(x)], y, z)}"
               (evil-tree-edit-slurp))
             :to-have-buffer-contents "{foo(bar[(x,y)],z)}"))
@@ -381,10 +381,10 @@ if (foo == 3) {
             :to-have-buffer-contents "{if(foo)[{break;}]if(foobar){} else if (qwerty){}}")
     (expect (with-tree-test-buffer #'java-mode "{foo(bar[(x)], y, z)}"
               (evil-tree-edit-barf))
-            :to-have-buffer-contents "{foo(bar[()],x,y,z)}")
+            :to-have-buffer-contents "{foo(bar[()],x, y, z)}")
     (expect (with-tree-test-buffer #'java-mode "{foo(bar[(x,y)], z)}"
               (evil-tree-edit-barf))
-            :to-have-buffer-contents "{foo(bar[(x)],y,z)}"))
+            :to-have-buffer-contents "{foo(bar[(x)],y, z)}"))
   (it "gracefully fails if barf is impossible"
     (expect (with-tree-test-buffer #'java-mode "{foo(bar[()])}"
               (ignore-errors (evil-tree-edit-barf)))
@@ -434,7 +434,8 @@ class Main {
 }"
               (evil-tree-edit-delete))
             :to-have-buffer-contents "
-class Main {[void bar() {}]}")
+class Main {[void bar() {}]
+}")
     (expect (with-tree-test-buffer #'java-mode "
 class Main {
   // should we delete this?
@@ -442,7 +443,8 @@ class Main {
   void bar() {}}"
               (evil-tree-edit-delete))
             :to-have-buffer-contents "
-class Main {// should we delete this?
+class Main {
+  // should we delete this?
 [void bar() {}]}")
     (expect (with-tree-test-buffer #'java-mode "
 class Main {
@@ -454,9 +456,11 @@ class Main {
 }"
               (evil-tree-edit-delete))
             :to-have-buffer-contents "
-class Main {// should we delete this?
-// i'm a second comment in a row
-[void bar() {}]// here too
+class Main {
+  // should we delete this?
+  // i'm a second comment in a row
+[void bar() {}]
+  // here too
 }")
     (expect (with-tree-test-buffer #'java-mode "
 {
@@ -466,7 +470,9 @@ class Main {// should we delete this?
 }"
               (evil-tree-edit-delete))
             :to-have-buffer-contents "
-{break;[break;]}")
+{
+  break;[break;]
+}")
     (expect (with-tree-test-buffer #'java-mode "
 class Main {[public] void main() {}
 }"
@@ -474,7 +480,7 @@ class Main {[public] void main() {}
               (evil-tree-edit-goto-parent)
               (evil-tree-edit-delete))
             :to-have-buffer-contents "
-class Main {[void] main(){}
+class Main {[void] main() {}
 }")
     (expect (with-tree-test-buffer #'java-mode "{foo([x],y);}"
               (evil-tree-edit-delete))

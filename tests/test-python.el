@@ -118,6 +118,18 @@ if TREE:
     x
     [y]")))
 
+(describe "exchange"
+  (it "works"
+    (expect (with-tree-test-buffer #'python-mode "
+for [foo] in TREE:
+    TREE
+"
+              (evil-tree-edit-exchange "bar"))
+            :to-have-buffer-contents "
+for [bar] in TREE:
+    TREE
+")))
+
 (describe "wrap"
   (it "works"
     (expect (with-tree-test-buffer #'python-mode "
