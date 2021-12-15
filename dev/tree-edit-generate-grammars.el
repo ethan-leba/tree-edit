@@ -71,13 +71,11 @@
 
 (defun tree-edit--generate-supertype (type grammar)
   "Return TYPE's supertypes (and itself) in GRAMMAR."
-  (condition-case nil
-      (->> (-map #'car grammar)
-           (--filter (reazon-run 1 q (tree-edit-parseo (alist-get it grammar) `(,type) '())))
-           (--mapcat `(,it . ,(tree-edit--generate-supertype it grammar)))
-           (-uniq)
-           (cons type))
-    (error (message (format "failed to parse %s" type)))))
+  (->> (-map #'car grammar)
+       (--filter (reazon-run 1 q (tree-edit-parseo (alist-get it grammar) `(,type) '())))
+       (--mapcat `(,it . ,(tree-edit--generate-supertype it grammar)))
+       (-uniq)
+       (cons type)))
 
 (defun tree-edit--generate-supertypes (grammar)
   "Return an alist of a type to it's supertypes (and itself) in GRAMMAR."
