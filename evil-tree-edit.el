@@ -372,6 +372,7 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
 (evil-define-state tree
   "evil-tree-edit state"
   :tag " <T>"
+  :cursor 'hollow
   :entry-hook (evil-tree-edit--enter-tree-state)
   :exit-hook (evil-tree-edit--exit-tree-state)
   :suppress-keymap t)
