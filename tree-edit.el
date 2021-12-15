@@ -566,9 +566,8 @@ if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
   (unless (tree-edit--valid-replacement-p type node)
     (user-error "Cannot replace the current node with type %s!" type))
-  (delete-region (tsc-node-start-position node)
-                 (tsc-node-end-position node))
-  (tree-edit-make-node type tree-edit-syntax-snippets))
+  (-let [(_ . node-index) (tree-edit--get-parent-tokens node)]
+    (tree-edit--replace-fragment `(,type) node node-index (1+ node-index))))
 
 (defun tree-edit--exchange-fragment (text node)
   "Insert a node of the given TEXT next to NODE.
@@ -577,13 +576,12 @@ if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
   (cl-block nil
     (dolist (fragment-node (tree-edit--parse-fragment text))
-      (let ((type (tsc-node-type fragment-node)))
+      (-let ((type (tsc-node-type fragment-node))
+             ((_ . node-index) (tree-edit--get-parent-tokens node)))
         (when (tree-edit--valid-replacement-p type node)
-          (delete-region (tsc-node-start-position node)
-                         (tsc-node-end-position node))
-          (-> fragment-node
-              (tree-edit--text-to-insertable-node text)
-              (tree-edit--render-node))
+          (--> fragment-node
+               (tree-edit--text-to-insertable-node it text)
+               (tree-edit--replace-fragment `(,it) node node-index (1+ node-index)))
           (cl-return))))
     (user-error "Cannot replace the current node with '%s'!" text)))
 
