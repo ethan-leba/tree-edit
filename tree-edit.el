@@ -387,13 +387,14 @@ delete, and what syntax needs to be inserted after, if any."
                 `(,left-idx ,(1- right-idx) ,(car result))))))))
 
 ;;* Globals: node rendering
+;; TODO: delete me
 (defun tree-edit-make-node (node-type rules &optional fragment)
   "Given a NODE-TYPE and a set of RULES, generate a node string.
 
 If FRAGMENT is passed in, that will be used as a basis for node
 construction, instead of looking up the rules for node-type."
   (interactive)
-  (tree-edit--render-node (tree-edit--generate-node node-type rules fragment)))
+  (tree-edit--render-node nil (tree-edit--generate-node node-type rules fragment) nil 0))
 
 ;;* Locals: node rendering
 (defun tree-edit--adhoc-pcre-to-rx (pcre)
@@ -441,8 +442,12 @@ the TYPE's supertypes until exhausted."
   (-let (((l . r) (tree-edit--whitespace-rules-for-type type)))
     (append l tokens r)))
 
-(defun tree-edit--render-node (tokens)
-  "Insert TOKENS into the buffer, properly formatting as needed.
+(defun tree-edit--render-node (left-tokens new-tokens right-text indentation)
+  "Insert NEW-TOKENS into the buffer, properly formatting as needed.
+
+LEFT-TOKENS are used for calculating the formatting of
+NEW-TOKENS, while RIGHT-TEXT is used to ensure that no tokens are
+improperly spaced.
 
 Pre-existing nodes in the tokens are assumed to be already
 formatted correctly and thus are inserted as-is.
@@ -453,35 +458,46 @@ Text nodes (likely from the `kill-ring') are not assumed to be
 formatted correctly and thus decomposed by
 `tree-edit--text-to-insertable-node' into chunks where formatting
 matters (i.e. expressions are left alone but blocks are split)."
-  (combine-after-change-calls
-    (-let* ((indentation (current-indentation))
-            (prev nil)
-            (stack tokens)
-            (deferred-newline nil))
-      (while stack
-        (-let ((current (pop stack)))
-          ;; TODO: use `pcase'
-          (cond ((not current) '())
-                ((consp current)
-                 (setq stack (append (tree-edit--add-whitespace-rules-to-tokens
-                                      (car current) (cdr current))
-                                     stack)))
-                ((equal current :newline)
-                 (setq deferred-newline t))
-                ((equal current :indent)
-                 (setq indentation (+ indentation 4)))
-                ((equal current :dedent)
-                 (setq indentation (- indentation 4)))
-                ((stringp current)
-                 (when deferred-newline
-                   (newline)
-                   (indent-line-to indentation)
-                   (setq deferred-newline nil))
-                 (if (tree-edit--needs-space-p prev current)
-                     (insert " " current)
-                   (insert current))))
-          (unless (consp current)
-            (setq prev current)))))))
+  (-let* ((prev nil)
+          (deferred-newline nil))
+    (cl-flet ((process-tokens
+               (stack do-insert)
+               (while stack
+                 (-let ((current (pop stack)))
+                   ;; TODO: use `pcase'
+                   (cond ((not current) '())
+                         ((consp current)
+                          (setq stack (append (tree-edit--add-whitespace-rules-to-tokens
+                                               (car current) (cdr current))
+                                              stack)))
+                         ((equal current :newline)
+                          (setq deferred-newline t))
+                         ((equal current :indent)
+                          (setq indentation (+ indentation 4)))
+                         ((equal current :dedent)
+                          (setq indentation (- indentation 4)))
+                         ((stringp current)
+                          (when deferred-newline
+                            (when do-insert
+                              (newline)
+                              (indent-line-to indentation))
+                            (setq deferred-newline nil))
+                          (when do-insert
+                            (if (tree-edit--needs-space-p prev current)
+                                (insert " " current)
+                              (insert current)))))
+                   (when (or (equal :newline current) (stringp current))
+                     (setq prev current))))))
+      (process-tokens left-tokens nil)
+      (combine-after-change-calls
+        (process-tokens new-tokens t)
+        (when right-text
+          (when deferred-newline
+            (newline)
+            (indent-line-to indentation)
+            (setq deferred-newline nil))
+          (when (tree-edit--needs-space-p prev right-text)
+            (insert " ")))))))
 
 (defun tree-edit--text-and-type (node)
   "Return a pair of NODE and it's text."
@@ -492,19 +508,26 @@ matters (i.e. expressions are left alone but blocks are split)."
   (-let* ((parent (tsc-get-parent node))
           (children (tree-edit--get-all-children parent))
           (left (-map #'tree-edit--text-and-type (-slice children 0 l)))
-          (right (-map #'tree-edit--text-and-type (-slice children r
-                                                           (length children))))
+          (right (-some-> r (nth children) tsc-node-text))
           (render-fragment
            (and fragment
                 (tree-edit--generate-node
                  (tsc-node-type (tsc-get-parent node))
                  tree-edit-syntax-snippets
                  fragment))))
-    (save-excursion
-      (goto-char (tsc-node-start-position parent))
-      (delete-region (tsc-node-start-position parent)
-                     (tsc-node-end-position parent))
-      (tree-edit--render-node (append left (if fragment render-fragment) right)))))
+    (let ((indentation
+           (save-excursion
+             (goto-char (tsc-node-start-position (car children)))
+             (current-indentation))))
+      (save-excursion
+        (if (zerop l)
+            (goto-char (tsc-node-start-position (nth 0 children)))
+          (goto-char (tsc-node-end-position (nth (1- l) children))))
+        (delete-region (point)
+                       (if-let ((last-node (nth r children)))
+                           (tsc-node-start-position last-node)
+                         (tsc-node-end-position (nth (1- r) children))))
+        (tree-edit--render-node left (if fragment render-fragment) right indentation)))))
 
 (defun tree-edit--insert-fragment (fragment node position)
   "Insert rendered FRAGMENT in the children of NODE in the provided POSITION.
@@ -517,19 +540,25 @@ POSITION can be :before, :after, or nil."
                                     children))
           (split-position (+ (pcase position (:after 1) (:before 0)) node-index))
           (left (-map #'tree-edit--text-and-type (-slice children 0 split-position)))
-          (right (-map #'tree-edit--text-and-type (-slice children split-position
-                                                           (length children))))
+          (right (-some-> split-position (nth children) tsc-node-text))
           (render-fragment
            (and fragment
                 (tree-edit--generate-node
                  (tsc-node-type (tsc-get-parent node))
                  tree-edit-syntax-snippets
                  fragment))))
-    (save-excursion
-      (goto-char (tsc-node-start-position parent))
-      (delete-region (tsc-node-start-position parent)
-                     (tsc-node-end-position parent))
-      (tree-edit--render-node (append left render-fragment right)))))
+    (let ((indentation
+           (save-excursion
+             (goto-char (tsc-node-start-position (car children)))
+             (current-indentation))))
+      (save-excursion
+        (if (zerop split-position)
+            (goto-char (tsc-node-start-position (nth 0 children)))
+          (goto-char (tsc-node-end-position (nth (1- split-position) children))))
+        (if-let ((end (nth split-position children)))
+            (delete-region (point)
+                           (tsc-node-start-position end)))
+        (tree-edit--render-node left render-fragment right indentation)))))
 
 (defun tree-edit--split-node-for-insertion (node)
   "Split NODE into chunks of text as necessary for formatting."
