@@ -353,13 +353,16 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
     (overlay-put evil-tree-edit--node-overlay 'after-string "")
     (overlay-put evil-tree-edit--node-overlay 'face '())))
 
-(defun evil-tree-edit--re-enter-tree-state ()
-  "Change the current node."
-  (when evil-tree-edit--return-position
-    (evil-tree-state)
-    (evil-tree-edit--goto-node
-     (tree-edit--restore-location evil-tree-edit--return-position))
-    (setq evil-tree-edit--return-position nil)))
+(defun evil-tree-edit-normal-or-tree-state ()
+  "Enter normal or tree state contextually."
+  (interactive)
+  (if evil-tree-edit--return-position
+      (progn
+        (evil-tree-state)
+        (evil-tree-edit--goto-node
+         (tree-edit--restore-location evil-tree-edit--return-position))
+        (setq evil-tree-edit--return-position nil))
+    (evil-normal-state)))
 
 (defun evil-tree-edit--teardown ()
   "De-activate tree-edit state."
@@ -394,11 +397,9 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
     (evil-normal-state)
     (add-hook 'before-revert-hook #'evil-tree-edit--teardown nil 'local)
     ;; TODO: can we just run these on load?
-    (add-hook 'evil-tree-edit-movement-hook #'evil-tree-edit--update-overlay nil 'local)
-    (add-hook 'evil-normal-state-entry-hook #'evil-tree-edit--re-enter-tree-state nil 'local))
+    (add-hook 'evil-tree-edit-movement-hook #'evil-tree-edit--update-overlay nil 'local))
    (t
-    (remove-hook 'before-revert-hook #'evil-tree-edit--teardown 'local)
-    (remove-hook 'evil-normal-state-entry-hook #'evil-tree-edit--re-enter-tree-state 'local))))
+    (remove-hook 'before-revert-hook #'evil-tree-edit--teardown 'local))))
 
 (defun define-evil-tree-edit-avy-jump (keymap key func)
   "Define a key command in KEYMAP prefixed by KEY calling FUNC.
@@ -487,6 +488,7 @@ each language will have it's own set of nouns."
 
 ;; TODO: allow configuring/disabling this
 (evil-define-key 'normal evil-tree-edit-mode-map "Q" #'evil-tree-state)
+(evil-define-key 'insert evil-tree-edit-mode-map (kbd "<escape>") #'evil-tree-edit-normal-or-tree-state)
 
 (provide 'evil-tree-edit)
 ;;; evil-tree-edit.el ends here
