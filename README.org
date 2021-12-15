@@ -51,9 +51,9 @@ automatically enable in.
 #+end_src
 
 It's also recommended to use tree-edit with an autoformatter in it's current
-state, as tree-edit currently does not respect pre-existing formatting (see
-[[#limitations][limitations]]). If your language provides a performant formatter, you can even run
-it after every editing operation:
+state, as tree-edit does not always produce text consistent in formatting with
+the surrounding nodes. If your language provides a performant formatter, you can
+even run it after every editing operation:
 #+begin_src elisp
 (add-hook 'evil-tree-edit-after-change-hook #'my-format-buffer-command)
 #+end_src
@@ -209,10 +209,6 @@ fair bit of boilerplate, but here's some code to get started.
 * Limitations
 
 A non-comprehensive list of some of the larger limitations that tree-edit currently has:
-
-- Formatting :: tree-edit has configurable rules on whitespace formatting (see
-  =tree-edit-whitespace-rules=), but it currently does not respect any
-  pre-existing formatting that may be in place.
 
 - Impedance mismatch :: Most tree-sitter grammars were not designed with
   tree-edit's usecase in mind, so some grammars may be structured inconveniently
