@@ -559,13 +559,16 @@ POSITION can be :before, :after, or nil."
         ,(-map #'tree-edit--split-node-for-insertion (tree-edit--get-all-children node))))))
 
 (defun tree-edit--text-to-insertable-node (node text)
-  "Parse TEXT and convert into insertable node."
+  "Split NODE for insertion, using TEXT instead of the current buffer.
+
+`tsc-node-text' only operates on the current buffer so we have to
+hack around that here."
   (cl-letf (((symbol-function 'tsc-node-text)
              (lambda (node)
                (tsc--without-restriction
-                ;; XXX: Byte and position aren't the same thing, apparently. Maybe this will break?
-                (pcase-let ((`(,beg . ,end) (tsc-node-byte-range node)))
-                  (substring-no-properties text (1- beg) (if end (1- end) (length text))))))))
+                 ;; XXX: Byte and position aren't the same thing, apparently. Maybe this will break?
+                 (pcase-let ((`(,beg . ,end) (tsc-node-byte-range node)))
+                   (substring-no-properties text (1- beg) (if end (1- end) (length text))))))))
     (tree-edit--split-node-for-insertion node)))
 
 ;;* Globals: Structural editing functions
