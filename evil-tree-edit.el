@@ -68,8 +68,7 @@ moving the sibling index by the provided value."
 (defun evil-tree-edit--apply-movement (fun)
   "Apply movement FUN, and then update the node position and display."
   (when-let ((new-pos (tree-edit--apply-until-interesting fun evil-tree-edit-current-node)))
-    (setq evil-tree-edit-current-node new-pos)
-    (run-hooks 'evil-tree-edit-movement-hook)))
+    (evil-tree-edit--goto-node new-pos)))
 
 (defun evil-tree-edit--get-sig-parent (node)
   "Move NODE to the next (interesting) named sibling."
