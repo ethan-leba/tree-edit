@@ -386,16 +386,6 @@ delete, and what syntax needs to be inserted after, if any."
             (if (-every-p #'stringp (car result))
                 `(,left-idx ,(1- right-idx) ,(car result))))))))
 
-;;* Globals: node rendering
-;; TODO: delete me
-(defun tree-edit-make-node (node-type rules &optional fragment)
-  "Given a NODE-TYPE and a set of RULES, generate a node string.
-
-If FRAGMENT is passed in, that will be used as a basis for node
-construction, instead of looking up the rules for node-type."
-  (interactive)
-  (tree-edit--render-node nil (tree-edit--generate-node node-type rules fragment) nil 0))
-
 ;;* Locals: node rendering
 (defun tree-edit--adhoc-pcre-to-rx (pcre)
   "Convert PCRE to an elisp regex (in no way robust)

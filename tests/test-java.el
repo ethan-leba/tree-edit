@@ -118,7 +118,7 @@ if (foo == 3) {
 (defun tree-edit-test-make-node (&rest args)
   (with-temp-buffer
     (with-mode-local java-mode
-      (apply #'tree-edit-make-node args)
+      (tree-edit--render-node nil (apply #'tree-edit--generate-node args) nil 0)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
 (describe "node creation"
