@@ -45,6 +45,10 @@
   "Functions to call after a tree-edit command modifies the buffer."
   :type 'hook
   :group 'evil-tree-edit)
+(defcustom evil-tree-edit-disable-nontree-bindings nil
+  "If non-nil, don't set the default normal and insert state bindings."
+  :type 'boolean
+  :group 'evil-tree-edit)
 
 ;;* Navigation
 (defmacro evil-tree-edit--preserve-location (&rest body)
@@ -487,9 +491,9 @@ each language will have it's own set of nouns."
        (lambda () (set (make-local-variable 'evil-tree-state-map) mode-local-keymap))
        mode))))
 
-;; TODO: allow configuring/disabling this
-(evil-define-key 'normal evil-tree-edit-mode-map "Q" #'evil-tree-state)
-(evil-define-key 'insert evil-tree-edit-mode-map (kbd "<escape>") #'evil-tree-edit-normal-or-tree-state)
+(unless evil-tree-edit-disable-nontree-bindings
+  (evil-define-key 'normal evil-tree-edit-mode-map "Q" #'evil-tree-state)
+  (evil-define-key 'insert evil-tree-edit-mode-map (kbd "<escape>") #'evil-tree-edit-normal-or-tree-state))
 
 (provide 'evil-tree-edit)
 ;;; evil-tree-edit.el ends here
