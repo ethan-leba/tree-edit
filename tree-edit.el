@@ -479,15 +479,14 @@ matters (i.e. expressions are left alone but blocks are split)."
                    (when (or (equal :newline current) (stringp current))
                      (setq prev current))))))
       (process-tokens left-tokens nil)
-      (combine-after-change-calls
-        (process-tokens new-tokens t)
-        (when right-text
-          (when deferred-newline
-            (newline)
-            (indent-line-to indentation)
-            (setq deferred-newline nil))
-          (when (tree-edit--needs-space-p prev right-text)
-            (insert " ")))))))
+      (process-tokens new-tokens t)
+      (when right-text
+        (when deferred-newline
+          (newline)
+          (indent-line-to indentation)
+          (setq deferred-newline nil))
+        (when (tree-edit--needs-space-p prev right-text)
+          (insert " "))))))
 
 (defun tree-edit--text-and-type (node)
   "Return a pair of NODE and it's text."
@@ -508,16 +507,22 @@ matters (i.e. expressions are left alone but blocks are split)."
     (let ((indentation
            (save-excursion
              (goto-char (tsc-node-start-position (car children)))
-             (current-indentation))))
-      (save-excursion
-        (if (zerop l)
-            (goto-char (tsc-node-start-position (nth 0 children)))
-          (goto-char (tsc-node-end-position (nth (1- l) children))))
-        (delete-region (point)
-                       (if-let ((last-node (nth r children)))
-                           (tsc-node-start-position last-node)
-                         (tsc-node-end-position (nth (1- r) children))))
-        (tree-edit--render-node left (if fragment render-fragment) right indentation)))))
+             (current-indentation)))
+          (start-edit
+           (if (zerop l)
+               (tsc-node-start-position (nth 0 children))
+             (tsc-node-end-position (nth (1- l) children))))
+          (end-edit
+           (if-let ((last-node (nth r children)))
+               (tsc-node-start-position last-node)
+             (tsc-node-end-position (nth (1- r) children)))))
+      (combine-change-calls
+       start-edit
+       end-edit
+       (save-excursion
+         (goto-char start-edit)
+         (delete-region start-edit end-edit)
+         (tree-edit--render-node left (if fragment render-fragment) right indentation))))))
 
 (defun tree-edit--insert-fragment (fragment node position)
   "Insert rendered FRAGMENT in the children of NODE in the provided POSITION.
@@ -537,18 +542,25 @@ POSITION can be :before, :after, or nil."
                  (tsc-node-type (tsc-get-parent node))
                  tree-edit-syntax-snippets
                  fragment))))
-    (let ((indentation
-           (save-excursion
-             (goto-char (tsc-node-start-position (car children)))
-             (current-indentation))))
-      (save-excursion
-        (if (zerop split-position)
-            (goto-char (tsc-node-start-position (nth 0 children)))
-          (goto-char (tsc-node-end-position (nth (1- split-position) children))))
-        (if-let ((end (nth split-position children)))
-            (delete-region (point)
-                           (tsc-node-start-position end)))
-        (tree-edit--render-node left render-fragment right indentation)))))
+    (let* ((indentation
+            (save-excursion
+              (goto-char (tsc-node-start-position (car children)))
+              (current-indentation)))
+           (start-edit
+            (if (zerop split-position)
+                (goto-char (tsc-node-start-position (nth 0 children)))
+              (goto-char (tsc-node-end-position (nth (1- split-position) children)))))
+           (end-edit
+            (if-let ((end (nth split-position children)))
+                (tsc-node-start-position end)
+              start-edit)))
+      (combine-change-calls
+       start-edit
+       end-edit
+       (save-excursion
+         (delete-region start-edit end-edit)
+         (goto-char start-edit)
+         (tree-edit--render-node left render-fragment right indentation))))))
 
 (defun tree-edit--split-node-for-insertion (node)
   "Split NODE into chunks of text as necessary for formatting."
