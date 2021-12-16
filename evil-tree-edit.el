@@ -65,6 +65,23 @@ moving the sibling index by the provided value."
              (tree-edit--restore-location ,location-sym))
        (evil-tree-edit--update-overlay))))
 
+(defun evil-tree-edit--preserve-current-node-before (_ __)
+  "Save the location of the current node before the buffer is re-parsed."
+  (when (evil-tree-state-p)
+    (ignore-errors
+      (setq evil-tree-edit--return-position (tree-edit--save-location evil-tree-edit-current-node)))))
+
+(defun evil-tree-edit--preserve-current-node-after (_)
+  "Restore the location of the current node after the buffer is re-parsed.
+
+`tree-sitter-after-change-functions' provides an old-tree arg,
+but it seems to not work reliably with `tree-edit--save-location'."
+  (when (and evil-tree-edit-current-node evil-tree-edit--return-position (evil-tree-state-p))
+    (ignore-errors
+      (setq evil-tree-edit-current-node (tree-edit--restore-location evil-tree-edit--return-position))
+      (run-hooks 'evil-tree-edit-after-change-hook)
+      (evil-tree-edit--update-overlay))))
+
 (defun evil-tree-edit--apply-movement (fun)
   "Apply movement FUN, and then update the node position and display."
   (when-let ((new-pos (tree-edit--apply-until-interesting fun evil-tree-edit-current-node)))
@@ -115,9 +132,9 @@ If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
   (interactive)
   (setq evil-tree-edit--return-position
         (or return-location (tree-edit--save-location evil-tree-edit-current-node)))
+  (evil-change-state 'insert)
   (delete-region (tsc-node-start-position evil-tree-edit-current-node)
-                 (tsc-node-end-position evil-tree-edit-current-node))
-  (evil-change-state 'insert))
+                 (tsc-node-end-position evil-tree-edit-current-node)))
 
 (defun evil-tree-edit-copy ()
   "Copy the current node."
@@ -401,9 +418,13 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
     (evil-normal-state)
     (add-hook 'before-revert-hook #'evil-tree-edit--teardown nil 'local)
     ;; TODO: can we just run these on load?
+    (add-hook 'tree-sitter-after-change-functions #'evil-tree-edit--preserve-current-node-after nil 'local)
+    (add-hook 'before-change-functions #'evil-tree-edit--preserve-current-node-before nil 'local)
     (add-hook 'evil-tree-edit-movement-hook #'evil-tree-edit--update-overlay nil 'local))
    (t
-    (remove-hook 'before-revert-hook #'evil-tree-edit--teardown 'local))))
+    (remove-hook 'before-revert-hook #'evil-tree-edit--teardown 'local)
+    (remove-hook 'before-change-functions #'evil-tree-edit--preserve-current-node-before 'local)
+    (remove-hook 'tree-sitter-after-change-functions #'evil-tree-edit--preserve-current-node-after 'local))))
 
 (defun define-evil-tree-edit-avy-jump (keymap key func)
   "Define a key command in KEYMAP prefixed by KEY calling FUNC.
