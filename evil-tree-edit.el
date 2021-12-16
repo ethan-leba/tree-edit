@@ -450,17 +450,13 @@ If WRAP is t, include :wrap-override."
         (interactive)
         (,func (car kill-ring))))))
 
-(defun evil-tree-edit--make-suppressed-keymap ()
-  "Create a sparse keymap where keys default to undefined."
-  (make-composed-keymap (make-sparse-keymap) evil-suppress-map))
-
 (defun evil-tree-edit-set-state-bindings (mode)
   "Set keybindings for MODE in `evil-tree-state'.
 
 Should only be used in the context of mode-local bindings, as
 each language will have it's own set of nouns."
   (with-mode-local-symbol mode
-    (let ((mode-local-keymap (evil-tree-edit--make-suppressed-keymap)))
+    (let ((mode-local-keymap (make-composed-keymap (make-sparse-keymap) evil-suppress-map)))
       (define-evil-tree-edit-verb mode-local-keymap "i" #'evil-tree-edit-insert-sibling-before)
       (define-evil-tree-edit-verb mode-local-keymap "a" #'evil-tree-edit-insert-sibling)
       (define-evil-tree-edit-verb mode-local-keymap "I" #'evil-tree-edit-insert-child)
