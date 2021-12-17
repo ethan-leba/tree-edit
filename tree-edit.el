@@ -252,8 +252,14 @@ Fragments should parse as one of the following structures:
                         first-node))
             (let (result)
               (while node
-                (push node result)
-                (setq node (tree-edit--get-only-child node)))
+                (let ((tmp (tree-edit--get-only-child node)))
+                  (if (or (not result)
+                          (equal (tsc-node-position-range node)
+                                 (tsc-node-position-range (car result))))
+                      (progn
+                        (push node result)
+                        (setq node tmp))
+                    (setq node nil))))
               (reverse result))))))
 
 (defun tree-edit--type-of-fragment (fragment)
