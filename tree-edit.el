@@ -213,6 +213,14 @@ Relevant types are either supertypes of TYPE or alias names referring to TYPE."
     (alist-get type tree-edit--supertypes `(,type)))
    (alist-get parent-type tree-edit--containing-types)))
 
+(defun tree-edit-load-grammar-for-major-mode ()
+  "Load the grammar for the major mode, or error if none is registered."
+  (let ((language-file (alist-get major-mode tree-edit-language-alist)))
+    (unless language-file
+      (evil-tree-edit-mode -1)
+      (user-error "Tree-edit does not support %s!" (symbol-name major-mode)))
+    (require language-file)))
+
 ;;* Locals: node transformations
 
 

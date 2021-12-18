@@ -399,13 +399,8 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
   :lighter " TE"
   (cond
    (evil-tree-edit-mode
-    (let ((language-file (alist-get major-mode tree-edit-language-alist)))
-      (unless language-file
-        (evil-tree-edit-mode -1)
-        (user-error "Tree-edit does not support %s!" (symbol-name major-mode)))
-      (unless (featurep language-file)
-        (require language-file)
-        (evil-tree-edit-set-state-bindings major-mode)))
+    (tree-edit-load-grammar-for-major-mode)
+    (evil-tree-edit-set-state-bindings major-mode)
     (tree-sitter-mode)
     ;; HACK: Above mode binding won't come into effect until the state is changed.
     (evil-normal-state)
