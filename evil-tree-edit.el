@@ -84,6 +84,7 @@ but it seems to not work reliably with `tree-edit--save-location'."
 
 (defun evil-tree-edit--apply-movement (fun)
   "Apply movement FUN, and then update the node position and display."
+  (evil-tree-edit-ensure-current-node)
   (when-let ((new-pos (tree-edit--apply-until-interesting fun evil-tree-edit-current-node)))
     (evil-tree-edit--goto-node new-pos)))
 
@@ -98,30 +99,40 @@ but it seems to not work reliably with `tree-edit--save-location'."
       parent)
      (t (evil-tree-edit--get-sig-parent parent)))))
 
+(defun evil-tree-edit-ensure-current-node ()
+  "Error if `evil-tree-edit-current-node' is nil."
+  (unless evil-tree-edit-current-node
+    (user-error "`evil-tree-edit-current-node' is nil, are you in `evil-tree-state'?")))
+
 ;;* Globals: navigation
 (defun evil-tree-edit-goto-next-sibling ()
   "Move to the next (interesting) named sibling."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--apply-movement #'tsc-get-next-named-sibling))
 
 (defun evil-tree-edit-goto-prev-sibling ()
   "Move to the previous (interesting) named sibling."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--apply-movement #'tsc-get-prev-named-sibling))
 
 (defun evil-tree-edit-goto-parent ()
   "Move up to the next interesting parent."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--apply-movement #'tsc-get-parent))
 
 (defun evil-tree-edit-goto-child ()
   "Move to the first child, unless it's an only child."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--apply-movement (lambda (node) (tsc-get-nth-named-child node 0))))
 
 (defun evil-tree-edit-goto-sig-parent ()
   "Move to the next (interesting) named sibling."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--apply-movement #'evil-tree-edit--get-sig-parent))
 
 ;;* Evil tree-edit functions
@@ -130,6 +141,7 @@ but it seems to not work reliably with `tree-edit--save-location'."
 
 If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (setq evil-tree-edit--return-position
         (or return-location (tree-edit--save-location evil-tree-edit-current-node)))
   (evil-change-state 'insert)
@@ -139,12 +151,14 @@ If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
 (defun evil-tree-edit-copy ()
   "Copy the current node."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (kill-ring-save (tsc-node-start-position evil-tree-edit-current-node)
                   (tsc-node-end-position evil-tree-edit-current-node)))
 
 (defun evil-tree-edit-undo (count)
   "Undo COUNT actions while saving the cursor position."
   (interactive "*p")
+  (evil-tree-edit-ensure-current-node)
   (evil-undo count))
 
 (defun evil-tree-edit--format-query-string (node-type)
@@ -152,6 +166,7 @@ If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
 
 NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (--> (if (listp node-type) node-type `(,node-type))
        (-map (lambda (type) (format "(%s)" type)) it)
        (string-join it " ")
@@ -163,6 +178,7 @@ NODE-TYPE can be a symbol or a list of symbol."
 
 NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (let ((query-node
          (if (member (tsc-node-type evil-tree-edit-current-node)
                      tree-edit-significant-node-types)
@@ -178,6 +194,7 @@ NODE-TYPE can be a symbol or a list of symbol."
 
 NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (-> node-type
       (evil-tree-edit--format-query-string)
       (tree-edit-query evil-tree-edit-current-node)
@@ -191,6 +208,7 @@ NODE-TYPE can be a symbol or a list of symbol."
 (defun evil-tree-edit--avy-jump (nodes)
   "Avy jump to one of NODES."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (let* ((position->node (--map (cons (tsc-node-start-position it) it) nodes))
          ;; avy-action declares what should be done with the result of avy-process
          (avy-action (lambda (pos) (evil-tree-edit--goto-node (alist-get pos position->node)))))
@@ -211,6 +229,7 @@ NODE-TYPE can be a symbol or a list of symbol."
 
 (defun evil-tree-edit-wrap-node (type)
   "Wrap the current node in a node of selected TYPE."
+  (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--preserve-location
    (let* ((node-type (tsc-node-type evil-tree-edit-current-node))
           (node-text (tsc-node-text evil-tree-edit-current-node)))
@@ -229,6 +248,7 @@ NODE-TYPE can be a symbol or a list of symbol."
 See `tree-edit-exchange'."
 
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (tree-edit-exchange type-or-text evil-tree-edit-current-node))
 
 (defun evil-tree-edit-delete ()
@@ -236,6 +256,7 @@ See `tree-edit-exchange'."
 
 See `tree-edit-delete'."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (tree-edit-delete evil-tree-edit-current-node))
 
 (defun evil-tree-edit-raise ()
@@ -243,6 +264,7 @@ See `tree-edit-delete'."
 
 See `tree-edit-raise'."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (let ((raised-node (tree-edit-raise evil-tree-edit-current-node)))
     (setq evil-tree-edit-current-node raised-node))
   (evil-tree-edit--update-overlay))
@@ -255,28 +277,33 @@ current, otherwise after.
 
 See `tree-edit-insert-sibling'."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (tree-edit-insert-sibling type-or-text evil-tree-edit-current-node before)
   (unless before
     (evil-tree-edit-goto-next-sibling)))
 
 (defun evil-tree-edit-insert-sibling-before (type)
   "Insert a node of the given TYPE before the current."
+  (evil-tree-edit-ensure-current-node)
   (evil-tree-edit-insert-sibling type t))
 
 (defun evil-tree-edit-insert-child (type-or-text)
   "Insert a node of the given TYPE-OR-TEXT inside of the current node."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (tree-edit-insert-child type-or-text evil-tree-edit-current-node)
   (evil-tree-edit-goto-child))
 
 (defun evil-tree-edit-slurp ()
   "Transform current node's next sibling into it's leftmost child, if possible."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (tree-edit-slurp evil-tree-edit-current-node))
 
 (defun evil-tree-edit-barf ()
   "Transform current node's leftmost child into it's next sibling, if possible."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (tree-edit-barf evil-tree-edit-current-node))
 
 (defun evil-tree-edit-goto-next-placeholder ()
@@ -284,6 +311,7 @@ See `tree-edit-insert-sibling'."
 
 Placeholder is defined by `tree-edit-placeholder-node-type'."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (unless tree-edit-placeholder-node-type
     (user-error "`tree-edit-placeholder-node-type' not set!"))
   (pcase (tree-edit-query
@@ -298,6 +326,7 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
 (defun evil-tree-edit-change-next-placeholder ()
   "Move cursor to the next placeholder node and change it."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (let ((current-location (tree-edit--save-location evil-tree-edit-current-node)))
     (evil-tree-edit-goto-next-placeholder)
     (evil-tree-edit-change current-location)))
@@ -305,6 +334,7 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
 (defun evil-tree-edit-preview-node ()
   "Preview the different variations of the current node."
   (interactive)
+  (evil-tree-edit-ensure-current-node)
   (let ((reazon-occurs-check nil)
         (reazon-timeout 0.1)
         (tree-edit-parse-comments nil))
