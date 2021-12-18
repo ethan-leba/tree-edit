@@ -218,7 +218,9 @@ Relevant types are either supertypes of TYPE or alias names referring to TYPE."
   (let ((language-file (alist-get major-mode tree-edit-language-alist)))
     (unless language-file
       (evil-tree-edit-mode -1)
-      (user-error "Tree-edit does not support %s!" (symbol-name major-mode)))
+      (user-error
+       "No language file specified for major mode `%s' in `tree-edit-language-alist'!"
+       (symbol-name major-mode)))
     (require language-file)))
 
 ;;* Locals: node transformations
