@@ -49,6 +49,12 @@ best we can do for now is pretend that these nodes don't exist at
 all.
 
 https://tree-sitter.github.io/tree-sitter/creating-parsers#hiding-rules")
+;; TODO: This should be mode local
+(defvar tree-edit--type-cache (make-hash-table :test #'equal)
+  "Caches the type and split node for a given piece of text.
+
+This cache both as an optimization for text we copied through
+tree-edit, and works around certain edge cases.")
 (defvar tree-edit-parse-comments t
   "If non-nil, allow abritrary 'comment' nodes when parsing.
 
@@ -627,6 +633,12 @@ current, otherwise after."
 if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
   (cl-block nil
+    (if-let ((cached-node (gethash text tree-edit--type-cache)))
+        (-let (((type . split-node) cached-node)
+               ((_ . node-index) (tree-edit--get-parent-tokens node)))
+          (when (tree-edit--valid-replacement-p type node)
+            (tree-edit--replace-fragment `(,split-node) node node-index (1+ node-index))
+            (cl-return))))
     (dolist (fragment-node (tree-edit--parse-fragment text))
       (-let ((type (tsc-node-type fragment-node))
              ((_ . node-index) (tree-edit--get-parent-tokens node)))
@@ -675,6 +687,13 @@ current, otherwise after."
 if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
   (cl-block nil
+    (if-let ((cached-node (gethash text tree-edit--type-cache)))
+        (-let [(type . split-node) cached-node]
+          (if-let ((tokens (tree-edit--valid-insertions type (not before) node)))
+              (--> tokens
+                   (-replace-first (-first #'symbolp tokens) split-node it)
+                   (tree-edit--insert-fragment it node (if before :before :after))
+                   (cl-return)))))
     (dolist (fragment-node (tree-edit--parse-fragment text))
       (if-let ((type (tsc-node-type fragment-node))
                (tokens (tree-edit--valid-insertions type (not before) node)))
@@ -760,6 +779,15 @@ the text."
   (-let [(start end fragment) (or (tree-edit--valid-deletions node)
                                   (user-error "Cannot delete the current node"))]
     (tree-edit--replace-fragment fragment node start (1+ end))))
+
+(defun tree-edit-copy (node)
+  "Copy NODE and cache it's type."
+  (interactive)
+  (puthash (tsc-node-text node)
+           (cons (tsc-node-type node)
+                 (tree-edit--split-node-for-insertion node))
+           tree-edit--type-cache)
+  (kill-ring-save (tsc-node-start-position node) (tsc-node-end-position node)))
 
 ;;* Locals: Relational parser
 (reazon-defrel tree-edit-parseo (grammar tokens out)

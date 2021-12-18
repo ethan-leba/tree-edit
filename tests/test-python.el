@@ -118,7 +118,21 @@ if foo:
             :to-have-buffer-contents "
 if foo:
     [qwert()
-    bert()]")))
+    bert()]"))
+  (it "can handle context-specific types"
+    (expect (with-tree-test-buffer #'python-mode "foo([*bar])"
+              (evil-tree-edit-copy)
+              (evil-tree-edit-insert-sibling (car kill-ring)))
+            :to-have-buffer-contents "foo(*bar,[*bar])")
+    (expect (with-tree-test-buffer #'python-mode "{[1:2]}"
+              (evil-tree-edit-copy)
+              (evil-tree-edit-insert-sibling (car kill-ring)))
+            :to-have-buffer-contents "{1:2,[1:2]}")
+    (expect (with-tree-test-buffer #'python-mode "{[1:2],3:4}"
+              (evil-tree-edit-copy)
+              (evil-tree-edit-goto-next-sibling)
+              (evil-tree-edit-exchange (car kill-ring)))
+            :to-have-buffer-contents "{1:2,[1:2]}")))
 
 (describe "insert sibling"
   (it "works"

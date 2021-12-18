@@ -152,8 +152,7 @@ If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
   "Copy the current node."
   (interactive)
   (evil-tree-edit-ensure-current-node)
-  (kill-ring-save (tsc-node-start-position evil-tree-edit-current-node)
-                  (tsc-node-end-position evil-tree-edit-current-node)))
+  (tree-edit-copy evil-tree-edit-current-node))
 
 (defun evil-tree-edit-undo (count)
   "Undo COUNT actions while saving the cursor position."
