@@ -411,14 +411,6 @@ delete, and what syntax needs to be inserted after, if any."
                 `(,left-idx ,(1- right-idx) ,(car result))))))))
 
 ;;* Locals: node rendering
-(defun tree-edit--adhoc-pcre-to-rx (pcre)
-  "Convert PCRE to an elisp regex (in no way robust)
-
-pcre2el package doesn't support character classes, so can't use that.
-Upstream patch?"
-  (s-replace-all '(("\\p{L}" . "[:alpha:]")
-                   ("\\p{Nd}" . "[:digit:]")) pcre))
-
 (defun tree-edit--generate-node (node-type rules &optional tokens)
   "Given a NODE-TYPE and a set of RULES, generate a node string.
 
@@ -436,7 +428,8 @@ construction, instead of looking up the rules for node-type."
   "Check if the two tokens LEFT and RIGHT need a space between them.
 
 https://tree-sitter.github.io/tree-sitter/creating-parsers#keyword-extraction"
-  (let ((regex (tree-edit--adhoc-pcre-to-rx tree-edit--identifier-regex)))
+  ;; TODO: Parse from grammar -- this is Java's identifier regex
+  (let ((regex "[[:alpha:]_$][[:alpha:][:digit:]_$]*"))
     (and (stringp left)
          (stringp right)
          (< (length (s-matched-positions-all regex (string-join `(,left ,right))))

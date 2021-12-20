@@ -317,7 +317,7 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
             name
             mode
             `',(tree-edit--pretty-print grammar)
-            (tree-edit--pretty-print (tree-edit--extract-word-regex raw-grammar))
+            nil ;; TODO: Use grammar defined regex
             `',(tree-edit--pretty-print supertypes)
             `',(tree-edit--pretty-print (tree-edit--invert-supertypes supertypes))
             `',(tree-edit--pretty-print (tree-edit--generate-alias-names grammar))
