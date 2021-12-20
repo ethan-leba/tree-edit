@@ -298,6 +298,7 @@ Fragments should parse as one of the following structures:
 ;; TODO: Handle less restrictively by ripping out surrounding syntax (ie delete)
 (defun tree-edit--valid-replacement-p (type node)
   "Return non-nil if NODE can be replaced with a node of TYPE."
+  (tree-edit-load-grammar-for-major-mode)
   (let ((parent-type (tsc-node-type (tsc-get-parent node))))
     (if-let (override (alist-get parent-type tree-edit-node-replacement-override))
         (funcall override type node)
@@ -338,6 +339,7 @@ Fragments should parse as one of the following structures:
   "Return a valid sequence of tokens containing the provided TYPE, or nil.
 
 If AFTER is t, generate the tokens after NODE, otherwise before."
+  (tree-edit-load-grammar-for-major-mode)
   (let ((parent-type (tsc-node-type (tsc-get-parent node))))
     (if-let (override (alist-get parent-type tree-edit-node-insertion-override))
         (funcall override type node)
@@ -372,6 +374,7 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
 
 If successful, the return type will give a range of siblings to
 delete, and what syntax needs to be inserted after, if any."
+  (tree-edit-load-grammar-for-major-mode)
   (let ((parent-type (tsc-node-type (tsc-get-parent node))))
     (if-let (override (alist-get parent-type tree-edit-node-deletion-override))
         (funcall override node)
