@@ -693,6 +693,7 @@ the text."
   "Transform NODE's next sibling into it's leftmost child, if possible."
   (let ((slurp-candidate (tree-edit--get-next-node node)))
     (cond ((not slurp-candidate) (user-error "Nothing to slurp!"))
+          ((zerop (tsc-count-children node)) (user-error "Current node has no children, can't slurp!"))
           ;; No named children, use insert child
           ((equal (tsc-count-named-children node) 0)
            (let ((slurper (tsc--node-steps node)))
