@@ -683,9 +683,15 @@ If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
 the text."
   (tree-edit-insert-sibling type-or-text (tsc-get-nth-child node 0)))
 
+(defun tree-edit--get-next-node (node)
+  "Get the next node to the left of NODE."
+  (when-let ((parent (tsc-get-parent node)))
+    (or (tsc-get-next-named-sibling parent)
+        (tree-edit--get-next-node parent))))
+
 (defun tree-edit-slurp (node)
   "Transform NODE's next sibling into it's leftmost child, if possible."
-  (let ((slurp-candidate (tsc-get-next-named-sibling (tsc-get-parent node))))
+  (let ((slurp-candidate (tree-edit--get-next-node node)))
     (cond ((not slurp-candidate) (user-error "Nothing to slurp!"))
           ;; No named children, use insert child
           ((equal (tsc-count-named-children node) 0)
@@ -723,21 +729,22 @@ the text."
   "Transform NODE's leftmost child into it's next sibling, if possible."
   (unless (> (tsc-count-named-children node) 0)
     (user-error "Cannot barf a node with no named children!"))
-  (let* ((barfee (tsc-get-nth-named-child node
-                                          (1- (tsc-count-named-children node))))
-         (barfer (tsc-get-parent node))
-         (barfer-steps (tsc--node-steps barfer)))
+  (let ((barfer (tsc-get-parent node))
+        (barfee (tsc-get-nth-named-child node (1- (tsc-count-named-children node)))))
     (unless (tree-edit--valid-deletions barfee)
       (user-error "Cannot delete %s!" (tsc-node-text barfee)))
-    (unless (tree-edit--valid-insertions (tsc-node-type barfer)
-                                         t
-                                         (tsc-get-nth-child node 0))
-      (user-error "Cannot add %s into %s!"
-                  (tsc-node-text barfer)
-                  (tsc-node-type node)))
-    (let ((barfee-text (tsc-node-text barfee)))
-      (tree-edit-delete barfee)
-      (tree-edit-insert-sibling barfee-text (tsc--node-from-steps tree-sitter-tree barfer-steps)))))
+    (cl-block nil
+      (while barfer
+        (let* ((barfer-steps (tsc--node-steps barfer)))
+          (when (tree-edit--valid-insertions (tsc-node-type barfer)
+                                             t
+                                             (tsc-get-nth-child node 0))
+            (let ((barfee-text (tsc-node-text barfee)))
+              (tree-edit-delete barfee)
+              (tree-edit-insert-sibling barfee-text (tsc--node-from-steps tree-sitter-tree barfer-steps))
+              (cl-return)))
+          (setq barfer (tsc-get-parent barfer))))
+      (user-error "Cannot barf %s!" (tsc-node-type node)))))
 
 (defun tree-edit-delete (node)
   "Delete NODE, and any surrounding syntax that accompanies it."

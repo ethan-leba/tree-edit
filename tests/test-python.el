@@ -36,7 +36,23 @@ if foo:
         with difficulty():
             sadness()
         qwert()]
-baz()")))
+baz()"))
+  (it "can slurp multilevel"
+    (expect (with-tree-test-buffer #'python-mode "
+if TREE:
+    FOO
+else:
+    [BAR]
+TREE"
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-slurp))
+            :to-have-buffer-contents "
+if TREE:
+    FOO
+else:
+    [BAR
+    TREE]")))
 
 (describe "barf"
   (it "correctly indents"
@@ -50,7 +66,34 @@ baz()"
 if foo:
     [foo()]
 bar()
-baz()")))
+baz()"))
+  (it "can barf multilevel"
+    (expect (with-tree-test-buffer #'python-mode "
+if TREE:
+    FOO
+else:
+    [BAR
+    TREE]"
+              (evil-tree-edit-barf))
+            :to-have-buffer-contents "
+if TREE:
+    FOO
+else:
+    [BAR]
+TREE")
+    (expect (with-tree-test-buffer #'python-mode "
+if TREE:
+    FOO
+else:
+    [BAR
+    TREE]"
+              (evil-tree-edit-barf))
+            :to-have-buffer-contents "
+if TREE:
+    FOO
+else:
+    [BAR]
+TREE")))
 
 (describe "raise"
   (it "correctly indents"
