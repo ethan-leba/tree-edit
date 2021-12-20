@@ -69,19 +69,21 @@
             supertypes)
       subtypes)))
 
-(defun tree-edit--generate-supertype (type grammar)
+(defun tree-edit--generate-supertype (type grammar possible-supertypes)
   "Return TYPE's supertypes (and itself) in GRAMMAR."
   (->> (-map #'car grammar)
-       (--filter (reazon-run 1 q (tree-edit-parseo (alist-get it grammar) `(,type) '())))
-       (--mapcat `(,it . ,(tree-edit--generate-supertype it grammar)))
+       (--filter (and (or (s-starts-with-p "_" (symbol-name it))
+                          (member it possible-supertypes))
+                      (reazon-run 1 q (tree-edit-parseo (alist-get it grammar) `(,type) '()))))
+       (--mapcat `(,it . ,(tree-edit--generate-supertype it grammar possible-supertypes)))
        (-uniq)
        (cons type)))
 
-(defun tree-edit--generate-supertypes (grammar)
+(defun tree-edit--generate-supertypes (grammar possible-supertypes)
   "Return an alist of a type to it's supertypes (and itself) in GRAMMAR."
   (--map
    (let ((type (car it)))
-     `(,type . ,(tree-edit--generate-supertype type grammar)))
+     `(,type . ,(tree-edit--generate-supertype type grammar possible-supertypes)))
    grammar))
 
 (defun tree-edit--invert-supertypes (supertypes)
@@ -309,7 +311,7 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
           (map-apply (lambda (type node) (cons type (tree-edit--process-grammar node)))
                      (alist-get 'rules raw-grammar)))
          (grammar (tree-edit--extract-grammar grammar))
-         (supertypes (tree-edit--generate-supertypes grammar)))
+         (supertypes (tree-edit--generate-supertypes grammar (-map #'intern (alist-get 'supertypes raw-grammar)))))
     ;; FIXME: Formatting this huge string is very slow
     (format tree-edit--grammar-template
             name
