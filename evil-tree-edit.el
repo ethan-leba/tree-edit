@@ -160,6 +160,12 @@ If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
   (evil-tree-edit-ensure-current-node)
   (evil-undo count))
 
+(defun evil-tree-edit-add-placeholder-and-change ()
+  "Add a placeholder node and then change it."
+  (interactive)
+  (evil-tree-edit-insert-sibling tree-edit-placeholder-node-type)
+  (evil-tree-edit-change))
+
 (defun evil-tree-edit--format-query-string (node-type)
   "Format a query string for NODE-TYPE.
 
@@ -508,6 +514,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "k" #'evil-tree-edit-goto-prev-sibling)
       (define-key mode-local-keymap "h" #'evil-tree-edit-goto-parent)
       (define-key mode-local-keymap "f" #'evil-tree-edit-goto-child)
+      (define-key mode-local-keymap "x" #'evil-tree-edit-add-placeholder-and-change)
       (define-key mode-local-keymap "n" #'evil-tree-edit-goto-next-placeholder)
       (define-key mode-local-keymap "N" #'evil-tree-edit-change-next-placeholder)
       (define-key mode-local-keymap "c" #'evil-tree-edit-change)
