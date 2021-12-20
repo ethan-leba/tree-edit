@@ -3578,7 +3578,8 @@
 
  tree-edit--identifier-regex
  
-"[\\p{L}_$][\\p{L}\\p{Nd}_$]*"
+"[_\\p{XID_Start}][_\\p{XID_Continue}]*"
+
 
  tree-edit--supertypes
  '
@@ -3587,7 +3588,7 @@
  (_simple_statements _simple_statements)
  (_simple_statement _simple_statement)
  (import_statement import_statement _simple_statement)
- (import_prefix import_prefix relative_import)
+ (import_prefix import_prefix)
  (relative_import relative_import)
  (future_import_statement future_import_statement _simple_statement)
  (import_from_statement import_from_statement _simple_statement)
@@ -3600,14 +3601,9 @@
  (expression_statement expression_statement _simple_statement)
  (named_expression named_expression
 		   expression
-		   expression_statement
-		   _simple_statement
 		   _expressions
-		   with_item
-		   with_clause
 		   _expression_within_for_in_clause
 		   _right_hand_side
-		   type
 		   _collection_elements)
  (return_statement return_statement _simple_statement)
  (delete_statement delete_statement _simple_statement)
@@ -3617,21 +3613,18 @@
  (break_statement break_statement _simple_statement)
  (continue_statement continue_statement _simple_statement)
  (_compound_statement _compound_statement)
- (if_statement if_statement module _statement _compound_statement)
+ (if_statement if_statement _statement _compound_statement)
  (elif_clause elif_clause)
  (else_clause else_clause)
- (for_statement for_statement module _statement _compound_statement)
- (while_statement while_statement module _statement _compound_statement)
- (try_statement try_statement module _statement _compound_statement)
+ (for_statement for_statement _statement _compound_statement)
+ (while_statement while_statement _statement _compound_statement)
+ (try_statement try_statement _statement _compound_statement)
  (except_clause except_clause)
  (finally_clause finally_clause)
- (with_statement with_statement module _statement _compound_statement)
+ (with_statement with_statement _statement _compound_statement)
  (with_clause with_clause)
- (with_item with_item with_clause)
- (function_definition function_definition
-		      module
-		      _statement
-		      _compound_statement)
+ (with_item with_item)
+ (function_definition function_definition _statement _compound_statement)
  (parameters parameters)
  (lambda_parameters lambda_parameters)
  (list_splat list_splat _collection_elements)
@@ -3639,13 +3632,10 @@
  (global_statement global_statement _simple_statement)
  (nonlocal_statement nonlocal_statement _simple_statement)
  (exec_statement exec_statement _simple_statement)
- (class_definition class_definition module _statement _compound_statement)
+ (class_definition class_definition _statement _compound_statement)
  (parenthesized_list_splat parenthesized_list_splat _collection_elements)
  (argument_list argument_list)
- (decorated_definition decorated_definition
-		       module
-		       _statement
-		       _compound_statement)
+ (decorated_definition decorated_definition _statement _compound_statement)
  (decorator decorator)
  (_suite _suite)
  (block block _suite)
@@ -3653,156 +3643,90 @@
  (dotted_name dotted_name _import_list)
  (_parameters _parameters)
  (_patterns _patterns)
- (parameter parameter lambda_parameters _parameters)
+ (parameter parameter _parameters)
  (pattern pattern _patterns _left_hand_side)
  (tuple_pattern tuple_pattern
 		parameter
-		lambda_parameters
 		_parameters
 		pattern
 		_patterns
 		_left_hand_side)
  (list_pattern list_pattern pattern _patterns _left_hand_side)
- (default_parameter default_parameter
-   parameter
-   lambda_parameters
-   _parameters)
- (typed_default_parameter typed_default_parameter
-			  parameter
-			  lambda_parameters
-			  _parameters)
+ (default_parameter default_parameter parameter _parameters)
+ (typed_default_parameter typed_default_parameter parameter _parameters)
  (list_splat_pattern list_splat_pattern
 		     parameter
-		     lambda_parameters
 		     _parameters
 		     pattern
 		     _patterns
 		     _left_hand_side)
- (dictionary_splat_pattern dictionary_splat_pattern
-			   parameter
-			   lambda_parameters
-			   _parameters)
+ (dictionary_splat_pattern dictionary_splat_pattern parameter _parameters)
  (_expression_within_for_in_clause _expression_within_for_in_clause)
  (expression expression
-	     expression_statement
-	     _simple_statement
 	     _expressions
-	     with_item
-	     with_clause
 	     _expression_within_for_in_clause
 	     _right_hand_side
-	     type
 	     _collection_elements)
  (primary_expression primary_expression
 		     expression
-		     expression_statement
-		     _simple_statement
 		     _expressions
-		     with_item
-		     with_clause
 		     _expression_within_for_in_clause
 		     _right_hand_side
-		     type
 		     _collection_elements)
  (not_operator not_operator
 	       expression
-	       expression_statement
-	       _simple_statement
 	       _expressions
-	       with_item
-	       with_clause
 	       _expression_within_for_in_clause
 	       _right_hand_side
-	       type
 	       _collection_elements)
  (boolean_operator boolean_operator
 		   expression
-		   expression_statement
-		   _simple_statement
 		   _expressions
-		   with_item
-		   with_clause
 		   _expression_within_for_in_clause
 		   _right_hand_side
-		   type
 		   _collection_elements)
  (binary_operator binary_operator
 		  primary_expression
 		  expression
-		  expression_statement
-		  _simple_statement
 		  _expressions
-		  with_item
-		  with_clause
 		  _expression_within_for_in_clause
 		  _right_hand_side
-		  type
 		  _collection_elements)
  (unary_operator unary_operator
 		 primary_expression
 		 expression
-		 expression_statement
-		 _simple_statement
 		 _expressions
-		 with_item
-		 with_clause
 		 _expression_within_for_in_clause
 		 _right_hand_side
-		 type
 		 _collection_elements)
  (comparison_operator comparison_operator
 		      expression
-		      expression_statement
-		      _simple_statement
 		      _expressions
-		      with_item
-		      with_clause
 		      _expression_within_for_in_clause
 		      _right_hand_side
-		      type
 		      _collection_elements)
  (lambda lambda
    _expression_within_for_in_clause
    expression
-   expression_statement
-   _simple_statement
    _expressions
-   with_item
-   with_clause
    _right_hand_side
-   type
    _collection_elements)
  (lambda_within_for_in_clause lambda_within_for_in_clause)
- (assignment assignment
-	     expression_statement
-	     _simple_statement
-	     _right_hand_side)
- (augmented_assignment augmented_assignment
-		       expression_statement
-		       _simple_statement
-		       _right_hand_side)
+ (assignment assignment _right_hand_side)
+ (augmented_assignment augmented_assignment _right_hand_side)
  (_left_hand_side _left_hand_side)
  (pattern_list pattern_list _left_hand_side)
  (_right_hand_side _right_hand_side)
- (yield yield
-	expression_statement
-	_simple_statement
-	_right_hand_side
-	_collection_elements)
+ (yield yield _right_hand_side _collection_elements)
  (attribute attribute
 	    pattern
 	    _patterns
 	    _left_hand_side
 	    primary_expression
 	    expression
-	    expression_statement
-	    _simple_statement
 	    _expressions
-	    with_item
-	    with_clause
 	    _expression_within_for_in_clause
 	    _right_hand_side
-	    type
 	    _collection_elements)
  (subscript subscript
 	    pattern
@@ -3810,190 +3734,115 @@
 	    _left_hand_side
 	    primary_expression
 	    expression
-	    expression_statement
-	    _simple_statement
 	    _expressions
-	    with_item
-	    with_clause
 	    _expression_within_for_in_clause
 	    _right_hand_side
-	    type
 	    _collection_elements)
  (slice slice)
  (ellipsis ellipsis
 	   primary_expression
 	   expression
-	   expression_statement
-	   _simple_statement
 	   _expressions
-	   with_item
-	   with_clause
 	   _expression_within_for_in_clause
 	   _right_hand_side
-	   type
 	   _collection_elements)
  (call call
        primary_expression
        expression
-       expression_statement
-       _simple_statement
        _expressions
-       with_item
-       with_clause
        _expression_within_for_in_clause
        _right_hand_side
-       type
        _collection_elements)
- (typed_parameter typed_parameter parameter lambda_parameters _parameters)
+ (typed_parameter typed_parameter parameter _parameters)
  (type type)
  (keyword_argument keyword_argument)
  (list list
        primary_expression
        expression
-       expression_statement
-       _simple_statement
        _expressions
-       with_item
-       with_clause
        _expression_within_for_in_clause
        _right_hand_side
-       type
        _collection_elements)
  (set set
       primary_expression
       expression
-      expression_statement
-      _simple_statement
       _expressions
-      with_item
-      with_clause
       _expression_within_for_in_clause
       _right_hand_side
-      type
       _collection_elements)
  (tuple tuple
 	primary_expression
 	expression
-	expression_statement
-	_simple_statement
 	_expressions
-	with_item
-	with_clause
 	_expression_within_for_in_clause
 	_right_hand_side
-	type
 	_collection_elements)
  (dictionary dictionary
 	     primary_expression
 	     expression
-	     expression_statement
-	     _simple_statement
 	     _expressions
-	     with_item
-	     with_clause
 	     _expression_within_for_in_clause
 	     _right_hand_side
-	     type
 	     _collection_elements)
  (pair pair)
  (list_comprehension list_comprehension
 		     primary_expression
 		     expression
-		     expression_statement
-		     _simple_statement
 		     _expressions
-		     with_item
-		     with_clause
 		     _expression_within_for_in_clause
 		     _right_hand_side
-		     type
 		     _collection_elements)
  (dictionary_comprehension dictionary_comprehension
 			   primary_expression
 			   expression
-			   expression_statement
-			   _simple_statement
 			   _expressions
-			   with_item
-			   with_clause
 			   _expression_within_for_in_clause
 			   _right_hand_side
-			   type
 			   _collection_elements)
  (set_comprehension set_comprehension
 		    primary_expression
 		    expression
-		    expression_statement
-		    _simple_statement
 		    _expressions
-		    with_item
-		    with_clause
 		    _expression_within_for_in_clause
 		    _right_hand_side
-		    type
 		    _collection_elements)
  (generator_expression generator_expression
 		       primary_expression
 		       expression
-		       expression_statement
-		       _simple_statement
 		       _expressions
-		       with_item
-		       with_clause
 		       _expression_within_for_in_clause
 		       _right_hand_side
-		       type
 		       _collection_elements)
  (_comprehension_clauses _comprehension_clauses)
  (parenthesized_expression parenthesized_expression
 			   primary_expression
 			   expression
-			   expression_statement
-			   _simple_statement
 			   _expressions
-			   with_item
-			   with_clause
 			   _expression_within_for_in_clause
 			   _right_hand_side
-			   type
 			   _collection_elements)
  (_collection_elements _collection_elements)
  (for_in_clause for_in_clause _comprehension_clauses)
  (if_clause if_clause)
  (conditional_expression conditional_expression
 			 expression
-			 expression_statement
-			 _simple_statement
 			 _expressions
-			 with_item
-			 with_clause
 			 _expression_within_for_in_clause
 			 _right_hand_side
-			 type
 			 _collection_elements)
  (concatenated_string concatenated_string
 		      primary_expression
 		      expression
-		      expression_statement
-		      _simple_statement
 		      _expressions
-		      with_item
-		      with_clause
 		      _expression_within_for_in_clause
 		      _right_hand_side
-		      type
 		      _collection_elements)
  (string string
 	 primary_expression
 	 expression
-	 expression_statement
-	 _simple_statement
 	 _expressions
-	 with_item
-	 with_clause
 	 _expression_within_for_in_clause
 	 _right_hand_side
-	 type
 	 _collection_elements)
  (interpolation interpolation)
  (escape_sequence escape_sequence)
@@ -4004,111 +3853,67 @@
  (integer integer
 	  primary_expression
 	  expression
-	  expression_statement
-	  _simple_statement
 	  _expressions
-	  with_item
-	  with_clause
 	  _expression_within_for_in_clause
 	  _right_hand_side
-	  type
 	  _collection_elements)
  (float float
 	primary_expression
 	expression
-	expression_statement
-	_simple_statement
 	_expressions
-	with_item
-	with_clause
 	_expression_within_for_in_clause
 	_right_hand_side
-	type
 	_collection_elements)
  (identifier identifier
-	     dotted_name
-	     _import_list
 	     parameter
-	     lambda_parameters
 	     _parameters
 	     pattern
 	     _patterns
 	     _left_hand_side
 	     primary_expression
 	     expression
-	     expression_statement
-	     _simple_statement
 	     _expressions
-	     with_item
-	     with_clause
 	     _expression_within_for_in_clause
 	     _right_hand_side
-	     type
-	     _collection_elements
-	     keyword_identifier)
+	     _collection_elements)
  (keyword_identifier keyword_identifier
 		     pattern
 		     _patterns
 		     _left_hand_side
 		     primary_expression
 		     expression
-		     expression_statement
-		     _simple_statement
 		     _expressions
-		     with_item
-		     with_clause
 		     _expression_within_for_in_clause
 		     _right_hand_side
-		     type
 		     _collection_elements)
  (true true
        primary_expression
        expression
-       expression_statement
-       _simple_statement
        _expressions
-       with_item
-       with_clause
        _expression_within_for_in_clause
        _right_hand_side
-       type
        _collection_elements)
  (false false
 	primary_expression
 	expression
-	expression_statement
-	_simple_statement
 	_expressions
-	with_item
-	with_clause
 	_expression_within_for_in_clause
 	_right_hand_side
-	type
 	_collection_elements)
  (none none
        primary_expression
        expression
-       expression_statement
-       _simple_statement
        _expressions
-       with_item
-       with_clause
        _expression_within_for_in_clause
        _right_hand_side
-       type
        _collection_elements)
  (await await
 	expression
-	expression_statement
-	_simple_statement
 	_expressions
-	with_item
-	with_clause
 	_expression_within_for_in_clause
 	_right_hand_side
-	type
 	_collection_elements)
- (comment comment module)
+ (comment comment)
  (_semicolon _semicolon))
 
 
@@ -4120,7 +3925,7 @@
  (none none)
  (false false)
  (true true)
- (keyword_identifier keyword_identifier identifier)
+ (keyword_identifier keyword_identifier)
  (identifier identifier)
  (float float)
  (integer integer)
@@ -4147,6 +3952,7 @@
  (set set)
  (list list)
  (keyword_argument keyword_argument)
+ (type type)
  (typed_parameter typed_parameter)
  (call call)
  (ellipsis ellipsis)
@@ -4239,7 +4045,7 @@
 	      tuple_pattern
 	      parameter
 	      _parameters)
- (dotted_name identifier dotted_name)
+ (dotted_name dotted_name)
  (expression_list expression_list)
  (block block)
  (_suite block _suite)
@@ -4253,17 +4059,11 @@
  (global_statement global_statement)
  (dictionary_splat dictionary_splat)
  (list_splat list_splat)
- (lambda_parameters identifier
-		    typed_parameter
-		    dictionary_splat_pattern
-		    list_splat_pattern
-		    typed_default_parameter
-		    default_parameter
-		    tuple_pattern
-		    parameter
-		    lambda_parameters)
+ (lambda_parameters lambda_parameters)
  (parameters parameters)
  (function_definition function_definition)
+ (with_item with_item)
+ (with_clause with_clause)
  (with_statement with_statement)
  (finally_clause finally_clause)
  (except_clause except_clause)
@@ -4325,40 +4125,6 @@
 		       parenthesized_list_splat
 		       list_splat
 		       named_expression)
- (type await
-       none
-       false
-       true
-       keyword_identifier
-       identifier
-       float
-       integer
-       string
-       concatenated_string
-       conditional_expression
-       parenthesized_expression
-       generator_expression
-       set_comprehension
-       dictionary_comprehension
-       list_comprehension
-       dictionary
-       tuple
-       set
-       list
-       type
-       call
-       ellipsis
-       subscript
-       attribute
-       lambda
-       comparison_operator
-       unary_operator
-       binary_operator
-       boolean_operator
-       not_operator
-       primary_expression
-       expression
-       named_expression)
  (_right_hand_side await
 		   none
 		   false
@@ -4431,75 +4197,6 @@
 				   expression
 				   _expression_within_for_in_clause
 				   named_expression)
- (with_clause await
-	      none
-	      false
-	      true
-	      keyword_identifier
-	      identifier
-	      float
-	      integer
-	      string
-	      concatenated_string
-	      conditional_expression
-	      parenthesized_expression
-	      generator_expression
-	      set_comprehension
-	      dictionary_comprehension
-	      list_comprehension
-	      dictionary
-	      tuple
-	      set
-	      list
-	      call
-	      ellipsis
-	      subscript
-	      attribute
-	      lambda
-	      comparison_operator
-	      unary_operator
-	      binary_operator
-	      boolean_operator
-	      not_operator
-	      primary_expression
-	      expression
-	      with_item
-	      with_clause
-	      named_expression)
- (with_item await
-	    none
-	    false
-	    true
-	    keyword_identifier
-	    identifier
-	    float
-	    integer
-	    string
-	    concatenated_string
-	    conditional_expression
-	    parenthesized_expression
-	    generator_expression
-	    set_comprehension
-	    dictionary_comprehension
-	    list_comprehension
-	    dictionary
-	    tuple
-	    set
-	    list
-	    call
-	    ellipsis
-	    subscript
-	    attribute
-	    lambda
-	    comparison_operator
-	    unary_operator
-	    binary_operator
-	    boolean_operator
-	    not_operator
-	    primary_expression
-	    expression
-	    with_item
-	    named_expression)
  (_expressions await
 	       none
 	       false
@@ -4569,90 +4266,19 @@
 	     expression
 	     named_expression)
  (named_expression named_expression)
- (expression_statement await
-		       none
-		       false
-		       true
-		       keyword_identifier
-		       identifier
-		       float
-		       integer
-		       string
-		       concatenated_string
-		       conditional_expression
-		       parenthesized_expression
-		       generator_expression
-		       set_comprehension
-		       dictionary_comprehension
-		       list_comprehension
-		       dictionary
-		       tuple
-		       set
-		       list
-		       call
-		       ellipsis
-		       subscript
-		       attribute
-		       yield
-		       augmented_assignment
-		       assignment
-		       lambda
-		       comparison_operator
-		       unary_operator
-		       binary_operator
-		       boolean_operator
-		       not_operator
-		       primary_expression
-		       expression
-		       named_expression
-		       expression_statement)
+ (expression_statement expression_statement)
  (assert_statement assert_statement)
  (chevron chevron)
  (print_statement print_statement)
  (wildcard_import wildcard_import)
  (aliased_import aliased_import)
- (_import_list identifier dotted_name aliased_import _import_list)
+ (_import_list dotted_name aliased_import _import_list)
  (import_from_statement import_from_statement)
  (future_import_statement future_import_statement)
- (relative_import relative_import import_prefix)
+ (relative_import relative_import)
  (import_prefix import_prefix)
  (import_statement import_statement)
- (_simple_statement await
-		    none
-		    false
-		    true
-		    keyword_identifier
-		    identifier
-		    float
-		    integer
-		    string
-		    concatenated_string
-		    conditional_expression
-		    parenthesized_expression
-		    generator_expression
-		    set_comprehension
-		    dictionary_comprehension
-		    list_comprehension
-		    dictionary
-		    tuple
-		    set
-		    list
-		    call
-		    ellipsis
-		    subscript
-		    attribute
-		    yield
-		    augmented_assignment
-		    assignment
-		    lambda
-		    comparison_operator
-		    unary_operator
-		    binary_operator
-		    boolean_operator
-		    not_operator
-		    primary_expression
-		    expression
-		    exec_statement
+ (_simple_statement exec_statement
 		    nonlocal_statement
 		    global_statement
 		    continue_statement
@@ -4661,7 +4287,6 @@
 		    raise_statement
 		    delete_statement
 		    return_statement
-		    named_expression
 		    expression_statement
 		    assert_statement
 		    print_statement
@@ -4679,16 +4304,7 @@
 	     for_statement
 	     if_statement
 	     _statement)
- (module comment
-	 decorated_definition
-	 class_definition
-	 function_definition
-	 with_statement
-	 try_statement
-	 while_statement
-	 for_statement
-	 if_statement
-	 module))
+ (module module))
 
 
  tree-edit--alias-map
