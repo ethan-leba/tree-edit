@@ -668,10 +668,10 @@ current, otherwise after."
 if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
   (if-let (tokens (tree-edit--valid-insertions type (not before) node))
-      (let* ((used-type (-first #'symbolp tokens))
-             (tree-edit-syntax-snippets
-              `((,used-type . ,(alist-get type tree-edit-syntax-snippets)) . ,tree-edit-syntax-snippets)))
-        (tree-edit--insert-fragment tokens node (if before :before :after)))
+      (tree-edit--insert-fragment
+       (-map-first #'symbolp (-const type) tokens)
+       node
+       (if before :before :after))
     (user-error "Cannot insert node of type %s!" type)))
 
 (defun tree-edit--insert-fragment-sibling (text node &optional before)
