@@ -175,6 +175,17 @@ Typically an identifier, but can conceivably be any type of node.")
                         (number-sequence 0 (1- (tsc-count-named-children parent))))))
     (--find-index (equal (tsc-node-position-range node) (tsc-node-position-range it)) pnodes)))
 
+(defun tree-edit--all-named-descendants (node)
+  "Retrieve all named descendants of NODE."
+  ;; Use cursor for efficiency?
+  (let (result (stack `(,node)))
+    (while stack
+      (let* ((item (pop stack))
+             (children (tree-edit--get-all-children item)))
+        (setq stack (append children stack))
+        (setq result (append result children))))
+    result))
+
 (defun tree-edit--save-location (node)
   "Save the current location of the NODE."
   (cons (tsc--node-steps (tsc-get-parent node))
