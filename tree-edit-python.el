@@ -247,6 +247,10 @@
     :key "mn")
    (:type none
     :key "mN")
+   (:type call
+    :key "mm"
+    :name "method call"
+    :node-override '((call . (attribute argument_list))))
 
    ;; Augmented assignment
    (:type augmented_assignment
