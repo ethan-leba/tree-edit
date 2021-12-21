@@ -217,7 +217,6 @@ Relevant types are either supertypes of TYPE or alias names referring to TYPE."
   "Load the grammar for the major mode, or error if none is registered."
   (let ((language-file (alist-get major-mode tree-edit-language-alist)))
     (unless language-file
-      (evil-tree-edit-mode -1)
       (user-error
        "No language file specified for major mode `%s' in `tree-edit-language-alist'!"
        (symbol-name major-mode)))
