@@ -166,18 +166,6 @@ If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
   (evil-tree-edit-insert-sibling tree-edit-placeholder-node-type)
   (evil-tree-edit-change))
 
-(defun evil-tree-edit--format-query-string (node-type)
-  "Format a query string for NODE-TYPE.
-
-NODE-TYPE can be a symbol or a list of symbol."
-  (interactive)
-  (evil-tree-edit-ensure-current-node)
-  (--> (if (listp node-type) node-type `(,node-type))
-       (-map (lambda (type) (format "(%s)" type)) it)
-       (string-join it " ")
-       ;; Query string needs an @name here, or it won't return any results
-       (format "[%s] @foo" it)))
-
 (defun evil-tree-edit-sig-avy-jump (node-type)
   "Avy jump to a node with the NODE-TYPE within scope of the nearest sig node.
 
@@ -190,7 +178,7 @@ NODE-TYPE can be a symbol or a list of symbol."
              evil-tree-edit-current-node
            (evil-tree-edit--get-sig-parent evil-tree-edit-current-node))))
     (-> node-type
-        (evil-tree-edit--format-query-string)
+        (tree-edit--format-query-string)
         (tree-edit-query query-node)
         (evil-tree-edit--avy-jump))))
 
@@ -201,7 +189,7 @@ NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
   (evil-tree-edit-ensure-current-node)
   (-> node-type
-      (evil-tree-edit--format-query-string)
+      (tree-edit--format-query-string)
       (tree-edit-query evil-tree-edit-current-node)
       (evil-tree-edit--avy-jump)))
 

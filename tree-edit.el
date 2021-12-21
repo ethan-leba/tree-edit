@@ -202,6 +202,17 @@ will be selected if the last one is deleted."
         (tree-edit--apply-until-interesting fun parent)
       parent)))
 
+(defun tree-edit--format-query-string (node-type)
+  "Format a query string for NODE-TYPE.
+
+NODE-TYPE can be a symbol or a list of symbol."
+  (interactive)
+  (--> (if (listp node-type) node-type `(,node-type))
+       (-map (lambda (type) (format "(%s)" type)) it)
+       (string-join it " ")
+       ;; Query string needs an @name here, or it won't return any results
+       (format "[%s] @foo" it)))
+
 (defun tree-edit-query (patterns node)
   "Execute query PATTERNS against the children of NODE and return captures.
 
