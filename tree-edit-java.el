@@ -61,6 +61,9 @@
  tree-edit-significant-node-types
  '(block class_body)
 
+ tree-edit-dwim-node-alist
+ '((expression . expression_statement))
+
  tree-edit-nodes
  '((:type if_statement
     :key "i"

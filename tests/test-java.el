@@ -290,6 +290,17 @@ if (foo == 3) {
             :to-have-buffer-contents "
 {foo();[break;]// i'm a comment!
 }"))
+  (it "can perform DWIM insertions"
+    (expect (with-tree-test-buffer #'java-mode "{[foo(x);]}"
+              (evil-tree-edit-insert-sibling 'null_literal))
+            :to-have-buffer-contents "{foo(x);[null;]}")
+    (expect (with-tree-test-buffer #'java-mode "{[foo(x);]}"
+              (evil-tree-edit-insert-sibling "bar()"))
+            :to-have-buffer-contents "{foo(x);[bar();]}")
+    (expect (with-tree-test-buffer #'java-mode "{[foo(x);]}"
+              (with-type-cache "bar()" '(method_invocation method_invocation "bar()")
+                (evil-tree-edit-insert-sibling "bar()")))
+            :to-have-buffer-contents "{foo(x);[bar();]}"))
   (xit "can perform multi-node insertions"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer #'java-mode "{if(foo) [bar;]}"

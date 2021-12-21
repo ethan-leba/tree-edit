@@ -146,6 +146,11 @@ The following keywords are valid whitespace rules:
   "Node considered a placeholder. Set by mode-local grammar file.
 
 Typically an identifier, but can conceivably be any type of node.")
+(defvar tree-edit-dwim-node-alist nil
+  "Mapping from node type to a DWIM wrapper type. Set by mode-local grammar file.
+
+If a node cannot be inserted, but it can be inserted if wrapped
+in a DWIM node, that will happen instead.")
 
 ;;* User settings
 (defgroup tree-edit nil
@@ -683,6 +688,42 @@ current, otherwise after."
   (if (stringp type-or-text)
       (tree-edit--insert-fragment-sibling type-or-text node before)
     (tree-edit--insert-snippet-sibling type-or-text node before)))
+
+(defun tree-edit-insert-sibling-dwim (type-or-text node &optional before)
+  "Insert a node of the given TYPE-OR-TEXT next to NODE.
+
+If the insertion fails, then `tree-edit-dwim-node-alist' will be
+searched. If a DWIM node is found, that node will be inserted
+instead. Then the requested node will be inserted inside the
+first possible location inside of the DWIM node."
+  (condition-case err
+      (tree-edit-insert-sibling type-or-text node before)
+    (user-error
+     (let ((node-steps (tsc--node-steps node)))
+       ;; re-signal error?
+       (if-let* ((node-type
+                  (cond ((symbolp type-or-text) `(,type-or-text))
+                        ((gethash type-or-text tree-edit--type-cache)
+                         `(,(car (gethash type-or-text tree-edit--type-cache))))
+                        (t
+                         ;; not car
+                         (-map #'tsc-node-type (tree-edit--parse-fragment type-or-text)))))
+                 (dwim-node
+                  (alist-get
+                   (-first
+                    (lambda (type) (alist-get type tree-edit-dwim-node-alist))
+                    (--mapcat (alist-get it tree-edit--supertypes) node-type))
+                   tree-edit-dwim-node-alist)))
+           (progn
+             (tree-edit-insert-sibling dwim-node node before)
+             (let ((inserted-node
+                    (let ((restored-node (tsc--node-from-steps tree-sitter-tree node-steps)))
+                      (if before restored-node (tsc-get-next-named-sibling restored-node)))))
+               (cl-dolist (candidate (tree-edit--all-named-descendants inserted-node))
+                 (ignore-errors
+                   (tree-edit-exchange type-or-text candidate)
+                   (cl-return)))))
+         (signal (car err) (cdr err)))))))
 
 (defun tree-edit--insert-snippet-sibling (type node &optional before)
   "Insert a node of the given TYPE next to NODE.

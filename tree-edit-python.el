@@ -132,6 +132,10 @@
  tree-edit--hidden-node-types
  '(_newline _indent _dedent)
 
+ tree-edit-dwim-node-alist
+ '((expression . expression_statement)
+   (assignment . expression_statement))
+
  tree-edit-nodes
  '(;; Statements
    (:type if_statement

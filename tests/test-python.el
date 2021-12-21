@@ -149,6 +149,16 @@ if foo:
 [elif TREE:
     TREE]
 baz()"))
+  (it "handles DWIM nodes"
+    (expect (with-tree-test-buffer #'python-mode "
+[foo()]
+bar()"
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-insert-sibling 'call))
+            :to-have-buffer-contents "
+foo()
+[TREE()]
+bar()"))
   (it "can handle ambiguous fragments"
     ;; Could be identifier, or expression statement
     (expect (with-tree-test-buffer #'python-mode "foo([x])"

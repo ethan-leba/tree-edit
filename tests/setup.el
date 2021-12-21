@@ -73,6 +73,14 @@
        (backward-delete-char 1))
      ,@test-forms))
 
+(defmacro with-type-cache (k v &rest body)
+  (declare (indent 2))
+  (let ((hashname (gensym)))
+    `(let ((,hashname (make-hash-table :test #'equal)))
+       (puthash ,k ,v ,hashname)
+       (let ((tree-edit--type-cache ,hashname))
+         ,@body))))
+
 (defmacro with-tree-test-buffer (mode contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
   https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
