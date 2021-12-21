@@ -213,8 +213,7 @@ NODE-TYPE can be a symbol or a list of symbol."
   "Wrap the current node in a node of selected TYPE."
   (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--preserve-location
-   (let* ((node-type (tsc-node-type evil-tree-edit-current-node))
-          (node-text (tsc-node-text evil-tree-edit-current-node)))
+   (let ((node-text (tsc-node-text evil-tree-edit-current-node)))
      (evil-tree-edit-exchange type)
      (unwind-protect
          (evil-tree-edit--avy-jump
