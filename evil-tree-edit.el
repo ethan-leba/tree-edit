@@ -241,6 +241,15 @@ See `tree-edit-delete'."
   (evil-tree-edit-ensure-current-node)
   (tree-edit-delete evil-tree-edit-current-node))
 
+(defun evil-tree-edit-move ()
+  "Copy then delete the current node.
+
+See `tree-edit-delete'."
+  (interactive)
+  (evil-tree-edit-ensure-current-node)
+  (tree-edit-copy evil-tree-edit-current-node)
+  (tree-edit-delete evil-tree-edit-current-node))
+
 (defun evil-tree-edit-raise ()
   "Move the current node up the syntax tree until a valid replacement is found.
 
@@ -513,6 +522,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "N" #'evil-tree-edit-change-next-placeholder)
       (define-key mode-local-keymap "c" #'evil-tree-edit-change)
       (define-key mode-local-keymap "d" #'evil-tree-edit-delete)
+      (define-key mode-local-keymap "m" #'evil-tree-edit-move)
       (define-key mode-local-keymap "r" #'evil-tree-edit-raise)
       (define-key mode-local-keymap "y" #'evil-tree-edit-copy)
       (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
