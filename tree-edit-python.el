@@ -93,6 +93,7 @@
    (primary_expression . (identifier))
    (subscript . (identifier "[" expression "]"))
    (slice . (expression ":" expression))
+   (parenthesized_expression . ("(" expression ")"))
    (expression . (identifier))
    (identifier . ("TREE")))
 
@@ -175,6 +176,8 @@
    ;; Expressions
    (:type attribute
     :key ".")
+   (:type parenthesized_expression
+    :key "(")
    (:type named_expression
     :key "w"
     :name "walrus operator")
