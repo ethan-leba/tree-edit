@@ -313,6 +313,12 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
     (evil-tree-edit-goto-next-placeholder)
     (evil-tree-edit-change current-location)))
 
+(defun evil-tree-edit-change-next-placeholder-from-insert ()
+  "Complete edit of current node and change the next placeholder node."
+  (interactive)
+  (evil-tree-edit-normal-or-tree-state)
+  (evil-tree-edit-change-next-placeholder))
+
 (defun evil-tree-edit-preview-node ()
   "Preview the different variations of the current node."
   (interactive)
@@ -512,7 +518,8 @@ each language will have it's own set of nouns."
 
 (unless evil-tree-edit-disable-nontree-bindings
   (evil-define-key 'normal evil-tree-edit-mode-map "Q" #'evil-tree-state)
-  (evil-define-key 'insert evil-tree-edit-mode-map (kbd "<escape>") #'evil-tree-edit-normal-or-tree-state))
+  (evil-define-key 'insert evil-tree-edit-mode-map (kbd "<escape>") #'evil-tree-edit-normal-or-tree-state)
+  (evil-define-key 'insert evil-tree-edit-mode-map (kbd "C-<return>") #'evil-tree-edit-change-next-placeholder-from-insert))
 
 (provide 'evil-tree-edit)
 ;;; evil-tree-edit.el ends here
