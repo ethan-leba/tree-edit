@@ -92,6 +92,7 @@ but it seems to not work reliably with `tree-edit--save-location'."
   "Move NODE to the next (interesting) named sibling."
   (let ((parent (tsc-get-parent node)))
     (cond
+     ((not parent) node)
      ((tsc-node-eq parent (tsc-root-node tree-sitter-tree)) node)
      ((--any (member (tsc-node-type parent)
                      (cons it (alist-get it tree-edit--subtypes '())))
