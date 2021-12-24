@@ -373,6 +373,8 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
 
 (defun evil-tree-edit--exit-tree-state ()
   "De-activate tree-edit state."
+  (unless (eq evil-next-state 'insert)
+    (setq evil-tree-edit--return-position nil))
   (when evil-tree-edit--node-overlay
     (overlay-put evil-tree-edit--node-overlay 'after-string "")
     (overlay-put evil-tree-edit--node-overlay 'face '())))
