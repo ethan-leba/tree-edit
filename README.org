@@ -78,15 +78,15 @@ and to return to normal state press @@html:<kbd>@@ESC@@html:</kbd>@@.
 ** Navigation
 The navigation primitives follow the tree structure of the language.
 
-| Operation            | Keybind                        | Description                                                                         |
-|----------------------+--------------------------------+-------------------------------------------------------------------------------------|
-| Next                 | @@html:<kbd>@@j@@html:</kbd>@@ | Move cursor to the next sibling.                                                    |
-| Previous             | @@html:<kbd>@@k@@html:</kbd>@@ | Move cursor to the previous sibling.                                                |
-| Inwards              | @@html:<kbd>@@f@@html:</kbd>@@ | Move cursor to the first child.                                                     |
-| Outwards             | @@html:<kbd>@@h@@html:</kbd>@@ | Move cursor to the parent.                                                          |
-| Jump to              | @@html:<kbd>@@s@@html:</kbd>@@ | Avy jump to a node of /node-type/ for a node inside the current.                    |
-| Outwards Significant | @@html:<kbd>@@A@@html:</kbd>@@ | Move outwards until a significant node (e.g. function or class declaration) is hit. |
-| Goto Placeholder     | @@html:<kbd>@@n@@html:</kbd>@@ | Jump to the first placeholder node within the current.                              |
+| Operation                   | Keybind                        | Description                                                                         |
+|-----------------------------+--------------------------------+-------------------------------------------------------------------------------------|
+| Next                        | @@html:<kbd>@@j@@html:</kbd>@@ | Move cursor to the next sibling.                                                    |
+| Previous                    | @@html:<kbd>@@k@@html:</kbd>@@ | Move cursor to the previous sibling.                                                |
+| Inwards                     | @@html:<kbd>@@f@@html:</kbd>@@ | Move cursor to the first child.                                                     |
+| Outwards                    | @@html:<kbd>@@h@@html:</kbd>@@ | Move cursor to the parent.                                                          |
+| Jump to                     | @@html:<kbd>@@s@@html:</kbd>@@ | Avy jump to a node of /node-type/ for a node inside the current.                    |
+| Outwards Significant        | @@html:<kbd>@@A@@html:</kbd>@@ | Move outwards until a significant node (e.g. function or class declaration) is hit. |
+| Goto Placeholder            | @@html:<kbd>@@n@@html:</kbd>@@ | Jump to the first placeholder node within the current.                              |
 
 The definition of a placeholder node is configurable, but generally it's the
 =TREE= identifiers as seen in the GIF demo.
@@ -105,21 +105,25 @@ upon insertion: see example [[https://github.com/ethan-leba/tree-edit/blob/main/
 Any transformations will be rejected if a syntactically valid result cannot be
 generated.
 
-| Operation    | Keybind                        | Description                                                                                                            |
-|--------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------|
-| Raise        | @@html:<kbd>@@r@@html:</kbd>@@ | Replace the current node's parent with the current node.                                                               |
-| Delete       | @@html:<kbd>@@d@@html:</kbd>@@ | Delete the current node.                                                                                               |
-| Change       | @@html:<kbd>@@c@@html:</kbd>@@ | Delete the current node and drop into insert state. Tree state will be re-entered on @@html:<kbd>@@ESC@@html:</kbd>@@. |
-| Wrap         | @@html:<kbd>@@w@@html:</kbd>@@ | Create a new node of /node-type/ and insert the current one in it.                                                     |
-| Exchange     | @@html:<kbd>@@e@@html:</kbd>@@ | Exchange the current node with a new node of /node-type/.                                                              |
-| Insert       | @@html:<kbd>@@i@@html:</kbd>@@ | Insert a new node of /node-type/ to the right of the current.                                                          |
-| Append       | @@html:<kbd>@@a@@html:</kbd>@@ | Insert a new node of /node-type/ to the left of the current.                                                           |
-| Insert Child | @@html:<kbd>@@I@@html:</kbd>@@ | Insert a new node of /node-type/ as a child of the current. Useful for nodes with no named children, i.e. ={}=         |
-| Slurp        | @@html:<kbd>@@>@@html:</kbd>@@ | Grow the current node to contain the nearest right-most element.                                                       |
-| Barf         | @@html:<kbd>@@<@@html:</kbd>@@ | Shrink the current node to place it's left-most element into the parent node.                                          |
-| Copy         | @@html:<kbd>@@y@@html:</kbd>@@ | Copy the text of the current node.                                                                                     |
-| Undo         | @@html:<kbd>@@u@@html:</kbd>@@ | Undo the last operation.                                                                                               |
-| Preview      | @@html:<kbd>@@?@@html:</kbd>@@ | Preview the possible variations of the current node.                                                                   |
+| Operation                     | Keybind                        | Description                                                                                                            |
+|-------------------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------|
+| Raise                         | @@html:<kbd>@@r@@html:</kbd>@@ | Replace the current node's parent with the current node.                                                               |
+| Delete                        | @@html:<kbd>@@d@@html:</kbd>@@ | Delete the current node.                                                                                               |
+| Move                          | @@html:<kbd>@@m@@html:</kbd>@@ | Copy then delete the current node.                                                                                     |
+| Change                        | @@html:<kbd>@@c@@html:</kbd>@@ | Delete the current node and drop into insert state. Tree state will be re-entered on @@html:<kbd>@@ESC@@html:</kbd>@@. |
+| Wrap                          | @@html:<kbd>@@w@@html:</kbd>@@ | Create a new node of /node-type/ and insert the current one in it.                                                     |
+| Exchange                      | @@html:<kbd>@@e@@html:</kbd>@@ | Exchange the current node with a new node of /node-type/.                                                              |
+| Insert                        | @@html:<kbd>@@i@@html:</kbd>@@ | Insert a new node of /node-type/ to the right of the current.                                                          |
+| Append                        | @@html:<kbd>@@a@@html:</kbd>@@ | Insert a new node of /node-type/ to the left of the current.                                                           |
+| Insert Child                  | @@html:<kbd>@@I@@html:</kbd>@@ | Insert a new node of /node-type/ as a child of the current. Useful for nodes with no named children, i.e. ={}=         |
+| Goto Placeholder and Change   | @@html:<kbd>@@N@@html:</kbd>@@ | Jump to the first placeholder node within the current and edit it.                                                     |
+| Append Placeholder and Change | @@html:<kbd>@@x@@html:</kbd>@@ | Add a placeholder node and then immediately edit it.                                                                   |
+| Slurp                         | @@html:<kbd>@@>@@html:</kbd>@@ | Grow the current node to contain the nearest right-most element.                                                       |
+| Barf                          | @@html:<kbd>@@<@@html:</kbd>@@ | Shrink the current node to place it's left-most element into the parent node.                                          |
+| Copy                          | @@html:<kbd>@@y@@html:</kbd>@@ | Copy the text of the current node.                                                                                     |
+| Undo                          | @@html:<kbd>@@u@@html:</kbd>@@ | Undo the last operation.                                                                                               |
+| Preview                       | @@html:<kbd>@@?@@html:</kbd>@@ | Preview the possible variations of the current node.                                                                   |
+| Tree view                     | @@html:<kbd>@@v@@html:</kbd>@@ | Enable =tree-edit-view= or display if already enabled.                                                                 |
 
 ** Pasting
 Along with the standard node-types of the given language, tree-edit has a
