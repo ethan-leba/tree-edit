@@ -196,6 +196,23 @@ in a DWIM node, that will happen instead.")
   (cons (tsc--node-steps (tsc-get-parent node))
         (tree-edit--get-current-index node)))
 
+(defun tree-edit--node-from-steps (tree steps)
+  "Follow STEPS from TREE's root node; return the final node.
+STEPS should be a sequence of steps, as described by `tsc--node-steps'.
+
+If a step cannot be followed, signal a `tsc--invalid-node-step'
+error. Differs from `tsc--node-from-steps' in that it does not
+validate the type of the steps."
+  (let ((this (tsc-root-node tree)))
+    (pcase-dolist (`(,old-node . ,i) steps)
+      (let ((new-node (tsc-get-nth-child this i)))
+        (unless new-node
+          (signal 'tsc--invalid-node-step (list this old-node i new-node)))
+        (let ((new-type (tsc-node-type new-node))
+              (old-type (tsc-node-type old-node))))
+        (setq this new-node)))
+    this))
+
 (defun tree-edit--restore-location (location)
   "Restore the current node to LOCATION.
 
@@ -717,7 +734,7 @@ first possible location inside of the DWIM node."
            (progn
              (tree-edit-insert-sibling dwim-node node before)
              (let ((inserted-node
-                    (let ((restored-node (tsc--node-from-steps tree-sitter-tree node-steps)))
+                    (let ((restored-node (tree-edit--node-from-steps tree-sitter-tree node-steps)))
                       (if before restored-node (tsc-get-next-named-sibling restored-node)))))
                (cl-dolist (candidate (tree-edit--all-named-descendants inserted-node))
                  (ignore-errors
