@@ -336,6 +336,15 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
          ;; TODO: Prettier print
          (message (string-join (-map #'prin1-to-string it) "\n")))))
 
+(defun evil-tree-edit-open-tree-view ()
+  "Preview the different variations of the current node."
+  (interactive)
+  (evil-tree-edit-ensure-current-node)
+  (require 'tree-edit-view)
+  (if tree-edit-view-mode
+      (display-buffer tree-edit-view--tree-buffer)
+    (tree-edit-view-mode)))
+
 
 (defun evil-tree-edit--ambiguous-node-range-p (node-a node-b)
   "Do NODE-A and NODE-B share the same range?"
@@ -509,6 +518,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
       (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
       (define-key mode-local-keymap "?" #'evil-tree-edit-preview-node)
+      (define-key mode-local-keymap "v" #'evil-tree-edit-open-tree-view)
       (define-key mode-local-keymap "zz" #'evil-scroll-line-to-center)
       ;; `setq-mode-local' macroexpanded, since it doesn't accept symbols
       (mode-local-bind `((evil-tree-state-map . ,mode-local-keymap)) '(mode-variable-flag t) mode)
