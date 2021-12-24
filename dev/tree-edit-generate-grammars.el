@@ -10,7 +10,7 @@
 (require 'cl-extra)
 (require 'tree-edit)
 
-(defvar tree-edit--grammar-template
+(defconst tree-edit--grammar-template
   ";;; tree-edit-%1$s-grammar.el --- Description -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2021 Ethan Leba
@@ -54,6 +54,70 @@
 
 (provide 'tree-edit-%1$s-grammar)
 ;;; tree-edit-%1$s-grammar.el ends here")
+
+(defconst tree-edit--config-template
+  ";;; tree-edit-%1$s-grammar.el --- Description -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2021 Ethan Leba
+;; Author: Ethan Leba <ethanleba5@gmail.com>
+;; SPDX-License-Identifier: GPL-3.0-or-later
+;; Version: 0.1.0
+;; Package-Requires: ((emacs \"27.0\"))
+;; Homepage: https://github.com/ethan-leba/tree-edit
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;; This file contains key bindings and other configuration for `tree-edit' to
+;; work with %1$s.
+;;
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;; Code:
+(require 'mode-local)
+(require 'tree-edit-%1$s-grammar)
+(require 'tree-edit)
+
+(setq-mode-local
+ %s
+
+ tree-edit-whitespace-rules
+ '()
+
+ tree-edit-significant-node-types
+ '()
+
+ tree-edit-placeholder-node-type
+ nil
+
+ tree-edit-node-deletion-override
+ nil
+
+ tree-edit-node-replacement-override
+ nil
+
+ tree-edit-node-insertion-override
+ nil
+
+ tree-edit-dwim-node-alist
+ nil
+
+ tree-edit-nodes
+ nil
+
+ tree-edit-query-nodes
+ nil
+
+ ;; TODO: Check me!
+ tree-edit-syntax-snippets
+ %s)
+
+(provide 'tree-edit-%1$s)
+;;; tree-edit-%1$s.el ends here")
 
 (defun tree-edit--invert-supertypes (supertypes)
   "Invert SUPERTYPES alist into subtypes."
@@ -319,7 +383,6 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
                      (alist-get 'rules raw-grammar)))
          (grammar (tree-edit--extract-grammar grammar))
          (supertypes (tree-edit--generate-supertypes grammar (-map #'intern (alist-get 'supertypes raw-grammar)))))
-    ;; FIXME: Formatting this huge string is very slow
     (format tree-edit--grammar-template
             name
             mode
@@ -330,16 +393,26 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
             `',(tree-edit--pretty-print (tree-edit--generate-alias-names grammar))
             `',(tree-edit--pretty-print (tree-edit--generate-containing-types grammar)))))
 
-(-let* (((path name mode) command-line-args-left)
-        (file-name (format "tree-edit-%s-grammar.el" name)))
-  (message (format "Parsing %s grammar at %s." name path))
-  (with-temp-file (format "tree-edit-%s-grammar.el" name)
+(let ((command-line-args-left (s-split " " "~/scratch/tree-sitter-langs/repos/c/src/grammar.json c c-mode")))
+  (-let (((path name mode) command-line-args-left))
+    (message (format "Parsing %s grammar at %s." name path))
     (let ((time-start (float-time))
           (templated-string (tree-edit--generate-grammar-file path name mode)))
-      (insert templated-string)
+      (with-temp-file (format "tree-edit-%s-grammar.el" name)
+        (insert templated-string))
+      (load-file (format "tree-edit-%s-grammar.el" name))
+      (let ((default-nodes
+              (with-mode-local-symbol (intern mode)
+                (map-apply (lambda (type grammar)
+                             (cons type (car (reazon-run 1 q (tree-edit-parseo grammar q '())))))
+                           tree-edit-grammar))))
+        (with-temp-file (format "tree-edit-%s.el" name)
+          (insert (format tree-edit--config-template
+                          name
+                          mode
+                          `',(tree-edit--pretty-print default-nodes)))))
       (message
-       (format "Wrote grammar to %s after %s seconds."
-               file-name
+       (format "Completed after %s seconds."
                (round (- (float-time) time-start)))))))
 
 (provide 'tree-edit-generate-grammars)
