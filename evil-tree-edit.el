@@ -500,7 +500,7 @@ each language will have it's own set of nouns."
       (define-evil-tree-edit-verb mode-local-keymap "e" #'evil-tree-edit-exchange)
       (define-evil-tree-edit-verb mode-local-keymap "w" #'evil-tree-edit-wrap-node t)
       (define-evil-tree-edit-avy-jump mode-local-keymap "s" #'evil-tree-edit-avy-jump)
-      (define-evil-tree-edit-avy-jump mode-local-keymap "S" #'evil-tree-edit-sig-avy-jump)
+      (define-evil-tree-edit-avy-jump mode-local-keymap "q" #'evil-tree-edit-sig-avy-jump)
       (define-key mode-local-keymap [escape] 'evil-normal-state)
       (define-key mode-local-keymap ">" #'evil-tree-edit-slurp)
       (define-key mode-local-keymap "<" #'evil-tree-edit-barf)
