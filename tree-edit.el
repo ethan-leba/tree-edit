@@ -635,7 +635,9 @@ POSITION can be :before, :after, or nil."
     (if (or (equal rules '(nil . nil)) (not rules))
         (tree-edit--text-and-type node)
       `(,(tsc-node-type node) .
-        ,(-map #'tree-edit--split-node-for-insertion (tree-edit--get-all-children node))))))
+        ,(if (tsc-node-named-p node)
+            (-map #'tree-edit--split-node-for-insertion (tree-edit--get-all-children node))
+           `(,(tsc-node-text node)))))))
 
 (defun tree-edit--text-to-insertable-node (node text)
   "Split NODE for insertion, using TEXT instead of the current buffer.
