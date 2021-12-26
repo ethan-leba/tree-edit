@@ -151,6 +151,12 @@ Typically an identifier, but can conceivably be any type of node.")
 
 If a node cannot be inserted, but it can be inserted if wrapped
 in a DWIM node, that will happen instead.")
+(defvar tree-edit-indentation-level 4
+  "How many spaces/tabs to indent by when rendering nodes.
+
+Set by mode-local grammar file.
+
+TODO: Is there a builtin way to infer this from the buffer?")
 
 ;;* User settings
 (defgroup tree-edit nil
@@ -524,9 +530,9 @@ matters (i.e. expressions are left alone but blocks are split)."
                          ((equal current :newline)
                           (setq deferred-newline t))
                          ((equal current :indent)
-                          (setq indentation (+ indentation 4)))
+                          (setq indentation (+ indentation tree-edit-indentation-level)))
                          ((equal current :dedent)
-                          (setq indentation (- indentation 4)))
+                          (setq indentation (- indentation tree-edit-indentation-level)))
                          ((stringp current)
                           (when deferred-newline
                             (when do-insert
