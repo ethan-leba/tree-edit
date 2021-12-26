@@ -859,13 +859,18 @@ the text."
                                   (user-error "Cannot delete the current node"))]
     (tree-edit--replace-fragment fragment node start (1+ end))))
 
-(defun tree-edit-copy (node)
-  "Copy NODE and cache it's type."
+(defun tree-edit-cache-node (node)
+  "Store a mapping from NODE's text to type."
   (interactive)
   (puthash (tsc-node-text node)
            (cons (tsc-node-type node)
                  (tree-edit--split-node-for-insertion node))
-           tree-edit--type-cache)
+           tree-edit--type-cache))
+
+(defun tree-edit-copy (node)
+  "Copy NODE and cache it's type."
+  (interactive)
+  (tree-edit-cache-node node)
   (kill-ring-save (tsc-node-start-position node) (tsc-node-end-position node)))
 
 ;;* Locals: Relational parser
