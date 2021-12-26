@@ -469,7 +469,7 @@ construction, instead of looking up the rules for node-type."
   (interactive)
   (cons node-type
         (--map
-         (if (and (not (keywordp it)) (symbolp it)) (tree-edit--generate-node it rules) it)
+         (if (and (not (keywordp it)) (symbolp it)) (tree-edit--generate-node it rules) `(,it ,it))
          ;; TODO: See if we can make it via. the parser?
          (or tokens (alist-get node-type rules)
              (user-error "No node definition for %s" node-type)))))
