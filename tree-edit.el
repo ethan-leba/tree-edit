@@ -491,7 +491,7 @@ https://tree-sitter.github.io/tree-sitter/creating-parsers#keyword-extraction"
 
 Will search for the most specific rule first and travel through
 the TYPE's supertypes until exhausted."
-  (car (-remove-item nil (--map (alist-get it tree-edit-whitespace-rules)
+  (car (-remove-item nil (--map (alist-get it tree-edit-whitespace-rules nil nil #'equal)
                                 (alist-get type tree-edit--supertypes `(,type))))))
 
 (defun tree-edit--add-whitespace-rules-to-tokens (type tokens)
