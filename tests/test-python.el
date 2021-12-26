@@ -195,7 +195,10 @@ for [bar] in TREE:
             :to-have-buffer-contents "
 [for TREE in TREE:
     for FOO in BAR:
-        hi]")
+        hi]"))
+  ;; fixed by multitype?
+  ;; expression_statement[identifier] -> return[identifier]
+  (xit "can unwrap type"
     (expect (with-tree-test-buffer #'python-mode "
 for FOO in BAR:
     [hi]"
