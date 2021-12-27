@@ -241,6 +241,12 @@ will be selected if the last one is deleted."
         (tree-edit--apply-until-interesting fun parent)
       parent)))
 
+(defun tree-edit-all-aliases-for-type (type)
+  "Retrieve all aliases that a given node TYPE has. Useful for querying."
+  (--mapcat
+   (if-let (alias (alist-get type (cdr it))) `(,alias))
+   tree-edit--alias-map))
+
 (defun tree-edit--format-query-string (node-type)
   "Format a query string for NODE-TYPE.
 
