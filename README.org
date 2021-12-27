@@ -164,6 +164,7 @@ the =grammar.js= of the language.
 | Status | Language |
 |--------+----------|
 | ✅     | [[https://github.com/ethan-leba/tree-edit/issues/33][Python]]   |
+| 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/54][C]]        |
 | 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/34][Java]]     |
 
 

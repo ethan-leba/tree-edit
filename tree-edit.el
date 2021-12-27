@@ -164,7 +164,8 @@ TODO: Is there a builtin way to infer this from the buffer?")
   :group 'bindings
   :prefix "tree-edit-")
 (defcustom tree-edit-language-alist '((java-mode . tree-edit-java)
-                                      (python-mode . tree-edit-python))
+                                      (python-mode . tree-edit-python)
+                                      (c-mode . tree-edit-c))
   "Mapping from mode to language file."
   :type '(alist :key-type symbol :value-type symbol)
   :group 'tree-edit)
