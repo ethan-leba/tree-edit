@@ -376,8 +376,8 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
 (defun evil-tree-edit--update-overlay ()
   "Update the display of the current selected node, and move the cursor."
   (move-overlay evil-tree-edit--node-overlay
-                (tsc-node-start-position evil-tree-edit-current-node)
-                (tsc-node-end-position evil-tree-edit-current-node))
+                (or (tsc-node-start-position evil-tree-edit-current-node) (point-min))
+                (or (tsc-node-end-position evil-tree-edit-current-node) (point-max)))
   (goto-char (tsc-node-start-position evil-tree-edit-current-node))
   (if (or (evil-tree-edit--ambiguous-node-range-p
            (tsc-get-parent evil-tree-edit-current-node)
