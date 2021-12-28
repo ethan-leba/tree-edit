@@ -375,18 +375,14 @@ Fragments should parse as one of the following structures:
               ;; removing the selected element
               ((left (_ . right)) (-split-at index children))
               (relevant-types (tree-edit--relevant-types type parent-type)))
-        (if-let (result (reazon-run 1 q
-                          (reazon-fresh (tokens qr ql)
-                            (tree-edit--superpositiono right qr parent-type)
-                            (tree-edit--superpositiono left ql parent-type)
-                            (tree-edit--max-lengtho q 3)
-                            ;; FIXME: this should be limited to only 1 new named node, of the requested type
-                            (tree-edit--includes-typeo q relevant-types)
-                            (tree-edit--prefixpostfixo ql q qr tokens)
-                            (tree-edit-parseo grammar tokens '()))))
-            ;; TODO: Put this in the query
-            ;; Rejecting multi-node solutions
-            (and result (equal (length (car result)) 1)))))))
+        (car (tree-edit--run-relation 1 q (lambda (tokens) (and (listp tokens) (equal (length tokens) 1)))
+               (reazon-fresh (tokens qr ql)
+                 (tree-edit--superpositiono right qr parent-type)
+                 (tree-edit--superpositiono left ql parent-type)
+                 (tree-edit--max-lengtho q 3)
+                 (tree-edit--includes-typeo q relevant-types)
+                 (tree-edit--prefixpostfixo ql q qr tokens)
+                 (tree-edit-parseo grammar tokens '()))))))))
 
 (defun tree-edit--find-raise-ancestor (ancestor child)
   "Find a suitable ANCESTOR to be replaced with CHILD."
@@ -415,16 +411,15 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
               ((children . index) (tree-edit--get-parent-tokens node))
               ((left right) (-split-at (+ index (if after 1 0)) children))
               (relevant-types (tree-edit--relevant-types type parent-type)))
-        (if-let (result (reazon-run 1 q
-                          (reazon-fresh (tokens qr ql)
-                            (tree-edit--superpositiono right qr parent-type)
-                            (tree-edit--superpositiono left ql parent-type)
-                            (tree-edit--max-lengtho q 5)
-                            (tree-edit--prefixpostfixo ql q qr tokens)
-                            ;; FIXME: this should be limited to only 1 new named node, of the requested type
-                            (tree-edit--includes-typeo q relevant-types)
-                            (tree-edit-parseo grammar tokens '()))))
-            (car result))))))
+        (car (tree-edit--run-relation 1 q
+               (lambda (tokens) (and (listp tokens) (equal 1 (-count #'symbolp tokens))))
+               (reazon-fresh (tokens qr ql)
+                 (tree-edit--superpositiono right qr parent-type)
+                 (tree-edit--superpositiono left ql parent-type)
+                 (tree-edit--max-lengtho q 5)
+                 (tree-edit--prefixpostfixo ql q qr tokens)
+                 (tree-edit--includes-typeo q relevant-types)
+                 (tree-edit-parseo grammar tokens '()))))))))
 
 (defun tree-edit--remove-node-and-surrounding-syntax (tokens idx)
   "Return a pair of indices to remove the node at IDX in TOKENS and all surrounding syntax."
@@ -453,18 +448,15 @@ delete, and what syntax needs to be inserted after, if any."
               (left (-take left-idx children))
               (right (-drop right-idx children))
               (nodes-deleted (- right-idx left-idx)))
-        ;; FIXME: Q should be only string types, aka syntax -- we're banking that
-        ;;        the first thing reazon stumbles upon is syntax.
-        (if-let ((result (reazon-run 1 q
-                           (reazon-fresh (tokens qr ql)
-                             (tree-edit--superpositiono right qr parent-type)
-                             (tree-edit--superpositiono left ql parent-type)
-                             ;; Prevent nodes from being 'deleted' by putting the exact same thing back
-                             (tree-edit--max-lengtho q (1- nodes-deleted))
-                             (tree-edit--prefixpostfixo ql q qr tokens)
-                             (tree-edit-parseo grammar tokens '())))))
-            (if (-every-p #'stringp (car result))
-                `(,left-idx ,(1- right-idx) ,(car result))))))))
+        (when-let (result (tree-edit--run-relation 3 q
+                            (lambda (q) (and (listp q) (-all-p #'stringp q)))
+                            (reazon-fresh (tokens qr ql)
+                              (tree-edit--superpositiono right qr parent-type)
+                              (tree-edit--superpositiono left ql parent-type)
+                              (tree-edit--max-lengtho q nodes-deleted)
+                              (tree-edit--prefixpostfixo ql q qr tokens)
+                              (tree-edit-parseo grammar tokens '()))))
+          `(,left-idx ,(1- right-idx) ,(car result)))))))
 
 ;;* Locals: node rendering
 (defun tree-edit--generate-node (node-type rules &optional tokens)
@@ -882,6 +874,37 @@ the text."
   (kill-ring-save (tsc-node-start-position node) (tsc-node-end-position node)))
 
 ;;* Locals: Relational parser
+;; Upstream this to `reazon'?
+(defmacro tree-edit--run-relation (tries var pred &rest goals)
+  "Run GOALS against VAR/LIST for at most N values.
+If N is nil, run for as many values as possible. VAR/LIST can be
+either a symbol or a list."
+  (declare (indent 2)
+           (debug t))
+  `(let ((,var (reazon--make-variable ',var))
+         (reazon--stop-time (and reazon-timeout (+ reazon-timeout (float-time)))))
+     (tree-edit--take-first (reazon--run-goal (reazon-conj ,@goals)) ,pred ,tries ,var)))
+
+(defun tree-edit--take-first (stream pred tries var)
+  "Return the first item from STREAM for which PRED returns non-nil.
+
+Modified from `reazon--take'."
+  (declare (indent 1))
+  (cond
+   ((funcall pred (funcall (reazon--reify var) (car stream)))
+    `(,(funcall (reazon--reify var) (car stream))))
+   ((or (equal 1 tries) (functionp stream) (null stream)) nil)
+   (t
+    (cl-block nil
+      (let ((count (if tries (1- tries) -1))
+            (stream (reazon--pull (cdr stream))))
+        (while (and stream (not (zerop count)) (not (functionp stream)))
+          (let ((reified-var (funcall (reazon--reify var) (car stream))))
+            (when (funcall pred reified-var)
+              (cl-return `(,reified-var))))
+          (setq count (1- count))
+          (setq stream (reazon--pull (cdr stream)))))))))
+
 (reazon-defrel tree-edit-parseo (grammar tokens out)
   "TOKENS are a valid prefix of a node in GRAMMAR and OUT is unused tokens in TOKENS."
   (reazon-disj
