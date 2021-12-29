@@ -214,8 +214,6 @@ validate the type of the steps."
       (let ((new-node (tsc-get-nth-child this i)))
         (unless new-node
           (signal 'tsc--invalid-node-step (list this old-node i new-node)))
-        (let ((new-type (tsc-node-type new-node))
-              (old-type (tsc-node-type old-node))))
         (setq this new-node)))
     this))
 
