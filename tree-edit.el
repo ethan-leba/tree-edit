@@ -697,6 +697,8 @@ current, otherwise after."
   (let ((ancestor-to-replace (tree-edit--find-raise-ancestor (tsc-get-parent node) node)))
     (let ((node-text (tsc-node-text node))
           (ancestor-steps (tree-edit--save-location ancestor-to-replace)))
+      (tree-edit-cache-node node)
+      ;; FIXME: Relational parser is being run twice
       (tree-edit-exchange node-text ancestor-to-replace)
       (tree-edit--restore-location ancestor-steps))))
 
