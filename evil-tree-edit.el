@@ -313,8 +313,10 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
   (unless tree-edit-placeholder-node-type
     (user-error "`tree-edit-placeholder-node-type' not set!"))
   (pcase (tree-edit-query
-          (format "((%s) @node (.eq? @node %s))"
-                  tree-edit-placeholder-node-type
+          (format "((%s) (.eq? @node %s))"
+                  (tree-edit--format-query-string
+                   (cons tree-edit-placeholder-node-type
+                         (tree-edit-all-aliases-for-type tree-edit-placeholder-node-type)))
                   ;; XXX: Assuming the placeholder type is a singleton list containing a string
                   (car (alist-get tree-edit-placeholder-node-type tree-edit-syntax-snippets)))
           evil-tree-edit-current-node)
