@@ -256,7 +256,7 @@ NODE-TYPE can be a symbol or a list of symbol."
        (-map (lambda (type) (format "(%s)" type)) it)
        (string-join it " ")
        ;; Query string needs an @name here, or it won't return any results
-       (format "[%s] @foo" it)))
+       (format "[%s] @node" it)))
 
 (defun tree-edit-query (patterns node)
   "Execute query PATTERNS against the children of NODE and return captures.
