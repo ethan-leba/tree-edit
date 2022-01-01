@@ -14,7 +14,16 @@
 ;;
 (require 'tree-edit)
 
-(defcustom tree-edit-mode-map (make-sparse-keymap)
+(defcustom tree-edit-mode-map (let ((map (make-sparse-keymap)))
+				(define-key map (kbd "C-M-f") 'tree-edit-goto-next-sibling)
+				(define-key map (kbd "C-M-b") 'tree-edit-goto-prev-sibling)
+				(define-key map (kbd "C-M-p") 'tree-edit-goto-parent)
+				(define-key map (kbd "C-M-n") 'tree-edit-goto-child)
+				(define-key map (kbd "C-)") 'tree-edit-slurp-cmd)
+				(define-key map (kbd "C-(") 'tree-edit-barf-cmd)
+				(define-key map (kbd "C-c C-t r") 'tree-edit-raise-cmd)
+				(define-key map (kbd "C-c C-t d") 'tree-edit-delete-cmd)
+				map)
   "Keymap to hold bindings that become active with tree-edit-mode")
 
 (defcustom tree-edit-movement-hook nil
@@ -123,7 +132,12 @@ info about the node in case the node's range is ambiguous"
 
 ;;;###autoload
 (define-minor-mode tree-edit-mode
-  "Structural editing for any* language."
+  "Structural editing for any* language.
+
+Available bindings:
+
+\\{tree-edit-mode-map}
+"
   :init-value nil
   :keymap tree-edit-mode-map
   :lighter " TE"
