@@ -423,6 +423,18 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
                  (tree-edit--includes-typeo q relevant-types)
                  (tree-edit-parseo grammar tokens '()))))))))
 
+(defun tree-edit--valid-node-including-type (type parent-type)
+  "Return a valid sequence of tokens for PARENT-TYPE containing TYPE, or nil."
+  (tree-edit-load-grammar-for-major-mode)
+  (-let* ((reazon-occurs-check nil)
+          (grammar (alist-get parent-type tree-edit-grammar))
+          (relevant-types (tree-edit--relevant-types type parent-type)))
+    (car (tree-edit--run-relation 1 q
+           (lambda (tokens) (and (listp tokens) (equal 1 (-count #'symbolp tokens))))
+           (tree-edit--max-lengtho q 5)
+           (tree-edit--includes-typeo q relevant-types)
+           (tree-edit-parseo grammar q '())))))
+
 (defun tree-edit--remove-node-and-surrounding-syntax (tokens idx)
   "Return a pair of indices to remove the node at IDX in TOKENS and all surrounding syntax."
   (let ((end (1+ idx))
@@ -756,9 +768,18 @@ tree-sitter parser."
 (defun tree-edit-insert-child (type-or-text node)
   "Insert a node of the given TYPE-OR-TEXT inside of NODE.
 
+If NODE already has named children, the new node will be inserted
+before the first child.
+
 If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
 the text."
-  (tree-edit-insert-sibling type-or-text (tsc-get-nth-child node 0)))
+  (if (> (tsc-count-named-children node) 0)
+      (tree-edit-insert-sibling type-or-text (tsc-get-nth-named-child node 0) t)
+    (if-let (tokens (tree-edit--try-transformation
+                     type-or-text
+                     (lambda (type) (tree-edit--valid-node-including-type type (tsc-node-type node)))))
+        (tree-edit--replace-fragment tokens node 0 (tsc-count-children node))
+      (user-error "Cannot insert %s into %s!" type-or-text (tsc-node-type node)))))
 
 (defun tree-edit--get-next-node (node)
   "Get the next node to the left of NODE."

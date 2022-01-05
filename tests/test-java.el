@@ -326,12 +326,18 @@ if (foo == 3) {
 (describe "insert child"
   (it "correctly inserts child nodes"
     ;; Should select bounds of new named node
+    (expect (with-tree-test-buffer #'java-mode "[]"
+              (evil-tree-edit-insert-child 'break_statement))
+            :to-have-buffer-contents "[break;]")
     (expect (with-tree-test-buffer #'java-mode "{if (TREE) [{}]}"
               (evil-tree-edit-insert-child 'break_statement))
             :to-have-buffer-contents "{if (TREE) {[break;]}}")
     (expect (with-tree-test-buffer #'java-mode "{foo[()];}"
               (evil-tree-edit-insert-child 'identifier))
-            :to-have-buffer-contents "{foo([TREE]);}"))
+            :to-have-buffer-contents "{foo([TREE]);}")
+    (expect (with-tree-test-buffer #'java-mode "{foo[(TREE)];}"
+              (evil-tree-edit-insert-child 'method_invocation))
+            :to-have-buffer-contents "{foo([TREE()],TREE);}"))
   (it "can insert text fragments"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer #'java-mode "{if (TREE) [{}]}"
