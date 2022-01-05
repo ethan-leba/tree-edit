@@ -209,16 +209,16 @@ if (foo == 3) {
     (expect (with-tree-test-buffer #'java-mode "{foo([x]);}"
               (evil-tree-edit-change))
             :to-have-buffer-contents "{foo(|);}"))
-  (xit "re-enters tree mode on escape and reselects the node"
+  (it "re-enters tree mode on escape and reselects the node"
     (expect (with-tree-test-buffer #'java-mode "{foo([x]);}"
               (evil-tree-edit-change)
               (insert "foo")
-              (evil-normal-state))
+              (evil-tree-edit-normal-or-tree-state))
             :to-have-buffer-contents "{foo([foo]);}")
     (expect (with-tree-test-buffer #'java-mode "{foo(x + [y]);}"
               (evil-tree-edit-change)
               (insert "z")
-              (evil-normal-state))
+              (evil-tree-edit-normal-or-tree-state))
             :to-have-buffer-contents "{foo(x + [z]);}"))
   ;; TODO
   (xit "only allows string nodes to be changed"
