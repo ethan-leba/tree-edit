@@ -556,37 +556,36 @@ matters (i.e. expressions are left alone but blocks are split)."
   "Return a pair of NODE and it's text."
   `(,(tsc-node-type node) ,(tsc-node-text node)))
 
-(defun tree-edit--replace-fragment (fragment node l r)
+(defun tree-edit--replace-fragment (fragment parent l r)
   "Replace the nodes between L and R with the FRAGMENT in the children of NODE."
-  (-let* ((parent (tsc-get-parent node))
-          (children (tree-edit--get-all-children parent))
+  (-let* ((children (tree-edit--get-all-children parent))
           (left (-map #'tree-edit--text-and-type (-slice children 0 l)))
           (right (-some-> r (nth children) tsc-node-text))
           (render-fragment
            (and fragment
                 (tree-edit--generate-node
-                 (tsc-node-type (tsc-get-parent node))
+                 (tsc-node-type parent)
                  tree-edit-syntax-snippets
                  fragment))))
     (let ((indentation
            (save-excursion
-             (goto-char (tsc-node-start-position (car children)))
+             (if children (goto-char (tsc-node-start-position (car children))))
              (current-indentation)))
           (start-edit
            (if (zerop l)
-               (tsc-node-start-position (nth 0 children))
+               (tsc-node-start-position parent)
              (tsc-node-end-position (nth (1- l) children))))
           (end-edit
-           (if-let ((last-node (nth r children)))
-               (tsc-node-start-position last-node)
-             (tsc-node-end-position (nth (1- r) children)))))
+           (if (nth r children)
+               (tsc-node-start-position (nth r children))
+             (tsc-node-end-position parent))))
       (combine-change-calls
-       start-edit
-       end-edit
-       (save-excursion
-         (goto-char start-edit)
-         (delete-region start-edit end-edit)
-         (tree-edit--render-node left (if fragment render-fragment) right indentation))))))
+          start-edit
+          end-edit
+        (save-excursion
+          (goto-char start-edit)
+          (delete-region start-edit end-edit)
+          (tree-edit--render-node left (if fragment render-fragment) right indentation))))))
 
 (defun tree-edit--insert-fragment (fragment node position)
   "Insert rendered FRAGMENT in the children of NODE in the provided POSITION.
@@ -655,51 +654,22 @@ hack around that here."
 
 If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
 the text."
-  (if (stringp type-or-text)
-      (tree-edit--exchange-fragment type-or-text node)
-    (tree-edit--exchange-snippet type-or-text node)))
-
-(defun tree-edit--exchange-snippet (type node)
-  "Insert a node of the given TYPE next to NODE.
-
-if BEFORE is t, the sibling node will be inserted before the
-current, otherwise after."
-  (unless (tree-edit--valid-replacement-p type node)
-    (user-error "Cannot replace the current node with type %s!" type))
-  (-let [(_ . node-index) (tree-edit--get-parent-tokens node)]
-    (tree-edit--replace-fragment `(,type) node node-index (1+ node-index))))
-
-(defun tree-edit--exchange-fragment (text node)
-  "Insert a node of the given TEXT next to NODE.
-
-if BEFORE is t, the sibling node will be inserted before the
-current, otherwise after."
-  (cl-block nil
-    (if-let ((cached-node (gethash text tree-edit--type-cache)))
-        (-let (((type . split-node) cached-node)
-               ((_ . node-index) (tree-edit--get-parent-tokens node)))
-          (when (tree-edit--valid-replacement-p type node)
-            (tree-edit--replace-fragment `(,split-node) node node-index (1+ node-index))
-            (cl-return))))
-    (dolist (fragment-node (tree-edit--parse-fragment text))
-      (-let ((type (tsc-node-type fragment-node))
-             ((_ . node-index) (tree-edit--get-parent-tokens node)))
-        (when (tree-edit--valid-replacement-p type node)
-          (--> fragment-node
-               (tree-edit--text-to-insertable-node it text)
-               (tree-edit--replace-fragment `(,it) node node-index (1+ node-index)))
-          (cl-return))))
-    (user-error "Cannot replace the current node with '%s'!" text)))
+  (if-let (tokens (tree-edit--try-transformation
+                   type-or-text
+                   (lambda (type) (tree-edit--valid-replacement-p type node))))
+      (-let [(_ . node-index) (tree-edit--get-parent-tokens node)]
+        (tree-edit--replace-fragment tokens (tsc-get-parent node) node-index (1+ node-index)))
+    (user-error "Cannot replace %s with %s!" (tsc-node-type node) type-or-text)))
 
 (defun tree-edit-raise (node)
   "Move NODE up the syntax tree until a valid replacement is found."
   (let ((ancestor-to-replace (tree-edit--find-raise-ancestor (tsc-get-parent node) node)))
     (let ((node-text (tsc-node-text node))
-          (ancestor-steps (tree-edit--save-location ancestor-to-replace)))
+          (ancestor-steps (tree-edit--node-steps ancestor-to-replace)))
       (tree-edit-cache-node node)
       ;; FIXME: Relational parser is being run twice
       (tree-edit-exchange node-text ancestor-to-replace)
-      (tree-edit--restore-location ancestor-steps))))
+      (tree-edit--node-from-steps ancestor-steps))))
 
 (defun tree-edit-insert-sibling (type-or-text node &optional before)
   "Insert a node of the given TYPE-OR-TEXT next to NODE.
@@ -709,9 +679,11 @@ the text.
 
 if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
-  (if (stringp type-or-text)
-      (tree-edit--insert-fragment-sibling type-or-text node before)
-    (tree-edit--insert-snippet-sibling type-or-text node before)))
+  (if-let (tokens (tree-edit--try-transformation
+                   type-or-text
+                   (lambda (type) (tree-edit--valid-insertions type (not before) node))))
+      (tree-edit--insert-fragment tokens node (if before :before :after))
+    (user-error "Cannot insert %s %s %s!" type-or-text (if before "before" "after") (tsc-node-type node))))
 
 (defun tree-edit-insert-sibling-dwim (type-or-text node &optional before)
   "Insert a node of the given TYPE-OR-TEXT next to NODE.
@@ -749,39 +721,34 @@ first possible location inside of the DWIM node."
                    (cl-return)))))
          (signal (car err) (cdr err)))))))
 
-(defun tree-edit--insert-snippet-sibling (type node &optional before)
-  "Insert a node of the given TYPE next to NODE.
+(defun tree-edit--try-transformation (type-or-text pred)
+  "Run PRED on TYPE-OR-TEXT and return tokens if valid.
 
-if BEFORE is t, the sibling node will be inserted before the
-current, otherwise after."
-  (if-let (tokens (tree-edit--valid-insertions type (not before) node))
-      (tree-edit--insert-fragment
-       (-map-first #'symbolp (-const type) tokens)
-       node
-       (if before :before :after))
-    (user-error "Cannot insert node of type %s!" type)))
+If TYPE-OR-TEXT is a symbol, the symbol will be passed directly
+to the predicate.
 
-(defun tree-edit--insert-fragment-sibling (text node &optional before)
-  "Insert a node of the given TEXT next to NODE.
-
-if BEFORE is t, the sibling node will be inserted before the
-current, otherwise after."
-  (cl-block nil
-    (if-let ((cached-node (gethash text tree-edit--type-cache)))
-        (-let [(type . split-node) cached-node]
-          (if-let ((tokens (tree-edit--valid-insertions type (not before) node)))
-              (--> tokens
-                   (-replace-first (-first #'symbolp tokens) split-node it)
-                   (tree-edit--insert-fragment it node (if before :before :after))
-                   (cl-return)))))
-    (dolist (fragment-node (tree-edit--parse-fragment text))
-      (if-let ((type (tsc-node-type fragment-node))
-               (tokens (tree-edit--valid-insertions type (not before) node)))
-          (--> tokens
-               (-replace-first (-first #'symbolp tokens) (tree-edit--text-to-insertable-node fragment-node text) it)
-               (tree-edit--insert-fragment it node (if before :before :after))
-               (cl-return))))
-    (user-error "Cannot insert '%s'!" text)))
+If TYPE-OR-TEXT is a string, the type cache will be used if an
+entry exists. Otherwise, the string will be parsed by the
+tree-sitter parser."
+  (if (symbolp type-or-text)
+      (-some->> type-or-text
+        (funcall pred)
+        (-map-first #'symbolp (-const type-or-text)))
+    (cl-block nil
+      (if-let ((cached-node (gethash type-or-text tree-edit--type-cache)))
+          (-let [(type . split-node) cached-node]
+            (-some->> type
+              (funcall pred)
+              (-map-first #'symbolp (-const split-node))
+              (cl-return))))
+      (dolist (fragment-node (tree-edit--parse-fragment type-or-text))
+        (-some->> fragment-node
+          (tsc-node-type)
+          (funcall pred)
+          (-map-first
+           #'symbolp
+           (-const (tree-edit--text-to-insertable-node fragment-node type-or-text)))
+          (cl-return))))))
 
 (defun tree-edit-insert-child (type-or-text node)
   "Insert a node of the given TYPE-OR-TEXT inside of NODE.
@@ -858,7 +825,7 @@ the text."
   "Delete NODE, and any surrounding syntax that accompanies it."
   (-let [(start end fragment) (or (tree-edit--valid-deletions node)
                                   (user-error "Cannot delete the current node"))]
-    (tree-edit--replace-fragment fragment node start (1+ end))))
+    (tree-edit--replace-fragment fragment (tsc-get-parent node) start (1+ end))))
 
 (defun tree-edit-cache-node (node)
   "Store a mapping from NODE's text to type."
