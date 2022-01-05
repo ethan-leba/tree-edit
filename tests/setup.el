@@ -31,10 +31,10 @@
 
 (defun select-node ()
   (when (search-forward "[")
-    (backward-delete-char 1)
+    (delete-char -1)
     (let ((start (point)))
       (when (search-forward "]")
-        (backward-delete-char 1)
+        (delete-char -1)
         (let ((temp-node (tsc-get-descendant-for-position-range
                           (tsc-root-node tree-sitter-tree) start (point))))
           (evil-tree-state)
@@ -55,7 +55,6 @@
          (switch-to-buffer temp-buffer)
          (funcall ,mode)
          (evil-mode)
-         (tree-sitter-mode)
          (evil-tree-edit-mode)
          (mode-local--activate-bindings)
          (insert ,contents)
