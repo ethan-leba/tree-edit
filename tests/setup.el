@@ -11,6 +11,7 @@
       (progn
         (let ((start (tsc-node-start-position evil-tree-edit-current-node))
               (end (tsc-node-end-position evil-tree-edit-current-node)))
+          (evil-tree-state -1)
           (goto-char end)
           (insert "]")
           (goto-char start)
@@ -86,6 +87,7 @@
   https://github.com/abo-abo/lispy/blob/master/lispy-test.el#L15"
   (declare (indent 2))
   `(with-base-test-buffer ,mode ,contents
+     (evil-tree-state -1)
      (select-node)
      ,@test-forms))
 
