@@ -198,40 +198,43 @@ TODO: Is there a builtin way to infer this from the buffer?")
         (setq result (append result children))))
     result))
 
-(defun tree-edit--save-location (node)
-  "Save the current location of the NODE."
-  (cons (tsc--node-steps (tsc-get-parent node))
-        (tree-edit--get-current-index node)))
+(defun tree-edit--node-steps (node)
+  "Return the sequence of steps from the root node to NODE.
 
-(defun tree-edit--node-from-steps (tree steps)
+Each step has the form (CHILD-NODE . NTH), where CHILD-NODE is the node to
+descend into, and NTH is its 0-based ordinal position within the parent node.
+
+If NODE is the root node, the sequence is empty."
+  (let (steps parent (this node))
+    (while (setq parent (tsc-get-parent this))
+      (cl-block nil
+        (let ((i 0))
+          (tsc-mapc-children
+           (lambda (child)
+             (when (tsc-node-eq child this)
+               (push i steps)
+               (cl-return))
+             (when (tsc-node-named-p child)
+               (setq i (1+ i))))
+           parent))
+        (error "Unable to calculate node steps"))
+      (setq this parent))
+    steps))
+
+(defun tree-edit--node-from-steps (steps)
   "Follow STEPS from TREE's root node; return the final node.
 STEPS should be a sequence of steps, as described by `tsc--node-steps'.
 
 If a step cannot be followed, signal a `tsc--invalid-node-step'
 error. Differs from `tsc--node-from-steps' in that it does not
 validate the type of the steps."
-  (let ((this (tsc-root-node tree)))
-    (pcase-dolist (`(,old-node . ,i) steps)
-      (let ((new-node (tsc-get-nth-child this i)))
-        (unless new-node
-          (signal 'tsc--invalid-node-step (list this old-node i new-node)))
+  (let ((this (tsc-root-node tree-sitter-tree)))
+    (cl-dolist (step steps)
+      (when (zerop (tsc-count-named-children this))
+        (cl-return))
+      (let ((new-node (tsc-get-nth-named-child this (min step (1- (tsc-count-named-children this))))))
         (setq this new-node)))
     this))
-
-(defun tree-edit--restore-location (location)
-  "Restore the current node to LOCATION.
-
-More permissive than `tsc--node-from-steps' in that the parent
-will be selected if an only child is deleted and nearest sibling
-will be selected if the last one is deleted."
-  (condition-case nil
-      (-let* (((steps . child-index) location)
-              (recovered-parent (tsc--node-from-steps tree-sitter-tree steps))
-              (num-children (tsc-count-named-children recovered-parent)))
-        (if (equal num-children 0) recovered-parent
-          (tsc-get-nth-named-child recovered-parent
-                                   (min child-index (1- num-children)))))
-    (tsc--invalid-node-step (message "Tree-edit could not restore location"))))
 
 (defun tree-edit--apply-until-interesting (fun node)
   "Apply FUN to NODE until a named node is hit."
@@ -695,7 +698,7 @@ first possible location inside of the DWIM node."
   (condition-case err
       (tree-edit-insert-sibling type-or-text node before)
     (user-error
-     (let ((node-steps (tsc--node-steps node)))
+     (let ((node-steps (tree-edit--node-steps node)))
        ;; re-signal error?
        (if-let* ((node-type
                   (cond ((symbolp type-or-text) `(,type-or-text))
@@ -713,7 +716,7 @@ first possible location inside of the DWIM node."
            (progn
              (tree-edit-insert-sibling dwim-node node before)
              (let ((inserted-node
-                    (let ((restored-node (tree-edit--node-from-steps tree-sitter-tree node-steps)))
+                    (let ((restored-node (tree-edit--node-from-steps node-steps)))
                       (if before restored-node (tsc-get-next-named-sibling restored-node)))))
                (cl-dolist (candidate (tree-edit--all-named-descendants inserted-node))
                  (ignore-errors

@@ -58,27 +58,26 @@ Optionally applies a MOVEMENT to the node after restoration,
 moving the sibling index by the provided value."
   (declare (debug t))
   (let ((location-sym (gensym "location")))
-    `(let ((,location-sym (tree-edit--save-location evil-tree-edit-current-node)))
+    `(let ((,location-sym (tree-edit--node-steps evil-tree-edit-current-node)))
        ,@body
        (run-hooks 'evil-tree-edit-after-change-hook)
        (setq evil-tree-edit-current-node
-             (tree-edit--restore-location ,location-sym))
+             (tree-edit--node-from-steps ,location-sym))
        (evil-tree-edit--update-overlay))))
 
 (defun evil-tree-edit--preserve-current-node-before (_ __)
   "Save the location of the current node before the buffer is re-parsed."
   (when (evil-tree-state-p)
-    (ignore-errors
-      (setq evil-tree-edit--return-position (tree-edit--save-location evil-tree-edit-current-node)))))
+    (setq evil-tree-edit--return-position (tree-edit--node-steps evil-tree-edit-current-node))))
 
 (defun evil-tree-edit--preserve-current-node-after (_)
   "Restore the location of the current node after the buffer is re-parsed.
 
 `tree-sitter-after-change-functions' provides an old-tree arg,
-but it seems to not work reliably with `tree-edit--save-location'."
-  (when (and evil-tree-edit-current-node evil-tree-edit--return-position (evil-tree-state-p))
+but it seems to not work reliably with `tree-edit--node-from-steps'."
+  (when (and evil-tree-edit-current-node (evil-tree-state-p))
     (ignore-errors
-      (setq evil-tree-edit-current-node (tree-edit--restore-location evil-tree-edit--return-position))
+      (setq evil-tree-edit-current-node (tree-edit--node-from-steps evil-tree-edit--return-position))
       (run-hooks 'evil-tree-edit-after-change-hook)
       (evil-tree-edit--update-overlay))))
 
@@ -144,7 +143,7 @@ If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
   (interactive)
   (evil-tree-edit-ensure-current-node)
   (setq evil-tree-edit--return-position
-        (or return-location (tree-edit--save-location evil-tree-edit-current-node)))
+        (or return-location (tree-edit--node-steps evil-tree-edit-current-node)))
   (evil-change-state 'insert)
   (delete-region (tsc-node-start-position evil-tree-edit-current-node)
                  (tsc-node-end-position evil-tree-edit-current-node)))
@@ -327,7 +326,7 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
   "Move cursor to the next placeholder node and change it."
   (interactive)
   (evil-tree-edit-ensure-current-node)
-  (let ((current-location (tree-edit--save-location evil-tree-edit-current-node)))
+  (let ((current-location (tree-edit--node-steps evil-tree-edit-current-node)))
     (evil-tree-edit-goto-next-placeholder)
     (evil-tree-edit-change current-location)))
 
@@ -420,7 +419,7 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
       (progn
         (evil-tree-state)
         (evil-tree-edit--goto-node
-         (tree-edit--restore-location evil-tree-edit--return-position))
+         (tree-edit--node-from-steps evil-tree-edit--return-position))
         (setq evil-tree-edit--return-position nil))
     (evil-normal-state)))
 
