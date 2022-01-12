@@ -134,6 +134,7 @@ but it seems to not work reliably with `tree-edit--node-from-steps'."
 (defun evil-tree-edit-goto-sig-parent ()
   "Move to the next (interesting) named sibling."
   (interactive)
+  (evil-tree-edit--remember)
   (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--apply-movement #'evil-tree-edit--get-sig-parent))
 
@@ -196,6 +197,7 @@ If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
 NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
   (evil-tree-edit-ensure-current-node)
+  (evil-tree-edit--remember)
   (let ((query-node
          (if (member (tsc-node-type evil-tree-edit-current-node)
                      tree-edit-significant-node-types)
@@ -212,6 +214,7 @@ NODE-TYPE can be a symbol or a list of symbol."
 NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
   (evil-tree-edit-ensure-current-node)
+  (evil-tree-edit--remember)
   (-> node-type
       (tree-edit--format-query-string)
       (tree-edit-query evil-tree-edit-current-node)
