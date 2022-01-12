@@ -33,6 +33,8 @@
 (defvar-local evil-tree-edit--return-position nil
   "The location that the cursor should be returned to after exiting insert mode, if set.")
 
+(defvar evil-tree-edit-pos-ring (make-ring 100)
+  "Ring for node position history.")
 (defgroup evil-tree-edit nil
   "Evil structural editing for tree-sitter languages."
   :group 'bindings
@@ -134,6 +136,22 @@ but it seems to not work reliably with `tree-edit--node-from-steps'."
   (interactive)
   (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--apply-movement #'evil-tree-edit--get-sig-parent))
+
+(defun evil-tree-edit--remember ()
+  "Store the current point and mark in history."
+  (let* ((emptyp (zerop (ring-length evil-tree-edit-pos-ring)))
+         (top (unless emptyp (ring-ref evil-tree-edit-pos-ring 0)))
+         (pos (tree-edit--node-steps evil-tree-edit-current-node)))
+    (when (or emptyp (not (equal top pos)))
+      (ring-insert evil-tree-edit-pos-ring pos))))
+
+(defun evil-tree-edit-back ()
+  "Set current node to the last remembered position."
+  (interactive)
+  (unless (zerop (ring-length evil-tree-edit-pos-ring))
+    (-> (ring-remove evil-tree-edit-pos-ring 0)
+        (tree-edit--node-from-steps)
+        (evil-tree-edit--goto-node))))
 
 ;;* Evil tree-edit functions
 (defun evil-tree-edit-change (&optional return-location)
@@ -525,6 +543,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "k" #'evil-tree-edit-goto-prev-sibling)
       (define-key mode-local-keymap "h" #'evil-tree-edit-goto-parent)
       (define-key mode-local-keymap "f" #'evil-tree-edit-goto-child)
+      (define-key mode-local-keymap "b" #'evil-tree-edit-back)
       (define-key mode-local-keymap "x" #'evil-tree-edit-append-sibling-placeholder-and-change)
       (define-key mode-local-keymap "X" #'evil-tree-edit-insert-child-placeholder-and-change)
       (define-key mode-local-keymap "n" #'evil-tree-edit-goto-next-placeholder)
