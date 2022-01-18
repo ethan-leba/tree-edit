@@ -1,17 +1,5 @@
-#+TITLE: Extending tree-edit and library usage
 
-* Adding new languages to tree-edit
-
-1. [[https://github.com/cask/cask][Install cask]]
-2. Clone [[https://github.com/emacs-tree-sitter/tree-sitter-langs][tree-sitter-langs]]
-3. Run =cask emacs --script dev/tree-edit-generate-grammars.el <tree-sitter-langs>/repos/<language>/src/grammar.json <language> <language-mode>= in tree-edit root. This will generate two files: =tree-edit-<language>.el= and =tree-edit-<language>-grammar.el=. The grammar file should never needed to be modified, while =tree-edit-<language>.el= is a template that should be configured.
-4. Add language to =tree-edit-language-alist=
-5. See what breaks!
-
-** Customizing languages
-
-Check out the docstrings of the variables used in =tree-sitter-java.el= and the
-pre-existing language files to see how to customize languages.
+Documentation on using the tree-edit library. More to come!
 
 * Rolling your own tree-edit commands
 
@@ -58,3 +46,15 @@ objects selecting the entire line.
 
 #+RESULTS:
 : my/tree-edit-raise-word
+* Adding new languages to tree-edit
+
+1. [[https://github.com/cask/cask][Install cask]]
+2. Clone [[https://github.com/emacs-tree-sitter/tree-sitter-langs][tree-sitter-langs]]
+3. Run =cask emacs --script dev/tree-edit-generate-grammars.el <tree-sitter-langs>/repos/<language>/src/grammar.json <language> <language-mode>= in tree-edit root. This will generate two files: =tree-edit-<language>.el= and =tree-edit-<language>-grammar.el=. The grammar file should never needed to be modified, while =tree-edit-<language>.el= is a template that should be configured.
+4. Add language to =tree-edit-language-alist=
+5. See what breaks!
+
+** Customizing languages
+
+Check out the docstrings of the variables used in =tree-sitter-java.el= and the
+pre-existing language files to see how to customize languages.
