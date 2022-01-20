@@ -302,7 +302,7 @@ See `tree-edit-insert-sibling'."
 
 (defun evil-tree-edit-insert-sibling-before (type)
   "Insert a node of the given TYPE before the current."
-  (evil-tree-edit-insert-sibling type t))
+  (evil-tree-edit-insert-sibling type :before))
 
 (defun evil-tree-edit-insert-child (type-or-text)
   "Insert a node of the given TYPE-OR-TEXT inside of the current node."
