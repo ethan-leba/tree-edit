@@ -400,10 +400,10 @@ Fragments should parse as one of the following structures:
      (t (tree-edit--find-raise-ancestor (tsc-get-parent ancestor) child)))))
 
 ;; TODO: Refactor commonalities between syntax generators
-(defun tree-edit--valid-insertions (type after node)
+(defun tree-edit--valid-insertions (type node &optional before)
   "Return a valid sequence of tokens containing the provided TYPE, or nil.
 
-If AFTER is t, generate the tokens after NODE, otherwise before."
+If BEFORE is non-nil, generate the tokens after NODE, otherwise before."
   (tree-edit-load-grammar-for-major-mode)
   (let ((parent-type (tsc-node-type (tsc-get-parent node))))
     (if-let (override (alist-get parent-type tree-edit-node-insertion-override))
@@ -411,7 +411,7 @@ If AFTER is t, generate the tokens after NODE, otherwise before."
       (-let* ((reazon-occurs-check nil)
               (grammar (alist-get parent-type tree-edit-grammar))
               ((children . index) (tree-edit--get-parent-tokens node))
-              ((left right) (-split-at (+ index (if after 1 0)) children))
+              ((left right) (-split-at (+ index (if before 0 1)) children))
               (relevant-types (tree-edit--relevant-types type parent-type)))
         (car (tree-edit--run-relation 1 q
                (lambda (tokens) (and (listp tokens) (equal 1 (-count #'symbolp tokens))))
@@ -602,16 +602,16 @@ matters (i.e. expressions are left alone but blocks are split)."
           (delete-region start-edit end-edit)
           (tree-edit--render-node left (if fragment render-fragment) right indentation))))))
 
-(defun tree-edit--insert-fragment (fragment node position)
+(defun tree-edit--insert-fragment (fragment node before)
   "Insert rendered FRAGMENT in the children of NODE in the provided POSITION.
 
-POSITION can be :before, :after, or nil."
+if BEFORE is non-nil, the new node will be inserted before NODE, otherwise after."
   (-let* ((parent (tsc-get-parent node))
           (children (tree-edit--get-all-children parent))
           (node-index (--find-index (equal (tsc-node-position-range node)
                                            (tsc-node-position-range it))
                                     children))
-          (split-position (+ (pcase position (:after 1) (:before 0)) node-index))
+          (split-position (+ (if before 0 1) node-index))
           (left (-map #'tree-edit--text-and-type (-slice children 0 split-position)))
           (right (-some-> split-position (nth children) tsc-node-text))
           (render-fragment
@@ -696,8 +696,8 @@ if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
   (if-let (tokens (tree-edit--try-transformation
                    type-or-text
-                   (lambda (type) (tree-edit--valid-insertions type (not before) node))))
-      (tree-edit--insert-fragment tokens node (if before :before :after))
+                   (lambda (type) (tree-edit--valid-insertions type node before))))
+      (tree-edit--insert-fragment tokens node before)
     (user-error "Cannot insert %s %s %s!" type-or-text (if before "before" "after") (tsc-node-type node))))
 
 (defun tree-edit-insert-sibling-dwim (type-or-text node &optional before)
@@ -798,7 +798,6 @@ the text."
              (unless (tree-edit--valid-deletions slurp-candidate)
                (user-error "Cannot delete %s!" (tsc-node-text slurp-candidate)))
              (unless (tree-edit--valid-insertions (tsc-node-type slurp-candidate)
-                                                  t
                                                   (tsc-get-nth-child node 0))
                (user-error "Cannot add %s into %s!"
                            (tsc-node-text slurp-candidate)
@@ -814,9 +813,7 @@ the text."
                   (slurper-steps (tsc--node-steps slurper)))
              (unless (tree-edit--valid-deletions slurp-candidate)
                (user-error "Cannot delete %s!" (tsc-node-text slurp-candidate)))
-             (unless (tree-edit--valid-insertions
-                      (tsc-node-type slurp-candidate) t
-                      slurper)
+             (unless (tree-edit--valid-insertions (tsc-node-type slurp-candidate) slurper)
                (user-error "Cannot add %s into %s!"
                            (tsc-node-text slurp-candidate)
                            (tsc-node-type node)))
@@ -836,7 +833,6 @@ the text."
       (while barfer
         (let* ((barfer-steps (tsc--node-steps barfer)))
           (when (tree-edit--valid-insertions (tsc-node-type barfer)
-                                             t
                                              (tsc-get-nth-child node 0))
             (let ((barfee-text (tsc-node-text barfee)))
               (tree-edit-delete barfee)
