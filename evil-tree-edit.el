@@ -378,6 +378,11 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
   (interactive)
   (evil-tree-edit-exchange (car kill-ring)))
 
+(defun evil-tree-edit-yank-pop ()
+  "Exchange the current node with a selection from the kill-ring."
+  (interactive)
+  (evil-tree-edit-exchange (read-from-kill-ring "Exchange node: ")))
+
 (defun evil-tree-edit-clone ()
   "Insert a copy of the current node."
   (interactive)
@@ -531,10 +536,18 @@ If WRAP is t, include :wrap-override."
     keymap
     (string-join (list key "p"))
     (cons
-     "kill-ring"
+     "yank"
      `(lambda ()
         (interactive)
-        (,func (car kill-ring))))))
+        (,func (car kill-ring)))))
+  (define-key
+    keymap
+    (string-join (list key "P"))
+    (cons
+     "yank-pop"
+     `(lambda ()
+        (interactive)
+        (,func (read-from-kill-ring "Kill-ring: "))))))
 
 (defun evil-tree-edit-set-state-bindings (mode)
   "Set keybindings for MODE in `evil-tree-state'.
@@ -568,6 +581,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "r" #'evil-tree-edit-raise)
       (define-key mode-local-keymap "y" #'evil-tree-edit-copy)
       (define-key mode-local-keymap "p" #'evil-tree-edit-yank)
+      (define-key mode-local-keymap "P" #'evil-tree-edit-yank-pop)
       (define-key mode-local-keymap "C" #'evil-tree-edit-clone)
       (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
       (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
