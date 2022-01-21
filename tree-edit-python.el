@@ -215,6 +215,8 @@
     :node-override '((unary_operator . ("-" expression))))
    (:type pattern_list
     :key ",")
+   (:type decorator
+    :key "@")
    ;; Uncommon nodes and nodes that are only valid in specific contexts
    (:type list_splat
     :key "m*")
