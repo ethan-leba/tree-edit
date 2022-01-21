@@ -101,6 +101,14 @@ but it seems to not work reliably with `tree-edit--node-from-steps'."
       parent)
      (t (evil-tree-edit--get-sig-parent parent)))))
 
+(defun evil-tree-edit--remember ()
+  "Store the current point and mark in history."
+  (let* ((emptyp (zerop (ring-length evil-tree-edit-pos-ring)))
+         (top (unless emptyp (ring-ref evil-tree-edit-pos-ring 0)))
+         (pos (tree-edit--node-steps evil-tree-edit-current-node)))
+    (when (or emptyp (not (equal top pos)))
+      (ring-insert evil-tree-edit-pos-ring pos))))
+
 (defun evil-tree-edit-ensure-current-node ()
   "Error if `evil-tree-edit-current-node' is nil."
   (unless evil-tree-edit-current-node
@@ -137,14 +145,6 @@ but it seems to not work reliably with `tree-edit--node-from-steps'."
   (evil-tree-edit--remember)
   (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--apply-movement #'evil-tree-edit--get-sig-parent))
-
-(defun evil-tree-edit--remember ()
-  "Store the current point and mark in history."
-  (let* ((emptyp (zerop (ring-length evil-tree-edit-pos-ring)))
-         (top (unless emptyp (ring-ref evil-tree-edit-pos-ring 0)))
-         (pos (tree-edit--node-steps evil-tree-edit-current-node)))
-    (when (or emptyp (not (equal top pos)))
-      (ring-insert evil-tree-edit-pos-ring pos))))
 
 (defun evil-tree-edit-back ()
   "Set current node to the last remembered position."
