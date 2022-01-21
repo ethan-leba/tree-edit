@@ -373,10 +373,17 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
          ;; TODO: Prettier print
          (message (string-join (-map #'prin1-to-string it) "\n")))))
 
-(defun evil-tree-edit-paste ()
+(defun evil-tree-edit-yank ()
   "Exchange the current node with the top of the kill ring."
   (interactive)
   (evil-tree-edit-exchange (car kill-ring)))
+
+(defun evil-tree-edit-clone ()
+  "Insert a copy of the current node."
+  (interactive)
+  (let ((node-text (tsc-node-text evil-tree-edit-current-node)))
+    (tree-edit-cache-node evil-tree-edit-current-node)
+    (evil-tree-edit-insert-sibling node-text)))
 
 (defun evil-tree-edit-open-tree-view ()
   "Preview the different variations of the current node."
@@ -560,7 +567,8 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "m" #'evil-tree-edit-move)
       (define-key mode-local-keymap "r" #'evil-tree-edit-raise)
       (define-key mode-local-keymap "y" #'evil-tree-edit-copy)
-      (define-key mode-local-keymap "p" #'evil-tree-edit-paste)
+      (define-key mode-local-keymap "p" #'evil-tree-edit-yank)
+      (define-key mode-local-keymap "C" #'evil-tree-edit-clone)
       (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
       (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
       (define-key mode-local-keymap "?" #'evil-tree-edit-preview-node)
