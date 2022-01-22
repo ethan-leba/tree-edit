@@ -390,13 +390,13 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
     (tree-edit-cache-node evil-tree-edit-current-node)
     (evil-tree-edit-insert-sibling node-text)))
 
-(defun evil-tree-edit-open-tree-view ()
-  "Preview the different variations of the current node."
+(defun evil-tree-edit-toggle-tree-view ()
+  "Toggle `evil-tree-edit-view-mode'."
   (interactive)
   (evil-tree-edit-ensure-current-node)
   (require 'evil-tree-edit-view)
   (if evil-tree-edit-view-mode
-      (display-buffer evil-tree-edit-view--tree-buffer)
+      (evil-tree-edit-view-mode -1)
     (evil-tree-edit-view-mode)))
 
 
@@ -586,7 +586,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
       (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
       (define-key mode-local-keymap "?" #'evil-tree-edit-preview-node)
-      (define-key mode-local-keymap "v" #'evil-tree-edit-open-tree-view)
+      (define-key mode-local-keymap "v" #'evil-tree-edit-toggle-tree-view)
       (define-key mode-local-keymap "zz" #'evil-scroll-line-to-center)
       ;; `setq-mode-local' macroexpanded, since it doesn't accept symbols
       (mode-local-bind `((evil-tree-state-map . ,mode-local-keymap)) '(mode-variable-flag t) mode)
