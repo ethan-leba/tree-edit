@@ -91,6 +91,7 @@ lighter color if CHILD-OF-CURRENT-NODE is non-nil."
   (remove-hook 'tree-sitter-after-change-functions #'evil-tree-edit-view--display-tree :local)
   (remove-hook 'evil-tree-edit-movement-hook #'evil-tree-edit-view--display-tree-no-arg :local)
   (when (buffer-live-p evil-tree-edit-view--tree-buffer)
+    (-some-> evil-tree-edit-view--tree-buffer (get-buffer-window) (delete-window))
     (kill-buffer evil-tree-edit-view--tree-buffer)
     (setq evil-tree-edit-view--tree-buffer nil)))
 
