@@ -393,27 +393,26 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
             `',(tree-edit--pretty-print (tree-edit--generate-alias-names grammar))
             `',(tree-edit--pretty-print (tree-edit--generate-containing-types grammar)))))
 
-(let ((command-line-args-left (s-split " " "~/scratch/tree-sitter-langs/repos/c/src/grammar.json c c-mode")))
-  (-let (((path name mode) command-line-args-left))
-    (message (format "Parsing %s grammar at %s." name path))
-    (let ((time-start (float-time))
-          (templated-string (tree-edit--generate-grammar-file path name mode)))
-      (with-temp-file (format "tree-edit-%s-grammar.el" name)
-        (insert templated-string))
-      (load-file (format "tree-edit-%s-grammar.el" name))
-      (let ((default-nodes
-              (with-mode-local-symbol (intern mode)
-                (map-apply (lambda (type grammar)
-                             (cons type (car (reazon-run 1 q (tree-edit-parseo grammar q '())))))
-                           tree-edit-grammar))))
-        (with-temp-file (format "tree-edit-%s.el" name)
-          (insert (format tree-edit--config-template
-                          name
-                          mode
-                          `',(tree-edit--pretty-print default-nodes)))))
-      (message
-       (format "Completed after %s seconds."
-               (round (- (float-time) time-start)))))))
+(-let (((path name mode) command-line-args-left))
+  (message (format "Parsing %s grammar at %s." name path))
+  (let ((time-start (float-time))
+        (templated-string (tree-edit--generate-grammar-file path name mode)))
+    (with-temp-file (format "tree-edit-%s-grammar.el" name)
+      (insert templated-string))
+    (load-file (format "tree-edit-%s-grammar.el" name))
+    (let ((default-nodes
+            (with-mode-local-symbol (intern mode)
+              (map-apply (lambda (type grammar)
+                           (cons type (car (reazon-run 1 q (tree-edit-parseo grammar q '())))))
+                         tree-edit-grammar))))
+      (with-temp-file (format "tree-edit-%s.el" name)
+        (insert (format tree-edit--config-template
+                        name
+                        mode
+                        `',(tree-edit--pretty-print default-nodes)))))
+    (message
+     (format "Completed after %s seconds."
+             (round (- (float-time) time-start))))))
 
 (provide 'tree-edit-generate-grammars)
 ;;; tree-edit-generate-grammars.el ends here
