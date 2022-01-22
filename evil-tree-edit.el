@@ -394,10 +394,10 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
   "Preview the different variations of the current node."
   (interactive)
   (evil-tree-edit-ensure-current-node)
-  (require 'tree-edit-view)
-  (if tree-edit-view-mode
-      (display-buffer tree-edit-view--tree-buffer)
-    (tree-edit-view-mode)))
+  (require 'evil-tree-edit-view)
+  (if evil-tree-edit-view-mode
+      (display-buffer evil-tree-edit-view--tree-buffer)
+    (evil-tree-edit-view-mode)))
 
 
 (defun evil-tree-edit--ambiguous-node-range-p (node-a node-b)
