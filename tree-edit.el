@@ -472,6 +472,7 @@ delete, and what syntax needs to be inserted after, if any."
                               (tree-edit-parseo grammar tokens '()))))
           `(,left-idx ,(1- right-idx) ,(car result)))))))
 
+;; NOTE: The node rendering code is pretty crappy, sorry. I'll probably rewrite this whole thing later on.
 ;;* Locals: node rendering
 (defun tree-edit--generate-node (node-type rules &optional tokens)
   "Given a NODE-TYPE and a set of RULES, generate a node string.
