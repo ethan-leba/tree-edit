@@ -762,30 +762,17 @@ the text."
           ((zerop (tsc-count-children node)) (user-error "Current node has no children, can't slurp!"))
           ;; No named children, use insert child
           ((equal (tsc-count-named-children node) 0)
-           (let ((slurper (tsc--node-steps node)))
-             (unless (tree-edit--valid-deletions slurp-candidate)
-               (user-error "Cannot delete %s!" (tsc-node-text slurp-candidate)))
-             (unless (tree-edit--valid-insertions (tsc-node-type slurp-candidate)
-                                                  (tsc-get-nth-child node 0))
-               (user-error "Cannot add %s into %s!"
-                           (tsc-node-text slurp-candidate)
-                           (tsc-node-type node)))
-             (let ((slurp-text (tsc-node-text slurp-candidate)))
+           (let ((slurper (tsc--node-steps node))
+                 (slurp-text (tsc-node-text slurp-candidate)))
+             (atomic-change-group
                (tree-edit-delete slurp-candidate)
                (tree-edit-insert-child slurp-text (tsc--node-from-steps tree-sitter-tree slurper)))))
           ;; Named children, use insert sibling
           (t
-           (let* ((slurper
-                   (tsc-get-nth-named-child node
-                                            (1- (tsc-count-named-children node))))
-                  (slurper-steps (tsc--node-steps slurper)))
-             (unless (tree-edit--valid-deletions slurp-candidate)
-               (user-error "Cannot delete %s!" (tsc-node-text slurp-candidate)))
-             (unless (tree-edit--valid-insertions (tsc-node-type slurp-candidate) slurper)
-               (user-error "Cannot add %s into %s!"
-                           (tsc-node-text slurp-candidate)
-                           (tsc-node-type node)))
-             (let ((slurp-text (tsc-node-text slurp-candidate)))
+           (let* ((slurper (tsc-get-nth-named-child node (1- (tsc-count-named-children node))))
+                  (slurper-steps (tsc--node-steps slurper))
+                  (slurp-text (tsc-node-text slurp-candidate)))
+             (atomic-change-group
                (tree-edit-delete slurp-candidate)
                (tree-edit-insert-sibling slurp-text (tsc--node-from-steps tree-sitter-tree slurper-steps))))))))
 
