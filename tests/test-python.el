@@ -235,4 +235,15 @@ if foo:
     [bar()]"
               (evil-tree-edit-goto-parent)
               (evil-tree-edit-delete))
-            :to-throw 'user-error)))
+            :to-throw 'user-error))
+  ;; previously would not put 'pass' on a newline
+  (it "maintains spacing after deleted text"
+    ;; Should select bounds of new named node
+    (expect (with-tree-test-buffer #'python-mode "
+def foo() -> [bar]:
+    pass"
+              (evil-tree-edit-goto-parent)
+              (evil-tree-edit-delete))
+            :to-have-buffer-contents "
+def foo():
+    [pass]")))

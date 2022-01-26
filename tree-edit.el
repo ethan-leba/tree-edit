@@ -512,12 +512,12 @@ the TYPE's supertypes until exhausted."
   (-let (((l . r) (tree-edit--whitespace-rules-for-type type)))
     (append l tokens r)))
 
-(defun tree-edit--render-node (left-tokens new-tokens right-text indentation)
+(defun tree-edit--render-node (left-tokens new-tokens right-token indentation)
   "Insert NEW-TOKENS into the buffer, properly formatting as needed.
 
 LEFT-TOKENS are used for calculating the formatting of
-NEW-TOKENS, while RIGHT-TEXT is used to ensure that no tokens are
-improperly spaced.
+NEW-TOKENS, while RIGHT-TOKEN is used for adding any addition
+newlines or spaces before the remaining text.
 
 Pre-existing nodes in the tokens are assumed to be already
 formatted correctly and thus are inserted as-is.
@@ -531,7 +531,7 @@ matters (i.e. expressions are left alone but blocks are split)."
   (-let* ((prev nil)
           (deferred-newline nil))
     (cl-flet ((process-tokens
-               (stack do-insert)
+               (stack do-insert do-whitespace)
                (while stack
                  (-let ((current (pop stack)))
                    ;; TODO: use `pcase'
@@ -548,25 +548,20 @@ matters (i.e. expressions are left alone but blocks are split)."
                           (setq indentation (- indentation tree-edit-indentation-level)))
                          ((stringp current)
                           (when deferred-newline
-                            (when do-insert
+                            (when (or do-insert do-whitespace)
                               (newline)
                               (indent-line-to indentation))
                             (setq deferred-newline nil))
+                          (when (and (or do-insert do-whitespace)
+                                     (tree-edit--needs-space-p prev current))
+                            (insert " "))
                           (when do-insert
-                            (if (tree-edit--needs-space-p prev current)
-                                (insert " " current)
-                              (insert current)))))
+                            (insert current))))
                    (when (or (equal :newline current) (stringp current))
                      (setq prev current))))))
-      (process-tokens left-tokens nil)
-      (process-tokens new-tokens t)
-      (when right-text
-        (when deferred-newline
-          (newline)
-          (indent-line-to indentation)
-          (setq deferred-newline nil))
-        (when (tree-edit--needs-space-p prev right-text)
-          (insert " "))))))
+      (process-tokens left-tokens nil nil)
+      (process-tokens new-tokens t nil)
+      (process-tokens `(,right-token) nil t))))
 
 (defun tree-edit--text-and-type (node)
   "Return a pair of NODE and it's text."
@@ -576,7 +571,7 @@ matters (i.e. expressions are left alone but blocks are split)."
   "Replace the nodes between L and R with the FRAGMENT in the children of NODE."
   (-let* ((children (tree-edit--get-all-children parent))
           (left (-map #'tree-edit--text-and-type (-slice children 0 l)))
-          (right (-some-> r (nth children) tsc-node-text))
+          (right (-some-> r (nth children) (tree-edit--text-and-type)))
           (render-fragment
            (and fragment
                 (tree-edit--generate-node
@@ -614,7 +609,7 @@ if BEFORE is non-nil, the new node will be inserted before NODE, otherwise after
                                     children))
           (split-position (+ (if before 0 1) node-index))
           (left (-map #'tree-edit--text-and-type (-slice children 0 split-position)))
-          (right (-some-> split-position (nth children) tsc-node-text))
+          (right (-some-> split-position (nth children) (tree-edit--text-and-type)))
           (render-fragment
            (and fragment
                 (tree-edit--generate-node
