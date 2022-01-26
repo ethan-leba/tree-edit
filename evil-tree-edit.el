@@ -249,12 +249,11 @@ NODE-TYPE can be a symbol or a list of symbol."
    (let ((node-text (tsc-node-text evil-tree-edit-current-node))
          (node-type (tsc-node-type evil-tree-edit-current-node)))
      (tree-edit-cache-node evil-tree-edit-current-node)
-     (evil-tree-edit-exchange type)
-     (unwind-protect
-         (evil-tree-edit--avy-jump
-          (-filter (lambda (node) (tree-edit--valid-replacement-p node-type node))
-                   (tree-edit--all-named-descendants evil-tree-edit-current-node)))
-       ;; If avy fails, replace the old node back
+     (atomic-change-group
+       (evil-tree-edit-exchange type)
+       (evil-tree-edit--avy-jump
+        (--filter (tree-edit--valid-replacement-p node-type it)
+                  (tree-edit--all-named-descendants evil-tree-edit-current-node)))
        (evil-tree-edit-exchange node-text)))))
 
 (defun evil-tree-edit-exchange (type-or-text)
