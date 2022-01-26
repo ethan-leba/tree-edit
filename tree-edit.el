@@ -345,7 +345,7 @@ Fragments should parse as one of the following structures:
   (let* ((parent (tsc-get-parent node))
          (children (tree-edit--get-all-children parent)))
     (cons (-map #'tsc-node-type children)
-          (--find-index (equal (tsc-node-position-range node) (tsc-node-position-range it)) children))))
+          (--find-index (tsc-node-eq node it) children))))
 
 (defun tree-edit-simple-delete-override (node)
   "Allow deletion of NODE."
