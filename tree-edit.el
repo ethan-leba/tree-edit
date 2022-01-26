@@ -643,6 +643,8 @@ hack around that here."
 
 If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
 the text."
+  (when (tsc-node-eq node (tsc-root-node tree-sitter-tree))
+    (tree-edit-transformation-error "Cannot exchange the root node!"))
   (if-let (tokens (tree-edit--try-transformation
                    type-or-text
                    (lambda (type) (tree-edit--valid-replacement-p type node))))
@@ -668,6 +670,8 @@ the text.
 
 if BEFORE is t, the sibling node will be inserted before the
 current, otherwise after."
+  (when (tsc-node-eq node (tsc-root-node tree-sitter-tree))
+    (tree-edit-transformation-error "Cannot perform insertions on the root node!"))
   (if-let (tokens (tree-edit--try-transformation
                    type-or-text
                    (lambda (type) (tree-edit--valid-insertions type node before))))
@@ -815,6 +819,8 @@ the text."
 
 (defun tree-edit-delete (node)
   "Delete NODE, and any surrounding syntax that accompanies it."
+  (when (tsc-node-eq node (tsc-root-node tree-sitter-tree))
+    (tree-edit-transformation-error "Cannot delete the root node!"))
   (-let [(start end fragment) (or (tree-edit--valid-deletions node)
                                   (tree-edit-transformation-error "Cannot delete the current node"))]
     (tree-edit--replace-tokens fragment (tsc-get-parent node) start (1+ end))))

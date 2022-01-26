@@ -314,6 +314,9 @@ if (foo == 3) {
               (evil-tree-edit-insert-sibling '("else" 'block)))
             :to-have-buffer-contents "{if(foo) bar;else{TREE;}}"))
   (it "does not allow invalid transformations"
+    (expect (with-tree-test-buffer #'java-mode "[]"
+              (evil-tree-edit-insert-sibling 'break_statement))
+            :to-throw 'tree-edit-transformation-error)
     (expect (with-tree-test-buffer #'java-mode "{foo([x]);}"
               (evil-tree-edit-insert-sibling 'break_statement))
             :to-throw 'tree-edit-transformation-error)
@@ -533,6 +536,9 @@ class Main {[void] main() {}
               (evil-tree-edit-delete))
             :to-have-buffer-contents "class Foo {[int] bar;}"))
   (it "does not allow invalid transformations"
+    (expect (with-tree-test-buffer #'java-mode "[]"
+              (evil-tree-edit-delete))
+            :to-throw 'tree-edit-transformation-error)
     (expect (with-tree-test-buffer #'java-mode "{[foo](x);}"
               (evil-tree-edit-delete))
             :to-throw 'tree-edit-transformation-error)
