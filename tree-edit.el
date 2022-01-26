@@ -786,13 +786,13 @@ the text."
       (user-error "Cannot delete %s!" (tsc-node-text barfee)))
     (cl-block nil
       (while barfer
-        (let* ((barfer-steps (tsc--node-steps barfer)))
+        (let* ((barfer-steps (tsc--node-steps barfer))
+               (barfee-text (tsc-node-text barfee)))
           (when (tree-edit--valid-insertions (tsc-node-type barfer)
                                              (tsc-get-nth-child node 0))
-            (let ((barfee-text (tsc-node-text barfee)))
-              (tree-edit-delete barfee)
-              (tree-edit-insert-sibling barfee-text (tsc--node-from-steps tree-sitter-tree barfer-steps))
-              (cl-return)))
+            (tree-edit-delete barfee)
+            (tree-edit-insert-sibling barfee-text (tsc--node-from-steps tree-sitter-tree barfer-steps))
+            (cl-return))
           (setq barfer (tsc-get-parent barfer))))
       (user-error "Cannot barf %s!" (tsc-node-type node)))))
 
