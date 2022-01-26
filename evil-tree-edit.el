@@ -109,6 +109,12 @@ but it seems to not work reliably with `tree-edit--node-from-steps'."
     (when (or emptyp (not (equal top pos)))
       (ring-insert evil-tree-edit-pos-ring pos))))
 
+(defun evil-tree-edit--read-from-kill-ring (prompt)
+  "Prompt for kill ring string with PROMPT in backwards compatible manner."
+  (if (>= emacs-major-version 28)
+      (read-from-kill-ring prompt)
+    (completing-read prompt kill-ring)))
+
 (defun evil-tree-edit-ensure-current-node ()
   "Error if `evil-tree-edit-current-node' is nil."
   (unless evil-tree-edit-current-node
@@ -381,7 +387,7 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
 (defun evil-tree-edit-yank-pop ()
   "Exchange the current node with a selection from the kill-ring."
   (interactive)
-  (evil-tree-edit-exchange (read-from-kill-ring "Exchange node: ")))
+  (evil-tree-edit-exchange (evil-tree-edit--read-from-kill-ring "Exchange node: ")))
 
 (defun evil-tree-edit-clone ()
   "Insert a copy of the current node."
@@ -547,7 +553,7 @@ If WRAP is t, include :wrap-override."
      "yank-pop"
      `(lambda ()
         (interactive)
-        (,func (read-from-kill-ring "Kill-ring: "))))))
+        (,func (evil-tree-edit--read-from-kill-ring "Kill-ring: "))))))
 
 (defun evil-tree-edit-set-state-bindings (mode)
   "Set keybindings for MODE in `evil-tree-state'.
