@@ -567,7 +567,7 @@ matters (i.e. expressions are left alone but blocks are split)."
   "Return a pair of NODE and it's text."
   `(,(tsc-node-type node) ,(tsc-node-text node)))
 
-(defun tree-edit--replace-fragment (fragment parent l r)
+(defun tree-edit--replace-tokens (fragment parent l r)
   "Replace the nodes between L and R with the FRAGMENT in the children of NODE."
   (-let* ((children (tree-edit--get-all-children parent))
           (left (-map #'tree-edit--text-and-type (-slice children 0 l)))
@@ -598,7 +598,7 @@ matters (i.e. expressions are left alone but blocks are split)."
           (delete-region start-edit end-edit)
           (tree-edit--render-node left (if fragment render-fragment) right indentation))))))
 
-(defun tree-edit--insert-fragment (fragment node before)
+(defun tree-edit--insert-tokens (fragment node before)
   "Insert rendered FRAGMENT in the children of NODE in the provided POSITION.
 
 if BEFORE is non-nil, the new node will be inserted before NODE,
@@ -606,7 +606,7 @@ otherwise after."
   (-let* ((parent (tsc-get-parent node))
           (children (tree-edit--get-all-children parent))
           (node-index (+ (--find-index (tsc-node-eq node it) children) (if before 0 1))))
-    (tree-edit--replace-fragment fragment parent node-index node-index)))
+    (tree-edit--replace-tokens fragment parent node-index node-index)))
 
 (defun tree-edit--split-node-for-insertion (node)
   "Split NODE into chunks of text as necessary for formatting."
@@ -641,7 +641,7 @@ the text."
                    type-or-text
                    (lambda (type) (tree-edit--valid-replacement-p type node))))
       (-let [(_ . node-index) (tree-edit--get-parent-tokens node)]
-        (tree-edit--replace-fragment tokens (tsc-get-parent node) node-index (1+ node-index)))
+        (tree-edit--replace-tokens tokens (tsc-get-parent node) node-index (1+ node-index)))
     (user-error "Cannot replace %s with %s!" (tsc-node-type node) type-or-text)))
 
 (defun tree-edit-raise (node)
@@ -665,7 +665,7 @@ current, otherwise after."
   (if-let (tokens (tree-edit--try-transformation
                    type-or-text
                    (lambda (type) (tree-edit--valid-insertions type node before))))
-      (tree-edit--insert-fragment tokens node before)
+      (tree-edit--insert-tokens tokens node before)
     (user-error "Cannot insert %s %s %s!" type-or-text (if before "before" "after") (tsc-node-type node))))
 
 (defun tree-edit-insert-sibling-dwim (type-or-text node &optional before)
@@ -746,7 +746,7 @@ the text."
     (if-let (tokens (tree-edit--try-transformation
                      type-or-text
                      (lambda (type) (tree-edit--valid-node-including-type type (tsc-node-type node)))))
-        (tree-edit--replace-fragment tokens node 0 (tsc-count-children node))
+        (tree-edit--replace-tokens tokens node 0 (tsc-count-children node))
       (user-error "Cannot insert %s into %s!" type-or-text (tsc-node-type node)))))
 
 (defun tree-edit--get-next-node (node)
@@ -813,7 +813,7 @@ the text."
   "Delete NODE, and any surrounding syntax that accompanies it."
   (-let [(start end fragment) (or (tree-edit--valid-deletions node)
                                   (user-error "Cannot delete the current node"))]
-    (tree-edit--replace-fragment fragment (tsc-get-parent node) start (1+ end))))
+    (tree-edit--replace-tokens fragment (tsc-get-parent node) start (1+ end))))
 
 (defun tree-edit-cache-node (node)
   "Store a mapping from NODE's text to type."
