@@ -601,40 +601,12 @@ matters (i.e. expressions are left alone but blocks are split)."
 (defun tree-edit--insert-fragment (fragment node before)
   "Insert rendered FRAGMENT in the children of NODE in the provided POSITION.
 
-if BEFORE is non-nil, the new node will be inserted before NODE, otherwise after."
+if BEFORE is non-nil, the new node will be inserted before NODE,
+otherwise after."
   (-let* ((parent (tsc-get-parent node))
           (children (tree-edit--get-all-children parent))
-          (node-index (--find-index (equal (tsc-node-position-range node)
-                                           (tsc-node-position-range it))
-                                    children))
-          (split-position (+ (if before 0 1) node-index))
-          (left (-map #'tree-edit--text-and-type (-slice children 0 split-position)))
-          (right (-some-> split-position (nth children) (tree-edit--text-and-type)))
-          (render-fragment
-           (and fragment
-                (tree-edit--generate-node
-                 (tsc-node-type (tsc-get-parent node))
-                 tree-edit-syntax-snippets
-                 fragment))))
-    (let* ((indentation
-            (save-excursion
-              (goto-char (tsc-node-start-position (car children)))
-              (current-indentation)))
-           (start-edit
-            (if (zerop split-position)
-                (goto-char (tsc-node-start-position (nth 0 children)))
-              (goto-char (tsc-node-end-position (nth (1- split-position) children)))))
-           (end-edit
-            (if-let ((end (nth split-position children)))
-                (tsc-node-start-position end)
-              start-edit)))
-      (combine-change-calls
-       start-edit
-       end-edit
-       (save-excursion
-         (delete-region start-edit end-edit)
-         (goto-char start-edit)
-         (tree-edit--render-node left render-fragment right indentation))))))
+          (node-index (+ (--find-index (tsc-node-eq node it) children) (if before 0 1))))
+    (tree-edit--replace-fragment fragment parent node-index node-index)))
 
 (defun tree-edit--split-node-for-insertion (node)
   "Split NODE into chunks of text as necessary for formatting."
