@@ -66,11 +66,13 @@
    ;; Expressions & values
    (list . ("[" "]"))
    (list_splat . ("*" expression))
+   (list_splat_pattern . ("*" expression))
    (list_comprehension . ("[" expression for_in_clause "]"))
    (dictionary . ("{" "}"))
    (dictionary_comprehension . ("{" pair for_in_clause "}"))
    (tuple . ("(" expression "," ")"))
    (dictionary_splat . ("**" expression))
+   (dictionary_splat_pattern . ("**" expression))
    (not_operator . ("not" expression))
    (pair . (identifier ":" identifier))
    (keyword_argument . (identifier "=" identifier))
@@ -213,14 +215,17 @@
     :key "-"
     :name "negation"
     :node-override '((unary_operator . ("-" expression))))
-   (:type pattern_list
+   (:type (pattern_list
+           expression_list)
     :key ",")
    (:type decorator
     :key "@")
    ;; Uncommon nodes and nodes that are only valid in specific contexts
-   (:type list_splat
+   (:type (list_splat
+           list_splat_pattern)
     :key "m*")
-   (:type dictionary_splat
+   (:type (dictionary_splat
+           dictionary_splat_pattern)
     :key "m8")
    (:type elif_clause
     :key "ml")
@@ -234,7 +239,8 @@
     :key "mf")
    (:type if_clause
     :key "mi")
-   (:type argument_list
+   (:type (argument_list
+           parameters)
     :key "ma")
    (:type decorated_definition
     :key "md")
@@ -401,9 +407,9 @@
     :node-override '((boolean_operator . (expression "or" expression)))))
 
  tree-edit-query-nodes
- '((:type (integer float string true false none)
-    :name "values"
-    :key "V")
+ '((:type (identifier integer float string true false none)
+    :name "atoms"
+    :key "a")
    (:type (set list tuple dictionary)
     :name "containers"
     :key "j")
