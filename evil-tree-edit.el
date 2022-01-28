@@ -512,7 +512,9 @@ FUNC must take one argument, a symbol of the node type."
       (string-join (list key (plist-get node :key)))
       (cons
        ;; emacs-which-key integration
-       (or (plist-get node :name) (s-replace "_" " " (symbol-name (plist-get node :type))))
+       (cond ((plist-get node :name) (plist-get node :name))
+             ((listp (plist-get node :type)) (s-join "/" (--map (s-replace "_" " " (symbol-name it)) (plist-get node :type))))
+             (t (s-replace "_" " " (symbol-name (plist-get node :type)))))
        `(lambda ()
           (interactive)
           (,func ',(plist-get node :type)))))))
@@ -528,7 +530,9 @@ If WRAP is t, include :wrap-override."
       (string-join (list key (plist-get node :key)))
       (cons
        ;; emacs-which-key integration
-       (or (plist-get node :name) (s-replace "_" " " (symbol-name (plist-get node :type))))
+       (cond ((plist-get node :name) (plist-get node :name))
+             ((listp (plist-get node :type)) (s-join "/" (--map (s-replace "_" " " (symbol-name it)) (plist-get node :type))))
+             (t (s-replace "_" " " (symbol-name (plist-get node :type)))))
        `(lambda ()
           (interactive)
           (let ((tree-edit-syntax-snippets
