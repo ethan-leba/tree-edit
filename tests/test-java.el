@@ -332,6 +332,9 @@ if (foo == 3) {
     (expect (with-tree-test-buffer #'java-mode "{try{}catch(Exception e) {}[finally{}]}"
               (evil-tree-edit-insert-sibling 'catch_clause))
             :to-throw 'tree-edit-transformation-error))
+  (it "gracefully rejects bad data"
+    (expect (with-tree-test-buffer #'java-mode "{foo([x]);}"
+              (evil-tree-edit-insert-sibling 345))
             :to-throw 'user-error)))
 
 (describe "insert child"

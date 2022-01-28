@@ -737,7 +737,7 @@ tree-sitter parser."
         (funcall pred)
         (-map-first #'symbolp (-const type))
         (cl-return))))
-   (t
+   ((stringp type-or-text)
     (cl-block nil
       (if-let ((cached-node (gethash type-or-text tree-edit--type-cache)))
           (-let [(type . split-node) cached-node]
@@ -752,7 +752,8 @@ tree-sitter parser."
           (-map-first
            #'symbolp
            (-const (tree-edit--text-to-insertable-node fragment-node type-or-text)))
-          (cl-return)))))))
+          (cl-return)))))
+   (t (user-error "Bad data: %s" type-or-text))))
 
 (defun tree-edit-insert-child (type-or-text node)
   "Insert a node of the given TYPE-OR-TEXT inside of NODE.
