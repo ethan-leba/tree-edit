@@ -710,13 +710,24 @@ first possible location inside of the DWIM node."
 If TYPE-OR-TEXT is a symbol, the symbol will be passed directly
 to the predicate.
 
+If TYPE-OR-TEXT is a list (presumably of symbols), the types will
+be tried in order.
+
 If TYPE-OR-TEXT is a string, the type cache will be used if an
 entry exists. Otherwise, the string will be parsed by the
 tree-sitter parser."
-  (if (symbolp type-or-text)
-      (-some->> type-or-text
+  (cond
+   ((symbolp type-or-text)
+    (-some->> type-or-text
+      (funcall pred)
+      (-map-first #'symbolp (-const type-or-text))))
+   ((listp type-or-text)
+    (cl-dolist (type type-or-text)
+      (-some->> type
         (funcall pred)
-        (-map-first #'symbolp (-const type-or-text)))
+        (-map-first #'symbolp (-const type))
+        (cl-return))))
+   (t
     (cl-block nil
       (if-let ((cached-node (gethash type-or-text tree-edit--type-cache)))
           (-let [(type . split-node) cached-node]
@@ -731,7 +742,7 @@ tree-sitter parser."
           (-map-first
            #'symbolp
            (-const (tree-edit--text-to-insertable-node fragment-node type-or-text)))
-          (cl-return))))))
+          (cl-return)))))))
 
 (defun tree-edit-insert-child (type-or-text node)
   "Insert a node of the given TYPE-OR-TEXT inside of NODE.

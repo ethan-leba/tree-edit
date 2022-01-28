@@ -301,6 +301,13 @@ if (foo == 3) {
               (with-type-cache "bar()" '(method_invocation method_invocation "bar()")
                 (evil-tree-edit-insert-sibling "bar()")))
             :to-have-buffer-contents "{foo(x);[bar();]}"))
+  (it "works with list of types"
+    (expect (with-tree-test-buffer #'java-mode "{foo([x]);}"
+              (evil-tree-edit-insert-sibling '(break_statement identifier)))
+            :to-have-buffer-contents "{foo(x,[TREE]);}")
+    (expect (with-tree-test-buffer #'java-mode "{foo([x]);}"
+              (evil-tree-edit-insert-sibling '(method_invocation identifier)))
+            :to-have-buffer-contents "{foo(x,[TREE()]);}"))
   (xit "can perform multi-node insertions"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer #'java-mode "{if(foo) [bar;]}"
@@ -338,6 +345,14 @@ if (foo == 3) {
     (expect (with-tree-test-buffer #'java-mode "{foo[(TREE)];}"
               (evil-tree-edit-insert-child 'method_invocation))
             :to-have-buffer-contents "{foo([TREE()],TREE);}"))
+  (it "works with list of types"
+    ;; Should select bounds of new named node
+    (expect (with-tree-test-buffer #'java-mode "[]"
+              (evil-tree-edit-insert-child '(identifier break_statement)))
+            :to-have-buffer-contents "[break;]")
+    (expect (with-tree-test-buffer #'java-mode "[]"
+              (evil-tree-edit-insert-child '(continue_statement break_statement)))
+            :to-have-buffer-contents "[continue;]"))
   (it "can insert text fragments"
     ;; Should select bounds of new named node
     (expect (with-tree-test-buffer #'java-mode "{if (TREE) [{}]}"
