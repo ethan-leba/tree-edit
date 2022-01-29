@@ -175,7 +175,13 @@ TODO: Is there a builtin way to infer this from the buffer?")
 ;;   :type 'float
 ;;   :group 'tree-edit)
 
+(define-error 'tree-edit-transformation-error "[Failed transformation]")
+
 ;;* Utilities
+(defun tree-edit-transformation-error (format &rest args)
+  "Signal transformation error with string FORMAT formatted with ARGS."
+  (signal 'tree-edit-transformation-error (list (apply #'format-message format args))))
+
 (defun tree-edit--boring-nodep (node)
   "Check if the NODE is not a named node."
   (and (tsc-node-p node) (not (tsc-node-named-p node))))
@@ -391,7 +397,7 @@ Fragments should parse as one of the following structures:
   (interactive)
   (let ((child-type (tsc-node-type child)))
     (cond
-     ((not (and ancestor (tsc-get-parent ancestor))) (user-error "Can't raise node!"))
+     ((not (and ancestor (tsc-get-parent ancestor))) (tree-edit-transformation-error "Can't raise node!"))
      ;; XXX: For cases like (expression_statement (call)), where both represent the same text.
      ;;      This might only apply to Python.
      ((equal (tsc-node-byte-range ancestor) (tsc-node-byte-range child))
@@ -642,7 +648,7 @@ the text."
                    (lambda (type) (tree-edit--valid-replacement-p type node))))
       (-let [(_ . node-index) (tree-edit--get-parent-tokens node)]
         (tree-edit--replace-tokens tokens (tsc-get-parent node) node-index (1+ node-index)))
-    (user-error "Cannot replace %s with %s!" (tsc-node-type node) type-or-text)))
+    (tree-edit-transformation-error "Cannot replace %s with %s!" (tsc-node-type node) type-or-text)))
 
 (defun tree-edit-raise (node)
   "Move NODE up the syntax tree until a valid replacement is found."
@@ -666,7 +672,7 @@ current, otherwise after."
                    type-or-text
                    (lambda (type) (tree-edit--valid-insertions type node before))))
       (tree-edit--insert-tokens tokens node before)
-    (user-error "Cannot insert %s %s %s!" type-or-text (if before "before" "after") (tsc-node-type node))))
+    (tree-edit-transformation-error "Cannot insert %s %s %s!" type-or-text (if before "before" "after") (tsc-node-type node))))
 
 (defun tree-edit-insert-sibling-dwim (type-or-text node &optional before)
   "Insert a node of the given TYPE-OR-TEXT next to NODE.
@@ -677,7 +683,7 @@ instead. Then the requested node will be inserted inside the
 first possible location inside of the DWIM node."
   (condition-case err
       (tree-edit-insert-sibling type-or-text node before)
-    (user-error
+    (tree-edit-transformation-error
      (let ((node-steps (tree-edit--node-steps node)))
        ;; re-signal error?
        (if-let* ((node-type
@@ -758,7 +764,7 @@ the text."
                      type-or-text
                      (lambda (type) (tree-edit--valid-node-including-type type (tsc-node-type node)))))
         (tree-edit--replace-tokens tokens node 0 (tsc-count-children node))
-      (user-error "Cannot insert %s into %s!" type-or-text (tsc-node-type node)))))
+      (tree-edit-transformation-error "Cannot insert %s into %s!" type-or-text (tsc-node-type node)))))
 
 (defun tree-edit--get-next-node (node)
   "Get the next node to the left of NODE."
@@ -769,8 +775,8 @@ the text."
 (defun tree-edit-slurp (node)
   "Transform NODE's next sibling into it's leftmost child, if possible."
   (let ((slurp-candidate (tree-edit--get-next-node node)))
-    (cond ((not slurp-candidate) (user-error "Nothing to slurp!"))
-          ((zerop (tsc-count-children node)) (user-error "Current node has no children, can't slurp!"))
+    (cond ((not slurp-candidate) (tree-edit-transformation-error "Nothing to slurp!"))
+          ((zerop (tsc-count-children node)) (tree-edit-transformation-error "Current node has no children, can't slurp!"))
           ;; No named children, use insert child
           ((equal (tsc-count-named-children node) 0)
            (let ((slurper (tsc--node-steps node))
@@ -790,11 +796,11 @@ the text."
 (defun tree-edit-barf (node)
   "Transform NODE's leftmost child into it's next sibling, if possible."
   (unless (> (tsc-count-named-children node) 0)
-    (user-error "Cannot barf a node with no named children!"))
+    (tree-edit-transformation-error "Cannot barf a node with no named children!"))
   (let ((barfer (tsc-get-parent node))
         (barfee (tsc-get-nth-named-child node (1- (tsc-count-named-children node)))))
     (unless (tree-edit--valid-deletions barfee)
-      (user-error "Cannot delete %s!" (tsc-node-text barfee)))
+      (tree-edit-transformation-error "Cannot delete %s!" (tsc-node-text barfee)))
     (cl-block nil
       (while barfer
         (let* ((barfer-steps (tsc--node-steps barfer))
@@ -805,12 +811,12 @@ the text."
             (tree-edit-insert-sibling barfee-text (tsc--node-from-steps tree-sitter-tree barfer-steps))
             (cl-return))
           (setq barfer (tsc-get-parent barfer))))
-      (user-error "Cannot barf %s!" (tsc-node-type node)))))
+      (tree-edit-transformation-error "Cannot barf %s!" (tsc-node-type node)))))
 
 (defun tree-edit-delete (node)
   "Delete NODE, and any surrounding syntax that accompanies it."
   (-let [(start end fragment) (or (tree-edit--valid-deletions node)
-                                  (user-error "Cannot delete the current node"))]
+                                  (tree-edit-transformation-error "Cannot delete the current node"))]
     (tree-edit--replace-tokens fragment (tsc-get-parent node) start (1+ end))))
 
 (defun tree-edit-cache-node (node)

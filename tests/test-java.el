@@ -199,10 +199,10 @@ if (foo == 3) {
   (it "errors if a node cannot be raised"
     (expect (with-tree-test-buffer #'java-mode "{[foo];}"
               (evil-tree-edit-raise))
-            :to-throw 'user-error)
+            :to-throw 'tree-edit-transformation-error)
     (expect (with-tree-test-buffer #'java-mode "[{foo;}]"
               (evil-tree-edit-raise))
-            :to-throw 'user-error)))
+            :to-throw 'tree-edit-transformation-error)))
 
 (describe "change node"
   (it "enters insert mode after deleting the current node"
@@ -224,10 +224,10 @@ if (foo == 3) {
   (xit "only allows string nodes to be changed"
     (expect (with-tree-test-buffer #'java-mode "[{foo;}]"
               (evil-tree-edit-change))
-            :to-throw 'user-error)
+            :to-throw 'tree-edit-transformation-error)
     (expect (with-tree-test-buffer #'java-mode "{[3 + 5];}"
               (evil-tree-edit-change))
-            :to-throw 'user-error)))
+            :to-throw 'tree-edit-transformation-error)))
 
 ;; TODO: add proper tests
 ;; (describe "exchange node"
@@ -316,18 +316,19 @@ if (foo == 3) {
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer #'java-mode "{foo([x]);}"
               (evil-tree-edit-insert-sibling 'break_statement))
-            :to-throw 'user-error)
+            :to-throw 'tree-edit-transformation-error)
     ;; Only one else block
     (expect (with-tree-test-buffer #'java-mode "{if(TREE){}else[{}]}"
               (evil-tree-edit-insert-sibling 'block))
-            :to-throw 'user-error)
+            :to-throw 'tree-edit-transformation-error)
     ;; Only one finally clause
     (expect (with-tree-test-buffer #'java-mode "{try{}catch(Exception e) {}[finally{}]}"
               (evil-tree-edit-insert-sibling 'finally_clause))
-            :to-throw 'user-error)
+            :to-throw 'tree-edit-transformation-error)
     ;; Catch cannot go after finally
     (expect (with-tree-test-buffer #'java-mode "{try{}catch(Exception e) {}[finally{}]}"
               (evil-tree-edit-insert-sibling 'catch_clause))
+            :to-throw 'tree-edit-transformation-error))
             :to-throw 'user-error)))
 
 (describe "insert child"
@@ -364,10 +365,10 @@ if (foo == 3) {
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer #'java-mode "{foo[()];}"
               (evil-tree-edit-insert-child 'break_statement))
-            :to-throw 'user-error)
+            :to-throw 'tree-edit-transformation-error)
     (expect (with-tree-test-buffer #'java-mode "{foo[()];}"
               (evil-tree-edit-insert-child "break;"))
-            :to-throw 'user-error)))
+            :to-throw 'tree-edit-transformation-error)))
 
 (describe "slurp"
   (it "correctly slurps nodes"
@@ -534,13 +535,13 @@ class Main {[void] main() {}
   (it "does not allow invalid transformations"
     (expect (with-tree-test-buffer #'java-mode "{[foo](x);}"
               (evil-tree-edit-delete))
-            :to-throw 'user-error)
+            :to-throw 'tree-edit-transformation-error)
     (expect (with-tree-test-buffer #'java-mode "
 class Main {
   [void] main() {}
 }"
               (evil-tree-edit-delete))
-            :to-throw 'user-error))
+            :to-throw 'tree-edit-transformation-error))
   (xit "can deal with comments in between relevant syntax"
     (expect (with-tree-test-buffer #'java-mode "{
 foo(x, // comment

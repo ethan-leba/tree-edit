@@ -235,7 +235,7 @@ if foo:
     [bar()]"
               (evil-tree-edit-goto-parent)
               (evil-tree-edit-delete))
-            :to-throw 'user-error))
+            :to-throw 'tree-edit-transformation-error))
   ;; previously would not put 'pass' on a newline
   (it "maintains spacing after deleted text"
     ;; Should select bounds of new named node
