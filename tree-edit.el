@@ -638,19 +638,19 @@ hack around that here."
     (tree-edit--split-node-for-insertion node)))
 
 ;;* Globals: Structural editing functions
-(defun tree-edit-exchange (type-or-text node)
-  "Exchange NODE for TYPE-OR-TEXT.
+(defun tree-edit-exchange (new-node node)
+  "Attempt to exchange NODE for NEW-NODE.
 
-If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
+If NEW-NODE is a string, the tree-edit will attempt to infer the type of
 the text."
   (when (tsc-node-eq node (tsc-root-node tree-sitter-tree))
     (tree-edit-transformation-error "Cannot exchange the root node!"))
   (if-let (tokens (tree-edit--try-transformation
-                   type-or-text
+                   new-node
                    (lambda (type) (tree-edit--valid-replacement-p type node))))
       (-let [(_ . node-index) (tree-edit--get-parent-tokens node)]
         (tree-edit--replace-tokens tokens (tsc-get-parent node) node-index (1+ node-index)))
-    (tree-edit-transformation-error "Cannot replace %s with %s!" (tsc-node-type node) type-or-text)))
+    (tree-edit-transformation-error "Cannot replace %s with %s!" (tsc-node-type node) new-node)))
 
 (defun tree-edit-raise (node)
   "Move NODE up the syntax tree until a valid replacement is found."
@@ -662,41 +662,40 @@ the text."
       (tree-edit-exchange node-text ancestor-to-replace)
       (tree-edit--node-from-steps ancestor-steps))))
 
-(defun tree-edit-insert-sibling (type-or-text node &optional before)
-  "Insert a node of the given TYPE-OR-TEXT next to NODE.
+(defun tree-edit-insert-sibling (new-node node &optional before)
+  "Attempt to insert NEW-NODE adjacent to NODE.
 
-If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
+If NEW-NODE is a string, the tree-edit will attempt to infer the type of
 the text.
 
-if BEFORE is t, the sibling node will be inserted before the
-current, otherwise after."
+if BEFORE is t, the sibling node will be inserted before NODE, else after."
   (when (tsc-node-eq node (tsc-root-node tree-sitter-tree))
     (tree-edit-transformation-error "Cannot perform insertions on the root node!"))
   (if-let (tokens (tree-edit--try-transformation
-                   type-or-text
+                   new-node
                    (lambda (type) (tree-edit--valid-insertions type node before))))
       (tree-edit--insert-tokens tokens node before)
-    (tree-edit-transformation-error "Cannot insert %s %s %s!" type-or-text (if before "before" "after") (tsc-node-type node))))
+    (tree-edit-transformation-error "Cannot insert %s %s %s!" new-node (if before "before" "after") (tsc-node-type node))))
 
-(defun tree-edit-insert-sibling-dwim (type-or-text node &optional before)
-  "Insert a node of the given TYPE-OR-TEXT next to NODE.
+(defun tree-edit-insert-sibling-dwim (new-node node &optional before)
+  "Insert a node of the given NEW-NODE next to NODE.
 
 If the insertion fails, then `tree-edit-dwim-node-alist' will be
 searched. If a DWIM node is found, that node will be inserted
 instead. Then the requested node will be inserted inside the
 first possible location inside of the DWIM node."
   (condition-case err
-      (tree-edit-insert-sibling type-or-text node before)
+      (tree-edit-insert-sibling new-node node before)
     (tree-edit-transformation-error
      (let ((node-steps (tree-edit--node-steps node)))
        ;; re-signal error?
        (if-let* ((node-type
-                  (cond ((symbolp type-or-text) `(,type-or-text))
-                        ((gethash type-or-text tree-edit--type-cache)
-                         `(,(car (gethash type-or-text tree-edit--type-cache))))
+                  (cond ((symbolp new-node) `(,new-node))
+                        ((gethash new-node tree-edit--type-cache)
+                         `(,(car (gethash new-node tree-edit--type-cache))))
                         (t
                          ;; not car
-                         (-map #'tsc-node-type (tree-edit--parse-fragment type-or-text)))))
+                         (-map #'tsc-node-type (tree-edit--parse-fragment new-node)))))
                  (dwim-node
                   (alist-get
                    (-first
@@ -710,66 +709,66 @@ first possible location inside of the DWIM node."
                       (if before restored-node (tsc-get-next-named-sibling restored-node)))))
                (cl-dolist (candidate (tree-edit--all-named-descendants inserted-node))
                  (ignore-errors
-                   (tree-edit-exchange type-or-text candidate)
+                   (tree-edit-exchange new-node candidate)
                    (cl-return)))))
          (signal (car err) (cdr err)))))))
 
-(defun tree-edit--try-transformation (type-or-text pred)
-  "Run PRED on TYPE-OR-TEXT and return tokens if valid.
+(defun tree-edit--try-transformation (new-node pred)
+  "Run PRED on NEW-NODE and return tokens if valid.
 
-If TYPE-OR-TEXT is a symbol, the symbol will be passed directly
-to the predicate.
+If NEW-NODE is a symbol, the symbol will be passed directly to
+the predicate.
 
-If TYPE-OR-TEXT is a list (presumably of symbols), the types will
-be tried in order.
+If NEW-NODE is a list (presumably of symbols), the types will be
+tried in order.
 
-If TYPE-OR-TEXT is a string, the type cache will be used if an
-entry exists. Otherwise, the string will be parsed by the
-tree-sitter parser."
+If NEW-NODE is a string, the type cache will be used if an entry
+exists. Otherwise, the string will be parsed by the tree-sitter
+parser."
   (cond
-   ((symbolp type-or-text)
-    (-some->> type-or-text
+   ((symbolp new-node)
+    (-some->> new-node
       (funcall pred)
-      (-map-first #'symbolp (-const type-or-text))))
-   ((listp type-or-text)
-    (cl-dolist (type type-or-text)
+      (-map-first #'symbolp (-const new-node))))
+   ((listp new-node)
+    (cl-dolist (type new-node)
       (-some->> type
         (funcall pred)
         (-map-first #'symbolp (-const type))
         (cl-return))))
-   ((stringp type-or-text)
+   ((stringp new-node)
     (cl-block nil
-      (if-let ((cached-node (gethash type-or-text tree-edit--type-cache)))
+      (if-let ((cached-node (gethash new-node tree-edit--type-cache)))
           (-let [(type . split-node) cached-node]
             (-some->> type
               (funcall pred)
               (-map-first #'symbolp (-const split-node))
               (cl-return))))
-      (dolist (fragment-node (tree-edit--parse-fragment type-or-text))
+      (dolist (fragment-node (tree-edit--parse-fragment new-node))
         (-some->> fragment-node
           (tsc-node-type)
           (funcall pred)
           (-map-first
            #'symbolp
-           (-const (tree-edit--text-to-insertable-node fragment-node type-or-text)))
+           (-const (tree-edit--text-to-insertable-node fragment-node new-node)))
           (cl-return)))))
-   (t (user-error "Bad data: %s" type-or-text))))
+   (t (user-error "Bad data: %s" new-node))))
 
-(defun tree-edit-insert-child (type-or-text node)
-  "Insert a node of the given TYPE-OR-TEXT inside of NODE.
+(defun tree-edit-insert-child (new-node node)
+  "Attempt to insert NEW-NODE inside of NODE.
 
 If NODE already has named children, the new node will be inserted
 before the first child.
 
-If TYPE-OR-TEXT is a string, the tree-edit will attempt to infer the type of
-the text."
+If NEW-NODE is a string, the tree-edit will attempt to infer the
+type of the text."
   (if (> (tsc-count-named-children node) 0)
-      (tree-edit-insert-sibling type-or-text (tsc-get-nth-named-child node 0) t)
+      (tree-edit-insert-sibling new-node (tsc-get-nth-named-child node 0) t)
     (if-let (tokens (tree-edit--try-transformation
-                     type-or-text
+                     new-node
                      (lambda (type) (tree-edit--valid-node-including-type type (tsc-node-type node)))))
         (tree-edit--replace-tokens tokens node 0 (tsc-count-children node))
-      (tree-edit-transformation-error "Cannot insert %s into %s!" type-or-text (tsc-node-type node)))))
+      (tree-edit-transformation-error "Cannot insert %s into %s!" new-node (tsc-node-type node)))))
 
 (defun tree-edit--get-next-node (node)
   "Get the next node to the left of NODE."
