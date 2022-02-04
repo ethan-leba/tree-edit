@@ -371,27 +371,6 @@ Fragments should parse as one of the following structures:
 
 ;;* Globals: Syntax generation
 ;; TODO: Handle less restrictively by ripping out surrounding syntax (ie delete)
-(defun tree-edit--valid-replacement-p (type node)
-  "Return non-nil if NODE can be replaced with a node of TYPE."
-  (tree-edit-load-grammar-for-major-mode)
-  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
-    (if-let (override (alist-get parent-type tree-edit-node-replacement-override))
-        (funcall override type node)
-      (-let* ((reazon-occurs-check nil)
-              (grammar (alist-get parent-type tree-edit-grammar))
-              ((children . index) (tree-edit--get-parent-tokens node))
-              ;; removing the selected element
-              ((left (_ . right)) (-split-at index children))
-              (relevant-types (tree-edit--relevant-types type parent-type)))
-        (car (tree-edit--run-relation 1 q (lambda (tokens) (and (listp tokens) (equal (length tokens) 1)))
-               (reazon-fresh (tokens qr ql)
-                 (tree-edit--superpositiono right qr parent-type)
-                 (tree-edit--superpositiono left ql parent-type)
-                 (tree-edit--max-lengtho q 3)
-                 (tree-edit--includes-typeo q relevant-types)
-                 (tree-edit--prefixpostfixo ql q qr tokens)
-                 (tree-edit-parseo grammar tokens '()))))))))
-
 (defun tree-edit--find-raise-ancestor (ancestor child)
   "Find a suitable ANCESTOR to be replaced with CHILD."
   (interactive)
@@ -404,30 +383,6 @@ Fragments should parse as one of the following structures:
       (tree-edit--find-raise-ancestor (tsc-get-parent ancestor) child))
      ((tree-edit--valid-replacement-p child-type ancestor) ancestor)
      (t (tree-edit--find-raise-ancestor (tsc-get-parent ancestor) child)))))
-
-;; TODO: Refactor commonalities between syntax generators
-(defun tree-edit--valid-insertions (type node &optional before)
-  "Return a valid sequence of tokens containing the provided TYPE, or nil.
-
-If BEFORE is non-nil, generate the tokens after NODE, otherwise before."
-  (tree-edit-load-grammar-for-major-mode)
-  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
-    (if-let (override (alist-get parent-type tree-edit-node-insertion-override))
-        (funcall override type node)
-      (-let* ((reazon-occurs-check nil)
-              (grammar (alist-get parent-type tree-edit-grammar))
-              ((children . index) (tree-edit--get-parent-tokens node))
-              ((left right) (-split-at (+ index (if before 0 1)) children))
-              (relevant-types (tree-edit--relevant-types type parent-type)))
-        (car (tree-edit--run-relation 1 q
-               (lambda (tokens) (and (listp tokens) (equal 1 (-count #'symbolp tokens))))
-               (reazon-fresh (tokens qr ql)
-                 (tree-edit--superpositiono right qr parent-type)
-                 (tree-edit--superpositiono left ql parent-type)
-                 (tree-edit--max-lengtho q 5)
-                 (tree-edit--prefixpostfixo ql q qr tokens)
-                 (tree-edit--includes-typeo q relevant-types)
-                 (tree-edit-parseo grammar tokens '()))))))))
 
 (defun tree-edit--valid-node-including-type (type parent-type)
   "Return a valid sequence of tokens for PARENT-TYPE containing TYPE, or nil."
@@ -450,6 +405,50 @@ If BEFORE is non-nil, generate the tokens after NODE, otherwise before."
     (while (and (>= start 0) (stringp (nth start tokens)))
       (setq start (1- start)))
     (cons (1+ start) end)))
+
+(defun tree-edit--valid-replacement-p (type node)
+  "Return non-nil if NODE can be replaced with a node of TYPE."
+  (tree-edit-load-grammar-for-major-mode)
+  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
+    (if-let (override (alist-get parent-type tree-edit-node-replacement-override))
+        (funcall override type node)
+      (-let* ((reazon-occurs-check nil)
+              (grammar (alist-get parent-type tree-edit-grammar))
+              ((children . index) (tree-edit--get-parent-tokens node))
+              ;; removing the selected element
+              ((left (_ . right)) (-split-at index children))
+              (relevant-types (tree-edit--relevant-types type parent-type)))
+        (car (tree-edit--run-relation 1 q (lambda (tokens) (and (listp tokens) (equal (length tokens) 1)))
+               (reazon-fresh (tokens qr ql)
+                 (tree-edit--superpositiono right qr parent-type)
+                 (tree-edit--superpositiono left ql parent-type)
+                 (tree-edit--max-lengtho q 3)
+                 (tree-edit--includes-typeo q relevant-types)
+                 (tree-edit--prefixpostfixo ql q qr tokens)
+                 (tree-edit-parseo grammar tokens '()))))))))
+
+(defun tree-edit--valid-insertions (type node &optional before)
+  "Return a valid sequence of tokens containing the provided TYPE, or nil.
+
+If BEFORE is non-nil, generate the tokens after NODE, otherwise before."
+  (tree-edit-load-grammar-for-major-mode)
+  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
+    (if-let (override (alist-get parent-type tree-edit-node-insertion-override))
+        (funcall override type node)
+      (-let* ((reazon-occurs-check nil)
+              (grammar (alist-get parent-type tree-edit-grammar))
+              ((children . index) (tree-edit--get-parent-tokens node))
+              ((left right) (-split-at (+ index (if before 0 1)) children))
+              (relevant-types (tree-edit--relevant-types type parent-type)))
+        (car (tree-edit--run-relation 1 q
+               (lambda (tokens) (and (listp tokens) (equal 1 (-count #'symbolp tokens))))
+               (reazon-fresh (tokens qr ql)
+                 (tree-edit--superpositiono right qr parent-type)
+                 (tree-edit--superpositiono left ql parent-type)
+                 (tree-edit--max-lengtho q 5)
+                 (tree-edit--prefixpostfixo ql q qr tokens)
+                 (tree-edit--includes-typeo q relevant-types)
+                 (tree-edit-parseo grammar tokens '()))))))))
 
 (defun tree-edit--valid-deletions (node)
   "Return a set of edits if NODE can be deleted, else nil.
