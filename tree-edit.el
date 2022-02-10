@@ -199,7 +199,7 @@ TODO: Is there a builtin way to infer this from the buffer?")
   (let (result (stack `(,node)))
     (while stack
       (let* ((item (pop stack))
-             (children (tree-edit--get-all-children item)))
+             (children (-filter #'tsc-node-named-p (tree-edit--get-all-children item))))
         (setq stack (append children stack))
         (setq result (append result children))))
     result))
