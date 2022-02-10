@@ -841,11 +841,10 @@ type of the text."
 ;;* Locals: Relational parser
 ;; Upstream this to `reazon'?
 (defmacro tree-edit--run-relation (tries var pred &rest goals)
-  "Run GOALS against VAR/LIST for at most N values.
-If N is nil, run for as many values as possible. VAR/LIST can be
-either a symbol or a list."
-  (declare (indent 2)
-           (debug t))
+  "Run GOALS against VAR, returning the first matching PRED.
+
+Run PRED against TRIES answers, or all if TRIES is nil."
+  (declare (indent 2))
   `(let ((,var (reazon--make-variable ',var))
          (reazon--stop-time (and reazon-timeout (+ reazon-timeout (float-time)))))
      (tree-edit--take-first (reazon--run-goal (reazon-conj ,@goals)) ,pred ,tries ,var)))
