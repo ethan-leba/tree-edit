@@ -176,6 +176,9 @@ TODO: Is there a builtin way to infer this from the buffer?")
 ;;   :group 'tree-edit)
 
 (define-error 'tree-edit-transformation-error "[Failed transformation]")
+(cl-defstruct (tree-edit-result)
+  "The result of a sucessful structural edit."
+  start-index end-index tokens)
 
 ;;* Utilities
 (defun tree-edit-transformation-error (format &rest args)
@@ -353,24 +356,16 @@ Fragments should parse as one of the following structures:
     (cons (-map #'tsc-node-type children)
           (--find-index (tsc-node-eq node it) children))))
 
-(defun tree-edit-simple-delete-override (node)
-  "Allow deletion of NODE."
-  (-let [(_ . index) (tree-edit--get-parent-tokens node)]
-    `(,index ,index nil)))
+(defun tree-edit-simple-delete-override (_ _ start-index end-index)
+  "Allow deletion of NODE and surrounding syntax."
+  (make-tree-edit-result :start-index start-index :end-index end-index :tokens nil))
 
-(defun tree-edit-simple-insertion-override (type node)
+(defun tree-edit-simple-insertion-replacement-override (type parent start-index end-index)
   "Allow insertion of TYPE if it appears in NODE's parent's grammar."
-  (when-let (types (tree-edit--relevant-types
-                    type (-> node (tsc-get-parent) (tsc-node-type))))
-    `(,(car types))))
-
-(defun tree-edit-simple-replacement-override (type node)
-  "Allow replacement of NODE by TYPE if it appears in NODE's parent's grammar."
-  (tree-edit--relevant-types type (-> node (tsc-get-parent) (tsc-node-type))))
-
+  (when-let (types (tree-edit--relevant-types type (tsc-node-type parent)))
+    (make-tree-edit-result :start-index start-index :end-index (or end-index start-index) :tokens `(,type))))
 
 ;;* Globals: Syntax generation
-;; TODO: Handle less restrictively by ripping out surrounding syntax (ie delete)
 (defun tree-edit--find-raise-ancestor (ancestor child)
   "Find a suitable ANCESTOR to be replaced with CHILD."
   (interactive)
@@ -406,76 +401,84 @@ Fragments should parse as one of the following structures:
       (setq start (1- start)))
     (cons (1+ start) end)))
 
+(cl-defun tree-edit--attempt-structural-edit
+    (parent &key (new-type nil) start-index (end-index nil) (overrides-alist nil))
+  "Attempt to perform structural edit.
+
+Returns a `tree-edit-result' if successful, otherwise nil.
+
+This is the main interface to the miniKanren syntax relation.
+
+Properties
+  :new-type  The type to be inserted, if any
+  :start-index  Where the new tokens should start
+  :end-index  Where the old tokens should be removed, if set
+  :overrides-alist  Alist from type to function for overrides
+"
+  (tree-edit-load-grammar-for-major-mode)
+  (if-let (override (alist-get (tsc-node-type parent) overrides-alist))
+      (funcall override new-type parent start-index end-index)
+    (-let* (reazon-occurs-check
+            (parent-type (tsc-node-type parent))
+            (grammar (alist-get parent-type tree-edit-grammar))
+            (children (-map #'tsc-node-type (tree-edit--get-all-children parent)))
+            (left (-take start-index children))
+            (right (-drop (or end-index start-index) children))
+            (relevant-types (tree-edit--relevant-types new-type parent-type)))
+      (when-let (result (tree-edit--run-relation 3 q
+                          (lambda (tokens)
+                            (and
+                             (listp tokens)
+                             (if new-type
+                                 (equal 1 (-count #'symbolp tokens))
+                               (-all-p #'stringp tokens))))
+                          (reazon-fresh (tokens qr ql)
+                            (tree-edit--superpositiono right qr parent-type)
+                            (tree-edit--superpositiono left ql parent-type)
+                            (tree-edit--max-lengtho q 5)
+                            (if new-type (tree-edit--includes-typeo q relevant-types) #'reazon-!S)
+                            (tree-edit--prefixpostfixo ql q qr tokens)
+                            (tree-edit-parseo grammar tokens '()))))
+        (make-tree-edit-result
+         :start-index start-index
+         :end-index (or end-index start-index)
+         :tokens (car result))))))
+
 (defun tree-edit--valid-replacement-p (type node)
   "Return non-nil if NODE can be replaced with a node of TYPE."
-  (tree-edit-load-grammar-for-major-mode)
-  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
-    (if-let (override (alist-get parent-type tree-edit-node-replacement-override))
-        (funcall override type node)
-      (-let* ((reazon-occurs-check nil)
-              (grammar (alist-get parent-type tree-edit-grammar))
-              ((children . index) (tree-edit--get-parent-tokens node))
-              ;; removing the selected element
-              ((left (_ . right)) (-split-at index children))
-              (relevant-types (tree-edit--relevant-types type parent-type)))
-        (car (tree-edit--run-relation 1 q (lambda (tokens) (and (listp tokens) (equal (length tokens) 1)))
-               (reazon-fresh (tokens qr ql)
-                 (tree-edit--superpositiono right qr parent-type)
-                 (tree-edit--superpositiono left ql parent-type)
-                 (tree-edit--max-lengtho q 3)
-                 (tree-edit--includes-typeo q relevant-types)
-                 (tree-edit--prefixpostfixo ql q qr tokens)
-                 (tree-edit-parseo grammar tokens '()))))))))
+  (let* ((parent (tsc-get-parent node))
+         (index (--find-index (tsc-node-eq node it) (tree-edit--get-all-children parent))))
+    (tree-edit--attempt-structural-edit
+     parent
+     :new-type type
+     :start-index index
+     :end-index (1+ index)
+     :overrides-alist tree-edit-node-replacement-override)))
 
 (defun tree-edit--valid-insertions (type node &optional before)
   "Return a valid sequence of tokens containing the provided TYPE, or nil.
 
 If BEFORE is non-nil, generate the tokens after NODE, otherwise before."
-  (tree-edit-load-grammar-for-major-mode)
-  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
-    (if-let (override (alist-get parent-type tree-edit-node-insertion-override))
-        (funcall override type node)
-      (-let* ((reazon-occurs-check nil)
-              (grammar (alist-get parent-type tree-edit-grammar))
-              ((children . index) (tree-edit--get-parent-tokens node))
-              ((left right) (-split-at (+ index (if before 0 1)) children))
-              (relevant-types (tree-edit--relevant-types type parent-type)))
-        (car (tree-edit--run-relation 1 q
-               (lambda (tokens) (and (listp tokens) (equal 1 (-count #'symbolp tokens))))
-               (reazon-fresh (tokens qr ql)
-                 (tree-edit--superpositiono right qr parent-type)
-                 (tree-edit--superpositiono left ql parent-type)
-                 (tree-edit--max-lengtho q 5)
-                 (tree-edit--prefixpostfixo ql q qr tokens)
-                 (tree-edit--includes-typeo q relevant-types)
-                 (tree-edit-parseo grammar tokens '()))))))))
+  (let* ((parent (tsc-get-parent node))
+         (index (--find-index (tsc-node-eq node it) (tree-edit--get-all-children parent))))
+    (tree-edit--attempt-structural-edit
+     parent
+     :new-type type
+     :start-index (+ index (if before 0 1))
+     :overrides-alist tree-edit-node-insertion-override)))
 
 (defun tree-edit--valid-deletions (node)
   "Return a set of edits if NODE can be deleted, else nil.
 
 If successful, the return type will give a range of siblings to
 delete, and what syntax needs to be inserted after, if any."
-  (tree-edit-load-grammar-for-major-mode)
-  (let ((parent-type (tsc-node-type (tsc-get-parent node))))
-    (if-let (override (alist-get parent-type tree-edit-node-deletion-override))
-        (funcall override node)
-      (-let* ((reazon-occurs-check nil)
-              (parent-type (tsc-node-type (tsc-get-parent node)))
-              (grammar (alist-get (tsc-node-type (tsc-get-parent node)) tree-edit-grammar))
-              ((children . index) (tree-edit--get-parent-tokens node))
-              ((left-idx . right-idx) (tree-edit--remove-node-and-surrounding-syntax children index))
-              (left (-take left-idx children))
-              (right (-drop right-idx children))
-              (nodes-deleted (- right-idx left-idx)))
-        (when-let (result (tree-edit--run-relation 3 q
-                            (lambda (q) (and (listp q) (-all-p #'stringp q)))
-                            (reazon-fresh (tokens qr ql)
-                              (tree-edit--superpositiono right qr parent-type)
-                              (tree-edit--superpositiono left ql parent-type)
-                              (tree-edit--max-lengtho q nodes-deleted)
-                              (tree-edit--prefixpostfixo ql q qr tokens)
-                              (tree-edit-parseo grammar tokens '()))))
-          `(,left-idx ,(1- right-idx) ,(car result)))))))
+  (-let* (((children . index) (tree-edit--get-parent-tokens node))
+          ((left-idx . right-idx) (tree-edit--remove-node-and-surrounding-syntax children index)))
+    (tree-edit--attempt-structural-edit
+     (tsc-get-parent node)
+     :start-index left-idx
+     :end-index right-idx
+     :overrides-alist tree-edit-node-deletion-override)))
 
 ;; NOTE: The node rendering code is pretty crappy, sorry. I'll probably rewrite this whole thing later on.
 ;;* Locals: node rendering
@@ -572,46 +575,39 @@ matters (i.e. expressions are left alone but blocks are split)."
   "Return a pair of NODE and it's text."
   `(,(tsc-node-type node) ,(tsc-node-text node)))
 
-(defun tree-edit--replace-tokens (fragment parent l r)
-  "Replace the nodes between L and R with the FRAGMENT in the children of NODE."
-  (-let* ((children (tree-edit--get-all-children parent))
-          (left (-map #'tree-edit--text-and-type (-slice children 0 l)))
-          (right (-some-> r (nth children) (tree-edit--text-and-type)))
+(defun tree-edit--render-result (result parent)
+  "Convert RESULT into a textual representation by editing the children of PARENT."
+  (-let* ((start-index (tree-edit-result-start-index result))
+          (end-index (tree-edit-result-end-index result))
+          (fragment (tree-edit-result-tokens result))
+          (children (tree-edit--get-all-children parent))
+          (left (-map #'tree-edit--text-and-type (-slice children 0 start-index)))
+          (right (-some-> end-index (nth children) (tree-edit--text-and-type)))
           (render-fragment
            (and fragment
                 (tree-edit--generate-node
                  (tsc-node-type parent)
                  tree-edit-syntax-snippets
-                 fragment))))
-    (let ((indentation
+                 fragment)))
+          (indentation
            (save-excursion
              (if children (goto-char (tsc-node-start-position (car children))))
              (current-indentation)))
           (start-edit
-           (if (zerop l)
+           (if (zerop start-index)
                (tsc-node-start-position parent)
-             (tsc-node-end-position (nth (1- l) children))))
+             (tsc-node-end-position (nth (1- start-index) children))))
           (end-edit
-           (if (nth r children)
-               (tsc-node-start-position (nth r children))
+           (if (nth end-index children)
+               (tsc-node-start-position (nth end-index children))
              (tsc-node-end-position parent))))
-      (combine-change-calls
-          start-edit
-          end-edit
-        (save-excursion
-          (goto-char start-edit)
-          (delete-region start-edit end-edit)
-          (tree-edit--render-node left (if fragment render-fragment) right indentation))))))
-
-(defun tree-edit--insert-tokens (fragment node before)
-  "Insert rendered FRAGMENT in the children of NODE in the provided POSITION.
-
-if BEFORE is non-nil, the new node will be inserted before NODE,
-otherwise after."
-  (-let* ((parent (tsc-get-parent node))
-          (children (tree-edit--get-all-children parent))
-          (node-index (+ (--find-index (tsc-node-eq node it) children) (if before 0 1))))
-    (tree-edit--replace-tokens fragment parent node-index node-index)))
+    (combine-change-calls
+        start-edit
+        end-edit
+      (save-excursion
+        (goto-char start-edit)
+        (delete-region start-edit end-edit)
+        (tree-edit--render-node left (if fragment render-fragment) right indentation)))))
 
 (defun tree-edit--split-node-for-insertion (node)
   "Split NODE into chunks of text as necessary for formatting."
@@ -620,7 +616,7 @@ otherwise after."
         (tree-edit--text-and-type node)
       `(,(tsc-node-type node) .
         ,(if (tsc-node-named-p node)
-            (-map #'tree-edit--split-node-for-insertion (tree-edit--get-all-children node))
+             (-map #'tree-edit--split-node-for-insertion (tree-edit--get-all-children node))
            `(,(tsc-node-text node)))))))
 
 (defun tree-edit--text-to-insertable-node (node text)
@@ -644,11 +640,10 @@ If NEW-NODE is a string, the tree-edit will attempt to infer the type of
 the text."
   (when (tsc-node-eq node (tsc-root-node tree-sitter-tree))
     (tree-edit-transformation-error "Cannot exchange the root node!"))
-  (if-let (tokens (tree-edit--try-transformation
+  (if-let (result (tree-edit--try-transformation
                    new-node
                    (lambda (type) (tree-edit--valid-replacement-p type node))))
-      (-let [(_ . node-index) (tree-edit--get-parent-tokens node)]
-        (tree-edit--replace-tokens tokens (tsc-get-parent node) node-index (1+ node-index)))
+      (tree-edit--render-result result (tsc-get-parent node))
     (tree-edit-transformation-error "Cannot replace %s with %s!" (tsc-node-type node) new-node)))
 
 (defun tree-edit-raise (node)
@@ -670,10 +665,10 @@ the text.
 if BEFORE is t, the sibling node will be inserted before NODE, else after."
   (when (tsc-node-eq node (tsc-root-node tree-sitter-tree))
     (tree-edit-transformation-error "Cannot perform insertions on the root node!"))
-  (if-let (tokens (tree-edit--try-transformation
+  (if-let (result (tree-edit--try-transformation
                    new-node
                    (lambda (type) (tree-edit--valid-insertions type node before))))
-      (tree-edit--insert-tokens tokens node before)
+      (tree-edit--render-result result (tsc-get-parent node))
     (tree-edit-transformation-error "Cannot insert %s %s %s!" new-node (if before "before" "after") (tsc-node-type node))))
 
 (defun tree-edit-insert-sibling-dwim (new-node node &optional before)
@@ -712,6 +707,17 @@ first possible location inside of the DWIM node."
                    (cl-return)))))
          (signal (car err) (cdr err)))))))
 
+(defun tree-edit--post-process-tokens (type result)
+  "Replace alternate representations of TYPE in result with TYPE itself.
+
+For example, an 'identifier' type may be represented it's
+supertype (expression), so we need to replace it with the
+original."
+  (setf (tree-edit-result-tokens result)
+        ;; TODO: Check supertype
+        (-map-first #'symbolp (-const type) (tree-edit-result-tokens result)))
+  result)
+
 (defun tree-edit--try-transformation (new-node pred)
   "Run PRED on NEW-NODE and return tokens if valid.
 
@@ -728,12 +734,12 @@ parser."
    ((symbolp new-node)
     (-some->> new-node
       (funcall pred)
-      (-map-first #'symbolp (-const new-node))))
+      (tree-edit--post-process-tokens new-node)))
    ((listp new-node)
     (cl-dolist (type new-node)
       (-some->> type
         (funcall pred)
-        (-map-first #'symbolp (-const type))
+        (tree-edit--post-process-tokens type)
         (cl-return))))
    ((stringp new-node)
     (cl-block nil
@@ -741,15 +747,13 @@ parser."
           (-let [(type . split-node) cached-node]
             (-some->> type
               (funcall pred)
-              (-map-first #'symbolp (-const split-node))
+              (tree-edit--post-process-tokens split-node)
               (cl-return))))
       (dolist (fragment-node (tree-edit--parse-fragment new-node))
         (-some->> fragment-node
           (tsc-node-type)
           (funcall pred)
-          (-map-first
-           #'symbolp
-           (-const (tree-edit--text-to-insertable-node fragment-node new-node)))
+          (tree-edit--post-process-tokens (tree-edit--text-to-insertable-node fragment-node new-node))
           (cl-return)))))
    (t (user-error "Bad data: %s" new-node))))
 
@@ -763,10 +767,14 @@ If NEW-NODE is a string, the tree-edit will attempt to infer the
 type of the text."
   (if (> (tsc-count-named-children node) 0)
       (tree-edit-insert-sibling new-node (tsc-get-nth-named-child node 0) t)
-    (if-let (tokens (tree-edit--try-transformation
+    (if-let (result (tree-edit--try-transformation
                      new-node
-                     (lambda (type) (tree-edit--valid-node-including-type type (tsc-node-type node)))))
-        (tree-edit--replace-tokens tokens node 0 (tsc-count-children node))
+                     (lambda (type)
+                       (when-let ((tokens (tree-edit--valid-node-including-type type (tsc-node-type node))))
+                         (make-tree-edit-result :tokens tokens
+                                                :start-index 0
+                                                :end-index (tsc-count-children node))))))
+        (tree-edit--render-result result node)
       (tree-edit-transformation-error "Cannot insert %s into %s!" new-node (tsc-node-type node)))))
 
 (defun tree-edit--get-next-node (node)
@@ -820,9 +828,9 @@ type of the text."
   "Delete NODE, and any surrounding syntax that accompanies it."
   (when (tsc-node-eq node (tsc-root-node tree-sitter-tree))
     (tree-edit-transformation-error "Cannot delete the root node!"))
-  (-let [(start end fragment) (or (tree-edit--valid-deletions node)
-                                  (tree-edit-transformation-error "Cannot delete the current node"))]
-    (tree-edit--replace-tokens fragment (tsc-get-parent node) start (1+ end))))
+  (if-let (result (tree-edit--valid-deletions node))
+      (tree-edit--render-result result (tsc-get-parent node))
+    (tree-edit-transformation-error "Cannot delete the current node")))
 
 (defun tree-edit-cache-node (node)
   "Store a mapping from NODE's text to type."
