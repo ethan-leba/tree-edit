@@ -175,16 +175,17 @@ TODO: Is there a builtin way to infer this from the buffer?")
 ;;   :type 'float
 ;;   :group 'tree-edit)
 
+;;* Data definitions
 (define-error 'tree-edit-transformation-error "[Failed transformation]")
-(cl-defstruct (tree-edit-result)
-  "The result of a sucessful structural edit."
-  start-index end-index tokens)
-
-;;* Utilities
 (defun tree-edit-transformation-error (format &rest args)
   "Signal transformation error with string FORMAT formatted with ARGS."
   (signal 'tree-edit-transformation-error (list (apply #'format-message format args))))
 
+(cl-defstruct (tree-edit-result)
+  "The result of a successful structural edit."
+  start-index end-index tokens)
+
+;;* Utilities
 (defun tree-edit--boring-nodep (node)
   "Check if the NODE is not a named node."
   (and (tsc-node-p node) (not (tsc-node-named-p node))))
