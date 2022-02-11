@@ -335,15 +335,6 @@ Fragments should parse as one of the following structures:
                     (setq node nil))))
               (reverse result))))))
 
-(defun tree-edit--type-of-fragment (fragment)
-  "Return the node-type of the FRAGMENT, or nil if unparseable.
-
-Fragments should parse as one of the following structures:
-- (program (type))
-- (program (ERROR (type))
-- (program (... (type) (MISSING ...))"
-  (-some-> fragment (tree-edit--parse-fragment) (tsc-node-type)))
-
 (defun tree-edit--get-all-children (node)
   "Return all of NODE's children."
   (--map (tsc-get-nth-child node it)
