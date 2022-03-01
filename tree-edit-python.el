@@ -57,6 +57,7 @@
    (function_definition . ("def" identifier parameters ":" block))
    (class_definition . ("class" identifier ":" block))
    (parameters . ("(" ")"))
+   (typed_parameter . (identifier ":" identifier))
    (decorated_definition . (decorator function_definition))
    (assignment . (identifier "=" expression))
    (block . (expression_statement))
@@ -162,6 +163,8 @@
     :key "f")
    (:type function_definition
     :key "F")
+   (:type typed_parameter
+    :key ";")
    (:type class_definition
     :key "C")
    (:type assert_statement
@@ -227,6 +230,8 @@
    (:type (dictionary_splat
            dictionary_splat_pattern)
     :key "m8")
+   (:type continue_statement
+    :key "mc")
    (:type elif_clause
     :key "ml")
    (:type else_clause
