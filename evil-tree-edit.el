@@ -361,6 +361,22 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
   (evil-tree-edit-normal-or-tree-state)
   (evil-tree-edit-change-next-placeholder))
 
+(defun evil-tree-edit-node-info ()
+  "Preview the different variations of the current node."
+  (interactive)
+  (cond
+   (current-prefix-arg (evil-tree-edit-preview-node))
+   (t (evil-tree-edit-ensure-current-node)
+      (message "Current node type is '%s', bound to key '%s'."
+               (tsc-node-type evil-tree-edit-current-node)
+               (--any
+                (when (member (tsc-node-type evil-tree-edit-current-node)
+                              (if (listp (plist-get it :type))
+                                  (plist-get it :type)
+                                `(,(plist-get it :type))))
+                  (plist-get it :key))
+                tree-edit-nodes)))))
+
 (defun evil-tree-edit-preview-node ()
   "Preview the different variations of the current node."
   (interactive)
@@ -594,7 +610,7 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "C" #'evil-tree-edit-clone)
       (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
       (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
-      (define-key mode-local-keymap "?" #'evil-tree-edit-preview-node)
+      (define-key mode-local-keymap "?" #'evil-tree-edit-node-info)
       (define-key mode-local-keymap "v" #'evil-tree-edit-toggle-tree-view)
       (define-key mode-local-keymap "zz" #'evil-scroll-line-to-center)
       ;; `setq-mode-local' macroexpanded, since it doesn't accept symbols
