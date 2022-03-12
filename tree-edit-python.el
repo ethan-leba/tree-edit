@@ -27,7 +27,7 @@
 
 (defun tree-edit-python-block-deletion-override (_ parent start-index end-index)
   "Allow deletion of NODE in block, unless it's the only node."
-  (when (> (tsc-count-children parent) 1)
+  (when (> (tsc-count-named-children parent) 1)
     (make-tree-edit-result :start-index start-index :end-index end-index :tokens nil)))
 
 (setq-mode-local
@@ -60,8 +60,7 @@
    (typed_parameter . (identifier ":" identifier))
    (decorated_definition . (decorator function_definition))
    (assignment . (identifier "=" expression))
-   (block . (expression_statement))
-   (expression_statement . (expression))
+   (block . (expression))
    (decorator . ("@" primary_expression))
 
    ;; Expressions & values
@@ -160,8 +159,6 @@
     :key "b")
    (:type try_statement
     :key "T")
-   (:type expression_statement
-    :key "e")
    (:type for_statement
     :key "f")
    (:type function_definition
@@ -434,7 +431,6 @@
            import_from_statement
            print_statement
            assert_statement
-           expression_statement
            return_statement
            delete_statement
            raise_statement
