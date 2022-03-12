@@ -702,42 +702,6 @@ if BEFORE is t, the sibling node will be inserted before NODE, else after."
       (tree-edit--render-result result (tsc-get-parent node))
     (tree-edit-transformation-error "Cannot insert %s %s %s!" new-node (if before "before" "after") (tsc-node-type node))))
 
-(defun tree-edit-insert-sibling-dwim (new-node node &optional before)
-  "Insert a node of the given NEW-NODE next to NODE.
-
-If the insertion fails, then `tree-edit-dwim-node-alist' will be
-searched. If a DWIM node is found, that node will be inserted
-instead. Then the requested node will be inserted inside the
-first possible location inside of the DWIM node."
-  (condition-case err
-      (tree-edit-insert-sibling new-node node before)
-    (tree-edit-transformation-error
-     (let ((node-steps (tree-edit--node-steps node)))
-       ;; re-signal error?
-       (if-let* ((node-type
-                  (cond ((symbolp new-node) `(,new-node))
-                        ((gethash new-node tree-edit--type-cache)
-                         `(,(car (gethash new-node tree-edit--type-cache))))
-                        (t
-                         ;; not car
-                         (-map #'tsc-node-type (tree-edit--parse-fragment new-node)))))
-                 (dwim-node
-                  (alist-get
-                   (-first
-                    (lambda (type) (alist-get type tree-edit-dwim-node-alist))
-                    (--mapcat (alist-get it tree-edit--supertypes) node-type))
-                   tree-edit-dwim-node-alist)))
-           (progn
-             (tree-edit-insert-sibling dwim-node node before)
-             (let ((inserted-node
-                    (let ((restored-node (tree-edit--node-from-steps node-steps)))
-                      (if before restored-node (tsc-get-next-named-sibling restored-node)))))
-               (cl-dolist (candidate (tree-edit--all-named-descendants inserted-node))
-                 (ignore-errors
-                   (tree-edit-exchange new-node candidate)
-                   (cl-return)))))
-         (signal (car err) (cdr err)))))))
-
 (defun tree-edit--post-process-tokens (parent-type type replace-with result)
   "Replace alternate representations of TYPE in result with TYPE itself.
 

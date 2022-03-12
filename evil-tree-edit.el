@@ -322,7 +322,7 @@ current, otherwise after.
 See `tree-edit-insert-sibling'."
   (interactive)
   (evil-tree-edit-ensure-current-node)
-  (tree-edit-insert-sibling-dwim type-or-text evil-tree-edit-current-node before)
+  (tree-edit-insert-sibling type-or-text evil-tree-edit-current-node before)
   (unless before
     (evil-tree-edit-goto-next-sibling)))
 
