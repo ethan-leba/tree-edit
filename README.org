@@ -41,7 +41,7 @@ how the syntax generation works.
 
 | Status | Language |
 |--------+----------|
-| ✅     | [[https://github.com/ethan-leba/tree-edit/issues/33][Python]]   |
+| 🔶     | [[https://github.com/ethan-leba/tree-edit/issues/33][Python]]   |
 | 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/54][C]]        |
 | 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/34][Java]]     |
 
@@ -57,18 +57,20 @@ file for the language.
 
 See [[https://github.com/ethan-leba/tree-edit/blob/docs/doc/using-tree-edit.org#adding-new-languages-to-tree-edit][here]] to learn the process for adding a new language.
 
-* Limitations
+* Why forked grammars?
 
-A non-comprehensive list of some of the larger limitations that tree-edit currently has:
+Tree-sitter grammars were not designed with tree-edit's usecase in mind, so many
+grammars are structured inconveniently for tree-edit's purposes:
 
-- Impedance mismatch :: Most tree-sitter grammars were not designed with
-  tree-edit's usecase in mind, so some grammars may be structured inconveniently
-  for tree-edit's purposes.
+- Unnecessarily nested nodes :: some nodes are
 
-- Tree-sitter-langs :: Tree-edit currently depends on [[https://github.com/emacs-tree-sitter/tree-sitter-langs][tree-sitter-langs]] to power
-  the tree-sitter parsers, however tree-sitter-langs does not always have the
-  most up-to-date grammars and is missing some languages. If this continues to
-  be an issue a fork may be needed.
+- Aliased nodes ::
+
+- Hidden nodes ::
+
+All of these issues have little effect for syntax highlighting or large scale
+editing, but at the level of granularity tree-edit operates this becomes very
+detrimental.
 
 * Contributing
 
