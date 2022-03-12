@@ -26,44 +26,54 @@
 ((module (type . "REPEAT")
 	 (content (type . "CHOICE")
 		  (members ((type . "SEQ")
-			    (members ((type . "CHOICE")
-				      (members ((type . "SYMBOL")
-						(name . future_import_statement))
-					       ((type . "SYMBOL")
-						(name . import_statement))
-					       ((type . "SYMBOL")
-						(name . import_from_statement))
-					       ((type . "SYMBOL")
-						(name . print_statement))
-					       ((type . "SYMBOL")
-						(name . assert_statement))
-					       ((type . "SYMBOL")
-						(name . expression_statement))
-					       ((type . "SYMBOL")
-						(name . return_statement))
-					       ((type . "SYMBOL")
-						(name . delete_statement))
-					       ((type . "SYMBOL")
-						(name . raise_statement))
-					       ((type . "SYMBOL")
-						(name . pass_statement))
-					       ((type . "SYMBOL")
-						(name . break_statement))
-					       ((type . "SYMBOL")
-						(name . continue_statement))
-					       ((type . "SYMBOL")
-						(name . global_statement))
-					       ((type . "SYMBOL")
-						(name . nonlocal_statement))
-					       ((type . "SYMBOL")
-						(name . exec_statement))))
-				     ((type . "CHOICE")
-				      (members ((type . "REPEAT")
+			    (members ((type . "SEQ")
+				      (members ((type . "CHOICE")
+						(members ((type . "SYMBOL")
+							  (name . expression))
+							 ((type . "SYMBOL")
+							  (name . future_import_statement))
+							 ((type . "SYMBOL")
+							  (name . import_statement))
+							 ((type . "SYMBOL")
+							  (name . import_from_statement))
+							 ((type . "SYMBOL")
+							  (name . print_statement))
+							 ((type . "SYMBOL")
+							  (name . assert_statement))
+							 ((type . "SYMBOL")
+							  (name . comma_statement))
+							 ((type . "SYMBOL")
+							  (name . return_statement))
+							 ((type . "SYMBOL")
+							  (name . delete_statement))
+							 ((type . "SYMBOL")
+							  (name . raise_statement))
+							 ((type . "SYMBOL")
+							  (name . pass_statement))
+							 ((type . "SYMBOL")
+							  (name . break_statement))
+							 ((type . "SYMBOL")
+							  (name . continue_statement))
+							 ((type . "SYMBOL")
+							  (name . global_statement))
+							 ((type . "SYMBOL")
+							  (name . nonlocal_statement))
+							 ((type . "SYMBOL")
+							  (name . assignment))
+							 ((type . "SYMBOL")
+							  (name . augmented_assignment))
+							 ((type . "SYMBOL")
+							  (name . yield))
+							 ((type . "SYMBOL")
+							  (name . exec_statement))))
+					       ((type . "REPEAT")
 						(content (type . "SEQ")
 							 (members ((type . "STRING")
 								   (value . ";"))
 								  ((type . "CHOICE")
 								   (members ((type . "SYMBOL")
+									     (name . expression))
+									    ((type . "SYMBOL")
 									     (name . future_import_statement))
 									    ((type . "SYMBOL")
 									     (name . import_statement))
@@ -74,7 +84,7 @@
 									    ((type . "SYMBOL")
 									     (name . assert_statement))
 									    ((type . "SYMBOL")
-									     (name . expression_statement))
+									     (name . comma_statement))
 									    ((type . "SYMBOL")
 									     (name . return_statement))
 									    ((type . "SYMBOL")
@@ -92,8 +102,13 @@
 									    ((type . "SYMBOL")
 									     (name . nonlocal_statement))
 									    ((type . "SYMBOL")
-									     (name . exec_statement)))))))
-					       ((type . "BLANK"))))
+									     (name . assignment))
+									    ((type . "SYMBOL")
+									     (name . augmented_assignment))
+									    ((type . "SYMBOL")
+									     (name . yield))
+									    ((type . "SYMBOL")
+									     (name . exec_statement)))))))))
 				     ((type . "CHOICE")
 				      (members ((type . "STRING")
 						(value . ";"))
@@ -116,47 +131,59 @@
 				     ((type . "SYMBOL")
 				      (name . class_definition))
 				     ((type . "SYMBOL")
-				      (name . decorated_definition)))))))
+				      (name . decorated_definition))
+				     ((type . "SYMBOL")
+				      (name . match_statement)))))))
  (_statement (type . "CHOICE")
 	     (members ((type . "SEQ")
-		       (members ((type . "CHOICE")
-				 (members ((type . "SYMBOL")
-					   (name . future_import_statement))
-					  ((type . "SYMBOL")
-					   (name . import_statement))
-					  ((type . "SYMBOL")
-					   (name . import_from_statement))
-					  ((type . "SYMBOL")
-					   (name . print_statement))
-					  ((type . "SYMBOL")
-					   (name . assert_statement))
-					  ((type . "SYMBOL")
-					   (name . expression_statement))
-					  ((type . "SYMBOL")
-					   (name . return_statement))
-					  ((type . "SYMBOL")
-					   (name . delete_statement))
-					  ((type . "SYMBOL")
-					   (name . raise_statement))
-					  ((type . "SYMBOL")
-					   (name . pass_statement))
-					  ((type . "SYMBOL")
-					   (name . break_statement))
-					  ((type . "SYMBOL")
-					   (name . continue_statement))
-					  ((type . "SYMBOL")
-					   (name . global_statement))
-					  ((type . "SYMBOL")
-					   (name . nonlocal_statement))
-					  ((type . "SYMBOL")
-					   (name . exec_statement))))
-				((type . "CHOICE")
-				 (members ((type . "REPEAT")
+		       (members ((type . "SEQ")
+				 (members ((type . "CHOICE")
+					   (members ((type . "SYMBOL")
+						     (name . expression))
+						    ((type . "SYMBOL")
+						     (name . future_import_statement))
+						    ((type . "SYMBOL")
+						     (name . import_statement))
+						    ((type . "SYMBOL")
+						     (name . import_from_statement))
+						    ((type . "SYMBOL")
+						     (name . print_statement))
+						    ((type . "SYMBOL")
+						     (name . assert_statement))
+						    ((type . "SYMBOL")
+						     (name . comma_statement))
+						    ((type . "SYMBOL")
+						     (name . return_statement))
+						    ((type . "SYMBOL")
+						     (name . delete_statement))
+						    ((type . "SYMBOL")
+						     (name . raise_statement))
+						    ((type . "SYMBOL")
+						     (name . pass_statement))
+						    ((type . "SYMBOL")
+						     (name . break_statement))
+						    ((type . "SYMBOL")
+						     (name . continue_statement))
+						    ((type . "SYMBOL")
+						     (name . global_statement))
+						    ((type . "SYMBOL")
+						     (name . nonlocal_statement))
+						    ((type . "SYMBOL")
+						     (name . assignment))
+						    ((type . "SYMBOL")
+						     (name . augmented_assignment))
+						    ((type . "SYMBOL")
+						     (name . yield))
+						    ((type . "SYMBOL")
+						     (name . exec_statement))))
+					  ((type . "REPEAT")
 					   (content (type . "SEQ")
 						    (members ((type . "STRING")
 							      (value . ";"))
 							     ((type . "CHOICE")
 							      (members ((type . "SYMBOL")
+									(name . expression))
+								       ((type . "SYMBOL")
 									(name . future_import_statement))
 								       ((type . "SYMBOL")
 									(name . import_statement))
@@ -167,7 +194,7 @@
 								       ((type . "SYMBOL")
 									(name . assert_statement))
 								       ((type . "SYMBOL")
-									(name . expression_statement))
+									(name . comma_statement))
 								       ((type . "SYMBOL")
 									(name . return_statement))
 								       ((type . "SYMBOL")
@@ -185,8 +212,13 @@
 								       ((type . "SYMBOL")
 									(name . nonlocal_statement))
 								       ((type . "SYMBOL")
-									(name . exec_statement)))))))
-					  ((type . "BLANK"))))
+									(name . assignment))
+								       ((type . "SYMBOL")
+									(name . augmented_assignment))
+								       ((type . "SYMBOL")
+									(name . yield))
+								       ((type . "SYMBOL")
+									(name . exec_statement)))))))))
 				((type . "CHOICE")
 				 (members ((type . "STRING")
 					   (value . ";"))
@@ -209,46 +241,58 @@
 				((type . "SYMBOL")
 				 (name . class_definition))
 				((type . "SYMBOL")
-				 (name . decorated_definition))))))
+				 (name . decorated_definition))
+				((type . "SYMBOL")
+				 (name . match_statement))))))
  (_simple_statements (type . "SEQ")
-		     (members ((type . "CHOICE")
-			       (members ((type . "SYMBOL")
-					 (name . future_import_statement))
-					((type . "SYMBOL")
-					 (name . import_statement))
-					((type . "SYMBOL")
-					 (name . import_from_statement))
-					((type . "SYMBOL")
-					 (name . print_statement))
-					((type . "SYMBOL")
-					 (name . assert_statement))
-					((type . "SYMBOL")
-					 (name . expression_statement))
-					((type . "SYMBOL")
-					 (name . return_statement))
-					((type . "SYMBOL")
-					 (name . delete_statement))
-					((type . "SYMBOL")
-					 (name . raise_statement))
-					((type . "SYMBOL")
-					 (name . pass_statement))
-					((type . "SYMBOL")
-					 (name . break_statement))
-					((type . "SYMBOL")
-					 (name . continue_statement))
-					((type . "SYMBOL")
-					 (name . global_statement))
-					((type . "SYMBOL")
-					 (name . nonlocal_statement))
-					((type . "SYMBOL")
-					 (name . exec_statement))))
-			      ((type . "CHOICE")
-			       (members ((type . "REPEAT")
+		     (members ((type . "SEQ")
+			       (members ((type . "CHOICE")
+					 (members ((type . "SYMBOL")
+						   (name . expression))
+						  ((type . "SYMBOL")
+						   (name . future_import_statement))
+						  ((type . "SYMBOL")
+						   (name . import_statement))
+						  ((type . "SYMBOL")
+						   (name . import_from_statement))
+						  ((type . "SYMBOL")
+						   (name . print_statement))
+						  ((type . "SYMBOL")
+						   (name . assert_statement))
+						  ((type . "SYMBOL")
+						   (name . comma_statement))
+						  ((type . "SYMBOL")
+						   (name . return_statement))
+						  ((type . "SYMBOL")
+						   (name . delete_statement))
+						  ((type . "SYMBOL")
+						   (name . raise_statement))
+						  ((type . "SYMBOL")
+						   (name . pass_statement))
+						  ((type . "SYMBOL")
+						   (name . break_statement))
+						  ((type . "SYMBOL")
+						   (name . continue_statement))
+						  ((type . "SYMBOL")
+						   (name . global_statement))
+						  ((type . "SYMBOL")
+						   (name . nonlocal_statement))
+						  ((type . "SYMBOL")
+						   (name . assignment))
+						  ((type . "SYMBOL")
+						   (name . augmented_assignment))
+						  ((type . "SYMBOL")
+						   (name . yield))
+						  ((type . "SYMBOL")
+						   (name . exec_statement))))
+					((type . "REPEAT")
 					 (content (type . "SEQ")
 						  (members ((type . "STRING")
 							    (value . ";"))
 							   ((type . "CHOICE")
 							    (members ((type . "SYMBOL")
+								      (name . expression))
+								     ((type . "SYMBOL")
 								      (name . future_import_statement))
 								     ((type . "SYMBOL")
 								      (name . import_statement))
@@ -259,7 +303,7 @@
 								     ((type . "SYMBOL")
 								      (name . assert_statement))
 								     ((type . "SYMBOL")
-								      (name . expression_statement))
+								      (name . comma_statement))
 								     ((type . "SYMBOL")
 								      (name . return_statement))
 								     ((type . "SYMBOL")
@@ -277,8 +321,13 @@
 								     ((type . "SYMBOL")
 								      (name . nonlocal_statement))
 								     ((type . "SYMBOL")
-								      (name . exec_statement)))))))
-					((type . "BLANK"))))
+								      (name . assignment))
+								     ((type . "SYMBOL")
+								      (name . augmented_assignment))
+								     ((type . "SYMBOL")
+								      (name . yield))
+								     ((type . "SYMBOL")
+								      (name . exec_statement)))))))))
 			      ((type . "CHOICE")
 			       (members ((type . "STRING")
 					 (value . ";"))
@@ -287,6 +336,8 @@
 			       (name . _newline))))
  (_simple_statement (type . "CHOICE")
 		    (members ((type . "SYMBOL")
+			      (name . expression))
+			     ((type . "SYMBOL")
 			      (name . future_import_statement))
 			     ((type . "SYMBOL")
 			      (name . import_statement))
@@ -297,7 +348,7 @@
 			     ((type . "SYMBOL")
 			      (name . assert_statement))
 			     ((type . "SYMBOL")
-			      (name . expression_statement))
+			      (name . comma_statement))
 			     ((type . "SYMBOL")
 			      (name . return_statement))
 			     ((type . "SYMBOL")
@@ -315,6 +366,12 @@
 			     ((type . "SYMBOL")
 			      (name . nonlocal_statement))
 			     ((type . "SYMBOL")
+			      (name . assignment))
+			     ((type . "SYMBOL")
+			      (name . augmented_assignment))
+			     ((type . "SYMBOL")
+			      (name . yield))
+			     ((type . "SYMBOL")
 			      (name . exec_statement))))
  (import_statement (type . "SEQ")
 		   (members ((type . "STRING")
@@ -324,8 +381,15 @@
 				       (members ((type . "FIELD")
 						 (name . "name")
 						 (content (type . "CHOICE")
-							  (members ((type . "SYMBOL")
-								    (name . dotted_name))
+							  (members ((type . "SEQ")
+								    (members ((type . "SYMBOL")
+									      (name . identifier))
+									     ((type . "REPEAT")
+									      (content (type . "SEQ")
+										       (members ((type . "STRING")
+												 (value . "."))
+												((type . "SYMBOL")
+												 (name . identifier)))))))
 								   ((type . "SYMBOL")
 								    (name . aliased_import)))))
 						((type . "REPEAT")
@@ -335,8 +399,15 @@
 								   ((type . "FIELD")
 								    (name . "name")
 								    (content (type . "CHOICE")
-									     (members ((type . "SYMBOL")
-										       (name . dotted_name))
+									     (members ((type . "SEQ")
+										       (members ((type . "SYMBOL")
+												 (name . identifier))
+												((type . "REPEAT")
+												 (content (type . "SEQ")
+													  (members ((type . "STRING")
+														    (value . "."))
+														   ((type . "SYMBOL")
+														    (name . identifier)))))))
 										      ((type . "SYMBOL")
 										       (name . aliased_import))))))))))
 				      ((type . "CHOICE")
@@ -348,8 +419,15 @@
 		  (members ((type . "SYMBOL")
 			    (name . import_prefix))
 			   ((type . "CHOICE")
-			    (members ((type . "SYMBOL")
-				      (name . dotted_name))
+			    (members ((type . "SEQ")
+				      (members ((type . "SYMBOL")
+						(name . identifier))
+					       ((type . "REPEAT")
+						(content (type . "SEQ")
+							 (members ((type . "STRING")
+								   (value . "."))
+								  ((type . "SYMBOL")
+								   (name . identifier)))))))
 				     ((type . "BLANK"))))))
  (future_import_statement (type . "SEQ")
 			  (members ((type . "STRING")
@@ -364,8 +442,15 @@
 							(members ((type . "FIELD")
 								  (name . "name")
 								  (content (type . "CHOICE")
-									   (members ((type . "SYMBOL")
-										     (name . dotted_name))
+									   (members ((type . "SEQ")
+										     (members ((type . "SYMBOL")
+											       (name . identifier))
+											      ((type . "REPEAT")
+											       (content (type . "SEQ")
+													(members ((type . "STRING")
+														  (value . "."))
+														 ((type . "SYMBOL")
+														  (name . identifier)))))))
 										    ((type . "SYMBOL")
 										     (name . aliased_import)))))
 								 ((type . "REPEAT")
@@ -375,8 +460,15 @@
 										    ((type . "FIELD")
 										     (name . "name")
 										     (content (type . "CHOICE")
-											      (members ((type . "SYMBOL")
-													(name . dotted_name))
+											      (members ((type . "SEQ")
+													(members ((type . "SYMBOL")
+														  (name . identifier))
+														 ((type . "REPEAT")
+														  (content (type . "SEQ")
+															   (members ((type . "STRING")
+																     (value . "."))
+																    ((type . "SYMBOL")
+																     (name . identifier)))))))
 												       ((type . "SYMBOL")
 													(name . aliased_import))))))))))
 						       ((type . "CHOICE")
@@ -391,8 +483,15 @@
 								  (members ((type . "FIELD")
 									    (name . "name")
 									    (content (type . "CHOICE")
-										     (members ((type . "SYMBOL")
-											       (name . dotted_name))
+										     (members ((type . "SEQ")
+											       (members ((type . "SYMBOL")
+													 (name . identifier))
+													((type . "REPEAT")
+													 (content (type . "SEQ")
+														  (members ((type . "STRING")
+															    (value . "."))
+															   ((type . "SYMBOL")
+															    (name . identifier)))))))
 											      ((type . "SYMBOL")
 											       (name . aliased_import)))))
 									   ((type . "REPEAT")
@@ -402,8 +501,15 @@
 											      ((type . "FIELD")
 											       (name . "name")
 											       (content (type . "CHOICE")
-													(members ((type . "SYMBOL")
-														  (name . dotted_name))
+													(members ((type . "SEQ")
+														  (members ((type . "SYMBOL")
+															    (name . identifier))
+															   ((type . "REPEAT")
+															    (content (type . "SEQ")
+																     (members ((type . "STRING")
+																	       (value . "."))
+																	      ((type . "SYMBOL")
+																	       (name . identifier)))))))
 														 ((type . "SYMBOL")
 														  (name . aliased_import))))))))))
 								 ((type . "CHOICE")
@@ -420,8 +526,15 @@
 				  (content (type . "CHOICE")
 					   (members ((type . "SYMBOL")
 						     (name . relative_import))
-						    ((type . "SYMBOL")
-						     (name . dotted_name)))))
+						    ((type . "SEQ")
+						     (members ((type . "SYMBOL")
+							       (name . identifier))
+							      ((type . "REPEAT")
+							       (content (type . "SEQ")
+									(members ((type . "STRING")
+										  (value . "."))
+										 ((type . "SYMBOL")
+										  (name . identifier))))))))))
 				 ((type . "STRING")
 				  (value . "import"))
 				 ((type . "CHOICE")
@@ -432,8 +545,15 @@
 						      (members ((type . "FIELD")
 								(name . "name")
 								(content (type . "CHOICE")
-									 (members ((type . "SYMBOL")
-										   (name . dotted_name))
+									 (members ((type . "SEQ")
+										   (members ((type . "SYMBOL")
+											     (name . identifier))
+											    ((type . "REPEAT")
+											     (content (type . "SEQ")
+												      (members ((type . "STRING")
+														(value . "."))
+													       ((type . "SYMBOL")
+														(name . identifier)))))))
 										  ((type . "SYMBOL")
 										   (name . aliased_import)))))
 							       ((type . "REPEAT")
@@ -443,8 +563,15 @@
 										  ((type . "FIELD")
 										   (name . "name")
 										   (content (type . "CHOICE")
-											    (members ((type . "SYMBOL")
-												      (name . dotted_name))
+											    (members ((type . "SEQ")
+												      (members ((type . "SYMBOL")
+														(name . identifier))
+													       ((type . "REPEAT")
+														(content (type . "SEQ")
+															 (members ((type . "STRING")
+																   (value . "."))
+																  ((type . "SYMBOL")
+																   (name . identifier)))))))
 												     ((type . "SYMBOL")
 												      (name . aliased_import))))))))))
 						     ((type . "CHOICE")
@@ -459,8 +586,15 @@
 								(members ((type . "FIELD")
 									  (name . "name")
 									  (content (type . "CHOICE")
-										   (members ((type . "SYMBOL")
-											     (name . dotted_name))
+										   (members ((type . "SEQ")
+											     (members ((type . "SYMBOL")
+												       (name . identifier))
+												      ((type . "REPEAT")
+												       (content (type . "SEQ")
+														(members ((type . "STRING")
+															  (value . "."))
+															 ((type . "SYMBOL")
+															  (name . identifier)))))))
 											    ((type . "SYMBOL")
 											     (name . aliased_import)))))
 									 ((type . "REPEAT")
@@ -470,8 +604,15 @@
 											    ((type . "FIELD")
 											     (name . "name")
 											     (content (type . "CHOICE")
-												      (members ((type . "SYMBOL")
-														(name . dotted_name))
+												      (members ((type . "SEQ")
+														(members ((type . "SYMBOL")
+															  (name . identifier))
+															 ((type . "REPEAT")
+															  (content (type . "SEQ")
+																   (members ((type . "STRING")
+																	     (value . "."))
+																	    ((type . "SYMBOL")
+																	     (name . identifier)))))))
 													       ((type . "SYMBOL")
 														(name . aliased_import))))))))))
 							       ((type . "CHOICE")
@@ -485,8 +626,15 @@
 			 (members ((type . "FIELD")
 				   (name . "name")
 				   (content (type . "CHOICE")
-					    (members ((type . "SYMBOL")
-						      (name . dotted_name))
+					    (members ((type . "SEQ")
+						      (members ((type . "SYMBOL")
+								(name . identifier))
+							       ((type . "REPEAT")
+								(content (type . "SEQ")
+									 (members ((type . "STRING")
+										   (value . "."))
+										  ((type . "SYMBOL")
+										   (name . identifier)))))))
 						     ((type . "SYMBOL")
 						      (name . aliased_import)))))
 				  ((type . "REPEAT")
@@ -496,8 +644,15 @@
 						     ((type . "FIELD")
 						      (name . "name")
 						      (content (type . "CHOICE")
-							       (members ((type . "SYMBOL")
-									 (name . dotted_name))
+							       (members ((type . "SEQ")
+									 (members ((type . "SYMBOL")
+										   (name . identifier))
+										  ((type . "REPEAT")
+										   (content (type . "SEQ")
+											    (members ((type . "STRING")
+												      (value . "."))
+												     ((type . "SYMBOL")
+												      (name . identifier)))))))
 									((type . "SYMBOL")
 									 (name . aliased_import))))))))))
 			((type . "CHOICE")
@@ -507,7 +662,15 @@
  (aliased_import (type . "SEQ")
 		 (members ((type . "FIELD")
 			   (name . "name")
-			   (content (type . "SYMBOL") (name . dotted_name)))
+			   (content (type . "SEQ")
+				    (members ((type . "SYMBOL")
+					      (name . identifier))
+					     ((type . "REPEAT")
+					      (content (type . "SEQ")
+						       (members ((type . "STRING")
+								 (value . "."))
+								((type . "SYMBOL")
+								 (name . identifier))))))))
 			  ((type . "STRING")
 			   (value . "as"))
 			  ((type . "FIELD")
@@ -573,38 +736,49 @@
 							  (value . ","))
 							 ((type . "SYMBOL")
 							  (name . expression)))))))))
- (expression_statement (type . "CHOICE")
-		       (members ((type . "SYMBOL")
-				 (name . expression))
-				((type . "SEQ")
-				 (members ((type . "SEQ")
-					   (members ((type . "SYMBOL")
-						     (name . expression))
-						    ((type . "REPEAT")
-						     (content (type . "SEQ")
-							      (members ((type . "STRING")
-									(value . ","))
-								       ((type . "SYMBOL")
-									(name . expression)))))))
-					  ((type . "CHOICE")
-					   (members ((type . "STRING")
-						     (value . ","))
-						    ((type . "BLANK"))))))
-				((type . "SYMBOL")
-				 (name . assignment))
-				((type . "SYMBOL")
-				 (name . augmented_assignment))
-				((type . "SYMBOL")
-				 (name . yield))))
+ (comma_statement (type . "CHOICE")
+		  (members ((type . "SEQ")
+			    (members ((type . "SYMBOL")
+				      (name . expression))
+				     ((type . "STRING")
+				      (value . ","))
+				     ((type . "SEQ")
+				      (members ((type . "SYMBOL")
+						(name . expression))
+					       ((type . "REPEAT")
+						(content (type . "SEQ")
+							 (members ((type . "STRING")
+								   (value . ","))
+								  ((type . "SYMBOL")
+								   (name . expression)))))))
+				     ((type . "CHOICE")
+				      (members ((type . "STRING")
+						(value . ","))
+					       ((type . "BLANK"))))))))
  (named_expression (type . "SEQ")
 		   (members ((type . "FIELD")
 			     (name . "name")
-			     (content (type . "SYMBOL") (name . identifier)))
+			     (content (type . "CHOICE")
+				      (members ((type . "SYMBOL")
+						(name . identifier))
+					       ((type . "ALIAS")
+						(content (type . "STRING")
+							 (value . "match"))
+						(named . t)
+						(value . identifier)))))
 			    ((type . "STRING")
 			     (value . ":="))
 			    ((type . "FIELD")
 			     (name . "value")
 			     (content (type . "SYMBOL") (name . expression)))))
+ (_named_expresssion_lhs (type . "CHOICE")
+			 (members ((type . "SYMBOL")
+				   (name . identifier))
+				  ((type . "ALIAS")
+				   (content (type . "STRING")
+					    (value . "match"))
+				   (named . t)
+				   (value . identifier))))
  (return_statement (type . "SEQ")
 		   (members ((type . "STRING")
 			     (value . "return"))
@@ -672,7 +846,9 @@
 			       ((type . "SYMBOL")
 				(name . class_definition))
 			       ((type . "SYMBOL")
-				(name . decorated_definition))))
+				(name . decorated_definition))
+			       ((type . "SYMBOL")
+				(name . match_statement))))
  (if_statement (type . "SEQ")
 	       (members ((type . "STRING")
 			 (value . "if"))
@@ -686,44 +862,54 @@
 			 (content (type . "CHOICE")
 				  (members ((type . "ALIAS")
 					    (content (type . "SEQ")
-						     (members ((type . "CHOICE")
-							       (members ((type . "SYMBOL")
-									 (name . future_import_statement))
-									((type . "SYMBOL")
-									 (name . import_statement))
-									((type . "SYMBOL")
-									 (name . import_from_statement))
-									((type . "SYMBOL")
-									 (name . print_statement))
-									((type . "SYMBOL")
-									 (name . assert_statement))
-									((type . "SYMBOL")
-									 (name . expression_statement))
-									((type . "SYMBOL")
-									 (name . return_statement))
-									((type . "SYMBOL")
-									 (name . delete_statement))
-									((type . "SYMBOL")
-									 (name . raise_statement))
-									((type . "SYMBOL")
-									 (name . pass_statement))
-									((type . "SYMBOL")
-									 (name . break_statement))
-									((type . "SYMBOL")
-									 (name . continue_statement))
-									((type . "SYMBOL")
-									 (name . global_statement))
-									((type . "SYMBOL")
-									 (name . nonlocal_statement))
-									((type . "SYMBOL")
-									 (name . exec_statement))))
-							      ((type . "CHOICE")
-							       (members ((type . "REPEAT")
+						     (members ((type . "SEQ")
+							       (members ((type . "CHOICE")
+									 (members ((type . "SYMBOL")
+										   (name . expression))
+										  ((type . "SYMBOL")
+										   (name . future_import_statement))
+										  ((type . "SYMBOL")
+										   (name . import_statement))
+										  ((type . "SYMBOL")
+										   (name . import_from_statement))
+										  ((type . "SYMBOL")
+										   (name . print_statement))
+										  ((type . "SYMBOL")
+										   (name . assert_statement))
+										  ((type . "SYMBOL")
+										   (name . comma_statement))
+										  ((type . "SYMBOL")
+										   (name . return_statement))
+										  ((type . "SYMBOL")
+										   (name . delete_statement))
+										  ((type . "SYMBOL")
+										   (name . raise_statement))
+										  ((type . "SYMBOL")
+										   (name . pass_statement))
+										  ((type . "SYMBOL")
+										   (name . break_statement))
+										  ((type . "SYMBOL")
+										   (name . continue_statement))
+										  ((type . "SYMBOL")
+										   (name . global_statement))
+										  ((type . "SYMBOL")
+										   (name . nonlocal_statement))
+										  ((type . "SYMBOL")
+										   (name . assignment))
+										  ((type . "SYMBOL")
+										   (name . augmented_assignment))
+										  ((type . "SYMBOL")
+										   (name . yield))
+										  ((type . "SYMBOL")
+										   (name . exec_statement))))
+									((type . "REPEAT")
 									 (content (type . "SEQ")
 										  (members ((type . "STRING")
 											    (value . ";"))
 											   ((type . "CHOICE")
 											    (members ((type . "SYMBOL")
+												      (name . expression))
+												     ((type . "SYMBOL")
 												      (name . future_import_statement))
 												     ((type . "SYMBOL")
 												      (name . import_statement))
@@ -734,7 +920,7 @@
 												     ((type . "SYMBOL")
 												      (name . assert_statement))
 												     ((type . "SYMBOL")
-												      (name . expression_statement))
+												      (name . comma_statement))
 												     ((type . "SYMBOL")
 												      (name . return_statement))
 												     ((type . "SYMBOL")
@@ -752,8 +938,13 @@
 												     ((type . "SYMBOL")
 												      (name . nonlocal_statement))
 												     ((type . "SYMBOL")
-												      (name . exec_statement)))))))
-									((type . "BLANK"))))
+												      (name . assignment))
+												     ((type . "SYMBOL")
+												      (name . augmented_assignment))
+												     ((type . "SYMBOL")
+												      (name . yield))
+												     ((type . "SYMBOL")
+												      (name . exec_statement)))))))))
 							      ((type . "CHOICE")
 							       (members ((type . "STRING")
 									 (value . ";"))
@@ -766,7 +957,12 @@
 					    (members ((type . "SYMBOL")
 						      (name . _indent))
 						     ((type . "SYMBOL")
-						      (name . block)))))))
+						      (name . block))))
+					   ((type . "ALIAS")
+					    (content (type . "SYMBOL")
+						     (name . _newline))
+					    (named . t)
+					    (value . block)))))
 			((type . "REPEAT")
 			 (content (type . "FIELD")
 				  (name . "alternative")
@@ -791,44 +987,54 @@
 			(content (type . "CHOICE")
 				 (members ((type . "ALIAS")
 					   (content (type . "SEQ")
-						    (members ((type . "CHOICE")
-							      (members ((type . "SYMBOL")
-									(name . future_import_statement))
-								       ((type . "SYMBOL")
-									(name . import_statement))
-								       ((type . "SYMBOL")
-									(name . import_from_statement))
-								       ((type . "SYMBOL")
-									(name . print_statement))
-								       ((type . "SYMBOL")
-									(name . assert_statement))
-								       ((type . "SYMBOL")
-									(name . expression_statement))
-								       ((type . "SYMBOL")
-									(name . return_statement))
-								       ((type . "SYMBOL")
-									(name . delete_statement))
-								       ((type . "SYMBOL")
-									(name . raise_statement))
-								       ((type . "SYMBOL")
-									(name . pass_statement))
-								       ((type . "SYMBOL")
-									(name . break_statement))
-								       ((type . "SYMBOL")
-									(name . continue_statement))
-								       ((type . "SYMBOL")
-									(name . global_statement))
-								       ((type . "SYMBOL")
-									(name . nonlocal_statement))
-								       ((type . "SYMBOL")
-									(name . exec_statement))))
-							     ((type . "CHOICE")
-							      (members ((type . "REPEAT")
+						    (members ((type . "SEQ")
+							      (members ((type . "CHOICE")
+									(members ((type . "SYMBOL")
+										  (name . expression))
+										 ((type . "SYMBOL")
+										  (name . future_import_statement))
+										 ((type . "SYMBOL")
+										  (name . import_statement))
+										 ((type . "SYMBOL")
+										  (name . import_from_statement))
+										 ((type . "SYMBOL")
+										  (name . print_statement))
+										 ((type . "SYMBOL")
+										  (name . assert_statement))
+										 ((type . "SYMBOL")
+										  (name . comma_statement))
+										 ((type . "SYMBOL")
+										  (name . return_statement))
+										 ((type . "SYMBOL")
+										  (name . delete_statement))
+										 ((type . "SYMBOL")
+										  (name . raise_statement))
+										 ((type . "SYMBOL")
+										  (name . pass_statement))
+										 ((type . "SYMBOL")
+										  (name . break_statement))
+										 ((type . "SYMBOL")
+										  (name . continue_statement))
+										 ((type . "SYMBOL")
+										  (name . global_statement))
+										 ((type . "SYMBOL")
+										  (name . nonlocal_statement))
+										 ((type . "SYMBOL")
+										  (name . assignment))
+										 ((type . "SYMBOL")
+										  (name . augmented_assignment))
+										 ((type . "SYMBOL")
+										  (name . yield))
+										 ((type . "SYMBOL")
+										  (name . exec_statement))))
+								       ((type . "REPEAT")
 									(content (type . "SEQ")
 										 (members ((type . "STRING")
 											   (value . ";"))
 											  ((type . "CHOICE")
 											   (members ((type . "SYMBOL")
+												     (name . expression))
+												    ((type . "SYMBOL")
 												     (name . future_import_statement))
 												    ((type . "SYMBOL")
 												     (name . import_statement))
@@ -839,7 +1045,7 @@
 												    ((type . "SYMBOL")
 												     (name . assert_statement))
 												    ((type . "SYMBOL")
-												     (name . expression_statement))
+												     (name . comma_statement))
 												    ((type . "SYMBOL")
 												     (name . return_statement))
 												    ((type . "SYMBOL")
@@ -857,8 +1063,13 @@
 												    ((type . "SYMBOL")
 												     (name . nonlocal_statement))
 												    ((type . "SYMBOL")
-												     (name . exec_statement)))))))
-								       ((type . "BLANK"))))
+												     (name . assignment))
+												    ((type . "SYMBOL")
+												     (name . augmented_assignment))
+												    ((type . "SYMBOL")
+												     (name . yield))
+												    ((type . "SYMBOL")
+												     (name . exec_statement)))))))))
 							     ((type . "CHOICE")
 							      (members ((type . "STRING")
 									(value . ";"))
@@ -871,7 +1082,12 @@
 					   (members ((type . "SYMBOL")
 						     (name . _indent))
 						    ((type . "SYMBOL")
-						     (name . block)))))))))
+						     (name . block))))
+					  ((type . "ALIAS")
+					   (content (type . "SYMBOL")
+						    (name . _newline))
+					   (named . t)
+					   (value . block)))))))
  (else_clause (type . "SEQ")
 	      (members ((type . "STRING")
 			(value . "else"))
@@ -882,44 +1098,54 @@
 			(content (type . "CHOICE")
 				 (members ((type . "ALIAS")
 					   (content (type . "SEQ")
-						    (members ((type . "CHOICE")
-							      (members ((type . "SYMBOL")
-									(name . future_import_statement))
-								       ((type . "SYMBOL")
-									(name . import_statement))
-								       ((type . "SYMBOL")
-									(name . import_from_statement))
-								       ((type . "SYMBOL")
-									(name . print_statement))
-								       ((type . "SYMBOL")
-									(name . assert_statement))
-								       ((type . "SYMBOL")
-									(name . expression_statement))
-								       ((type . "SYMBOL")
-									(name . return_statement))
-								       ((type . "SYMBOL")
-									(name . delete_statement))
-								       ((type . "SYMBOL")
-									(name . raise_statement))
-								       ((type . "SYMBOL")
-									(name . pass_statement))
-								       ((type . "SYMBOL")
-									(name . break_statement))
-								       ((type . "SYMBOL")
-									(name . continue_statement))
-								       ((type . "SYMBOL")
-									(name . global_statement))
-								       ((type . "SYMBOL")
-									(name . nonlocal_statement))
-								       ((type . "SYMBOL")
-									(name . exec_statement))))
-							     ((type . "CHOICE")
-							      (members ((type . "REPEAT")
+						    (members ((type . "SEQ")
+							      (members ((type . "CHOICE")
+									(members ((type . "SYMBOL")
+										  (name . expression))
+										 ((type . "SYMBOL")
+										  (name . future_import_statement))
+										 ((type . "SYMBOL")
+										  (name . import_statement))
+										 ((type . "SYMBOL")
+										  (name . import_from_statement))
+										 ((type . "SYMBOL")
+										  (name . print_statement))
+										 ((type . "SYMBOL")
+										  (name . assert_statement))
+										 ((type . "SYMBOL")
+										  (name . comma_statement))
+										 ((type . "SYMBOL")
+										  (name . return_statement))
+										 ((type . "SYMBOL")
+										  (name . delete_statement))
+										 ((type . "SYMBOL")
+										  (name . raise_statement))
+										 ((type . "SYMBOL")
+										  (name . pass_statement))
+										 ((type . "SYMBOL")
+										  (name . break_statement))
+										 ((type . "SYMBOL")
+										  (name . continue_statement))
+										 ((type . "SYMBOL")
+										  (name . global_statement))
+										 ((type . "SYMBOL")
+										  (name . nonlocal_statement))
+										 ((type . "SYMBOL")
+										  (name . assignment))
+										 ((type . "SYMBOL")
+										  (name . augmented_assignment))
+										 ((type . "SYMBOL")
+										  (name . yield))
+										 ((type . "SYMBOL")
+										  (name . exec_statement))))
+								       ((type . "REPEAT")
 									(content (type . "SEQ")
 										 (members ((type . "STRING")
 											   (value . ";"))
 											  ((type . "CHOICE")
 											   (members ((type . "SYMBOL")
+												     (name . expression))
+												    ((type . "SYMBOL")
 												     (name . future_import_statement))
 												    ((type . "SYMBOL")
 												     (name . import_statement))
@@ -930,7 +1156,7 @@
 												    ((type . "SYMBOL")
 												     (name . assert_statement))
 												    ((type . "SYMBOL")
-												     (name . expression_statement))
+												     (name . comma_statement))
 												    ((type . "SYMBOL")
 												     (name . return_statement))
 												    ((type . "SYMBOL")
@@ -948,8 +1174,13 @@
 												    ((type . "SYMBOL")
 												     (name . nonlocal_statement))
 												    ((type . "SYMBOL")
-												     (name . exec_statement)))))))
-								       ((type . "BLANK"))))
+												     (name . assignment))
+												    ((type . "SYMBOL")
+												     (name . augmented_assignment))
+												    ((type . "SYMBOL")
+												     (name . yield))
+												    ((type . "SYMBOL")
+												     (name . exec_statement)))))))))
 							     ((type . "CHOICE")
 							      (members ((type . "STRING")
 									(value . ";"))
@@ -962,7 +1193,188 @@
 					   (members ((type . "SYMBOL")
 						     (name . _indent))
 						    ((type . "SYMBOL")
-						     (name . block)))))))))
+						     (name . block))))
+					  ((type . "ALIAS")
+					   (content (type . "SYMBOL")
+						    (name . _newline))
+					   (named . t)
+					   (value . block)))))))
+ (match_statement (type . "SEQ")
+		  (members ((type . "STRING")
+			    (value . "match"))
+			   ((type . "SEQ")
+			    (members ((type . "FIELD")
+				      (name . "subject")
+				      (content (type . "SYMBOL")
+					       (name . expression)))
+				     ((type . "REPEAT")
+				      (content (type . "SEQ")
+					       (members ((type . "STRING")
+							 (value . ","))
+							((type . "FIELD")
+							 (name . "subject")
+							 (content (type . "SYMBOL")
+								  (name . expression))))))))
+			   ((type . "CHOICE")
+			    (members ((type . "STRING")
+				      (value . ","))
+				     ((type . "BLANK"))))
+			   ((type . "STRING")
+			    (value . ":"))
+			   ((type . "REPEAT")
+			    (content (type . "FIELD")
+				     (name . "alternative")
+				     (content (type . "SYMBOL")
+					      (name . case_clause))))))
+ (case_clause (type . "SEQ")
+	      (members ((type . "STRING")
+			(value . "case"))
+		       ((type . "SEQ")
+			(members ((type . "FIELD")
+				  (name . "pattern")
+				  (content (type . "ALIAS")
+					   (content (type . "CHOICE")
+						    (members ((type . "SYMBOL")
+							      (name . expression))
+							     ((type . "SYMBOL")
+							      (name . list_splat_pattern))))
+					   (named . t)
+					   (value . case_pattern)))
+				 ((type . "REPEAT")
+				  (content (type . "SEQ")
+					   (members ((type . "STRING")
+						     (value . ","))
+						    ((type . "FIELD")
+						     (name . "pattern")
+						     (content (type . "ALIAS")
+							      (content (type . "CHOICE")
+								       (members ((type . "SYMBOL")
+										 (name . expression))
+										((type . "SYMBOL")
+										 (name . list_splat_pattern))))
+							      (named . t)
+							      (value . case_pattern))))))))
+		       ((type . "CHOICE")
+			(members ((type . "STRING")
+				  (value . ","))
+				 ((type . "BLANK"))))
+		       ((type . "CHOICE")
+			(members ((type . "FIELD")
+				  (name . "guard")
+				  (content (type . "SEQ")
+					   (members ((type . "STRING")
+						     (value . "if"))
+						    ((type . "SYMBOL")
+						     (name . expression)))))
+				 ((type . "BLANK"))))
+		       ((type . "STRING")
+			(value . ":"))
+		       ((type . "FIELD")
+			(name . "consequence")
+			(content (type . "CHOICE")
+				 (members ((type . "ALIAS")
+					   (content (type . "SEQ")
+						    (members ((type . "SEQ")
+							      (members ((type . "CHOICE")
+									(members ((type . "SYMBOL")
+										  (name . expression))
+										 ((type . "SYMBOL")
+										  (name . future_import_statement))
+										 ((type . "SYMBOL")
+										  (name . import_statement))
+										 ((type . "SYMBOL")
+										  (name . import_from_statement))
+										 ((type . "SYMBOL")
+										  (name . print_statement))
+										 ((type . "SYMBOL")
+										  (name . assert_statement))
+										 ((type . "SYMBOL")
+										  (name . comma_statement))
+										 ((type . "SYMBOL")
+										  (name . return_statement))
+										 ((type . "SYMBOL")
+										  (name . delete_statement))
+										 ((type . "SYMBOL")
+										  (name . raise_statement))
+										 ((type . "SYMBOL")
+										  (name . pass_statement))
+										 ((type . "SYMBOL")
+										  (name . break_statement))
+										 ((type . "SYMBOL")
+										  (name . continue_statement))
+										 ((type . "SYMBOL")
+										  (name . global_statement))
+										 ((type . "SYMBOL")
+										  (name . nonlocal_statement))
+										 ((type . "SYMBOL")
+										  (name . assignment))
+										 ((type . "SYMBOL")
+										  (name . augmented_assignment))
+										 ((type . "SYMBOL")
+										  (name . yield))
+										 ((type . "SYMBOL")
+										  (name . exec_statement))))
+								       ((type . "REPEAT")
+									(content (type . "SEQ")
+										 (members ((type . "STRING")
+											   (value . ";"))
+											  ((type . "CHOICE")
+											   (members ((type . "SYMBOL")
+												     (name . expression))
+												    ((type . "SYMBOL")
+												     (name . future_import_statement))
+												    ((type . "SYMBOL")
+												     (name . import_statement))
+												    ((type . "SYMBOL")
+												     (name . import_from_statement))
+												    ((type . "SYMBOL")
+												     (name . print_statement))
+												    ((type . "SYMBOL")
+												     (name . assert_statement))
+												    ((type . "SYMBOL")
+												     (name . comma_statement))
+												    ((type . "SYMBOL")
+												     (name . return_statement))
+												    ((type . "SYMBOL")
+												     (name . delete_statement))
+												    ((type . "SYMBOL")
+												     (name . raise_statement))
+												    ((type . "SYMBOL")
+												     (name . pass_statement))
+												    ((type . "SYMBOL")
+												     (name . break_statement))
+												    ((type . "SYMBOL")
+												     (name . continue_statement))
+												    ((type . "SYMBOL")
+												     (name . global_statement))
+												    ((type . "SYMBOL")
+												     (name . nonlocal_statement))
+												    ((type . "SYMBOL")
+												     (name . assignment))
+												    ((type . "SYMBOL")
+												     (name . augmented_assignment))
+												    ((type . "SYMBOL")
+												     (name . yield))
+												    ((type . "SYMBOL")
+												     (name . exec_statement)))))))))
+							     ((type . "CHOICE")
+							      (members ((type . "STRING")
+									(value . ";"))
+								       ((type . "BLANK"))))
+							     ((type . "SYMBOL")
+							      (name . _newline))))
+					   (named . t)
+					   (value . block))
+					  ((type . "SEQ")
+					   (members ((type . "SYMBOL")
+						     (name . _indent))
+						    ((type . "SYMBOL")
+						     (name . block))))
+					  ((type . "ALIAS")
+					   (content (type . "SYMBOL")
+						    (name . _newline))
+					   (named . t)
+					   (value . block)))))))
  (for_statement (type . "SEQ")
 		(members ((type . "CHOICE")
 			  (members ((type . "STRING")
@@ -993,44 +1405,54 @@
 			  (content (type . "CHOICE")
 				   (members ((type . "ALIAS")
 					     (content (type . "SEQ")
-						      (members ((type . "CHOICE")
-								(members ((type . "SYMBOL")
-									  (name . future_import_statement))
-									 ((type . "SYMBOL")
-									  (name . import_statement))
-									 ((type . "SYMBOL")
-									  (name . import_from_statement))
-									 ((type . "SYMBOL")
-									  (name . print_statement))
-									 ((type . "SYMBOL")
-									  (name . assert_statement))
-									 ((type . "SYMBOL")
-									  (name . expression_statement))
-									 ((type . "SYMBOL")
-									  (name . return_statement))
-									 ((type . "SYMBOL")
-									  (name . delete_statement))
-									 ((type . "SYMBOL")
-									  (name . raise_statement))
-									 ((type . "SYMBOL")
-									  (name . pass_statement))
-									 ((type . "SYMBOL")
-									  (name . break_statement))
-									 ((type . "SYMBOL")
-									  (name . continue_statement))
-									 ((type . "SYMBOL")
-									  (name . global_statement))
-									 ((type . "SYMBOL")
-									  (name . nonlocal_statement))
-									 ((type . "SYMBOL")
-									  (name . exec_statement))))
-							       ((type . "CHOICE")
-								(members ((type . "REPEAT")
+						      (members ((type . "SEQ")
+								(members ((type . "CHOICE")
+									  (members ((type . "SYMBOL")
+										    (name . expression))
+										   ((type . "SYMBOL")
+										    (name . future_import_statement))
+										   ((type . "SYMBOL")
+										    (name . import_statement))
+										   ((type . "SYMBOL")
+										    (name . import_from_statement))
+										   ((type . "SYMBOL")
+										    (name . print_statement))
+										   ((type . "SYMBOL")
+										    (name . assert_statement))
+										   ((type . "SYMBOL")
+										    (name . comma_statement))
+										   ((type . "SYMBOL")
+										    (name . return_statement))
+										   ((type . "SYMBOL")
+										    (name . delete_statement))
+										   ((type . "SYMBOL")
+										    (name . raise_statement))
+										   ((type . "SYMBOL")
+										    (name . pass_statement))
+										   ((type . "SYMBOL")
+										    (name . break_statement))
+										   ((type . "SYMBOL")
+										    (name . continue_statement))
+										   ((type . "SYMBOL")
+										    (name . global_statement))
+										   ((type . "SYMBOL")
+										    (name . nonlocal_statement))
+										   ((type . "SYMBOL")
+										    (name . assignment))
+										   ((type . "SYMBOL")
+										    (name . augmented_assignment))
+										   ((type . "SYMBOL")
+										    (name . yield))
+										   ((type . "SYMBOL")
+										    (name . exec_statement))))
+									 ((type . "REPEAT")
 									  (content (type . "SEQ")
 										   (members ((type . "STRING")
 											     (value . ";"))
 											    ((type . "CHOICE")
 											     (members ((type . "SYMBOL")
+												       (name . expression))
+												      ((type . "SYMBOL")
 												       (name . future_import_statement))
 												      ((type . "SYMBOL")
 												       (name . import_statement))
@@ -1041,7 +1463,7 @@
 												      ((type . "SYMBOL")
 												       (name . assert_statement))
 												      ((type . "SYMBOL")
-												       (name . expression_statement))
+												       (name . comma_statement))
 												      ((type . "SYMBOL")
 												       (name . return_statement))
 												      ((type . "SYMBOL")
@@ -1059,8 +1481,13 @@
 												      ((type . "SYMBOL")
 												       (name . nonlocal_statement))
 												      ((type . "SYMBOL")
-												       (name . exec_statement)))))))
-									 ((type . "BLANK"))))
+												       (name . assignment))
+												      ((type . "SYMBOL")
+												       (name . augmented_assignment))
+												      ((type . "SYMBOL")
+												       (name . yield))
+												      ((type . "SYMBOL")
+												       (name . exec_statement)))))))))
 							       ((type . "CHOICE")
 								(members ((type . "STRING")
 									  (value . ";"))
@@ -1073,7 +1500,12 @@
 					     (members ((type . "SYMBOL")
 						       (name . _indent))
 						      ((type . "SYMBOL")
-						       (name . block)))))))
+						       (name . block))))
+					    ((type . "ALIAS")
+					     (content (type . "SYMBOL")
+						      (name . _newline))
+					     (named . t)
+					     (value . block)))))
 			 ((type . "FIELD")
 			  (name . "alternative")
 			  (content (type . "CHOICE")
@@ -1093,44 +1525,54 @@
 			    (content (type . "CHOICE")
 				     (members ((type . "ALIAS")
 					       (content (type . "SEQ")
-							(members ((type . "CHOICE")
-								  (members ((type . "SYMBOL")
-									    (name . future_import_statement))
-									   ((type . "SYMBOL")
-									    (name . import_statement))
-									   ((type . "SYMBOL")
-									    (name . import_from_statement))
-									   ((type . "SYMBOL")
-									    (name . print_statement))
-									   ((type . "SYMBOL")
-									    (name . assert_statement))
-									   ((type . "SYMBOL")
-									    (name . expression_statement))
-									   ((type . "SYMBOL")
-									    (name . return_statement))
-									   ((type . "SYMBOL")
-									    (name . delete_statement))
-									   ((type . "SYMBOL")
-									    (name . raise_statement))
-									   ((type . "SYMBOL")
-									    (name . pass_statement))
-									   ((type . "SYMBOL")
-									    (name . break_statement))
-									   ((type . "SYMBOL")
-									    (name . continue_statement))
-									   ((type . "SYMBOL")
-									    (name . global_statement))
-									   ((type . "SYMBOL")
-									    (name . nonlocal_statement))
-									   ((type . "SYMBOL")
-									    (name . exec_statement))))
-								 ((type . "CHOICE")
-								  (members ((type . "REPEAT")
+							(members ((type . "SEQ")
+								  (members ((type . "CHOICE")
+									    (members ((type . "SYMBOL")
+										      (name . expression))
+										     ((type . "SYMBOL")
+										      (name . future_import_statement))
+										     ((type . "SYMBOL")
+										      (name . import_statement))
+										     ((type . "SYMBOL")
+										      (name . import_from_statement))
+										     ((type . "SYMBOL")
+										      (name . print_statement))
+										     ((type . "SYMBOL")
+										      (name . assert_statement))
+										     ((type . "SYMBOL")
+										      (name . comma_statement))
+										     ((type . "SYMBOL")
+										      (name . return_statement))
+										     ((type . "SYMBOL")
+										      (name . delete_statement))
+										     ((type . "SYMBOL")
+										      (name . raise_statement))
+										     ((type . "SYMBOL")
+										      (name . pass_statement))
+										     ((type . "SYMBOL")
+										      (name . break_statement))
+										     ((type . "SYMBOL")
+										      (name . continue_statement))
+										     ((type . "SYMBOL")
+										      (name . global_statement))
+										     ((type . "SYMBOL")
+										      (name . nonlocal_statement))
+										     ((type . "SYMBOL")
+										      (name . assignment))
+										     ((type . "SYMBOL")
+										      (name . augmented_assignment))
+										     ((type . "SYMBOL")
+										      (name . yield))
+										     ((type . "SYMBOL")
+										      (name . exec_statement))))
+									   ((type . "REPEAT")
 									    (content (type . "SEQ")
 										     (members ((type . "STRING")
 											       (value . ";"))
 											      ((type . "CHOICE")
 											       (members ((type . "SYMBOL")
+													 (name . expression))
+													((type . "SYMBOL")
 													 (name . future_import_statement))
 													((type . "SYMBOL")
 													 (name . import_statement))
@@ -1141,7 +1583,7 @@
 													((type . "SYMBOL")
 													 (name . assert_statement))
 													((type . "SYMBOL")
-													 (name . expression_statement))
+													 (name . comma_statement))
 													((type . "SYMBOL")
 													 (name . return_statement))
 													((type . "SYMBOL")
@@ -1159,8 +1601,13 @@
 													((type . "SYMBOL")
 													 (name . nonlocal_statement))
 													((type . "SYMBOL")
-													 (name . exec_statement)))))))
-									   ((type . "BLANK"))))
+													 (name . assignment))
+													((type . "SYMBOL")
+													 (name . augmented_assignment))
+													((type . "SYMBOL")
+													 (name . yield))
+													((type . "SYMBOL")
+													 (name . exec_statement)))))))))
 								 ((type . "CHOICE")
 								  (members ((type . "STRING")
 									    (value . ";"))
@@ -1173,7 +1620,12 @@
 					       (members ((type . "SYMBOL")
 							 (name . _indent))
 							((type . "SYMBOL")
-							 (name . block)))))))
+							 (name . block))))
+					      ((type . "ALIAS")
+					       (content (type . "SYMBOL")
+							(name . _newline))
+					       (named . t)
+					       (value . block)))))
 			   ((type . "CHOICE")
 			    (members ((type . "FIELD")
 				      (name . "alternative")
@@ -1190,44 +1642,54 @@
 			  (content (type . "CHOICE")
 				   (members ((type . "ALIAS")
 					     (content (type . "SEQ")
-						      (members ((type . "CHOICE")
-								(members ((type . "SYMBOL")
-									  (name . future_import_statement))
-									 ((type . "SYMBOL")
-									  (name . import_statement))
-									 ((type . "SYMBOL")
-									  (name . import_from_statement))
-									 ((type . "SYMBOL")
-									  (name . print_statement))
-									 ((type . "SYMBOL")
-									  (name . assert_statement))
-									 ((type . "SYMBOL")
-									  (name . expression_statement))
-									 ((type . "SYMBOL")
-									  (name . return_statement))
-									 ((type . "SYMBOL")
-									  (name . delete_statement))
-									 ((type . "SYMBOL")
-									  (name . raise_statement))
-									 ((type . "SYMBOL")
-									  (name . pass_statement))
-									 ((type . "SYMBOL")
-									  (name . break_statement))
-									 ((type . "SYMBOL")
-									  (name . continue_statement))
-									 ((type . "SYMBOL")
-									  (name . global_statement))
-									 ((type . "SYMBOL")
-									  (name . nonlocal_statement))
-									 ((type . "SYMBOL")
-									  (name . exec_statement))))
-							       ((type . "CHOICE")
-								(members ((type . "REPEAT")
+						      (members ((type . "SEQ")
+								(members ((type . "CHOICE")
+									  (members ((type . "SYMBOL")
+										    (name . expression))
+										   ((type . "SYMBOL")
+										    (name . future_import_statement))
+										   ((type . "SYMBOL")
+										    (name . import_statement))
+										   ((type . "SYMBOL")
+										    (name . import_from_statement))
+										   ((type . "SYMBOL")
+										    (name . print_statement))
+										   ((type . "SYMBOL")
+										    (name . assert_statement))
+										   ((type . "SYMBOL")
+										    (name . comma_statement))
+										   ((type . "SYMBOL")
+										    (name . return_statement))
+										   ((type . "SYMBOL")
+										    (name . delete_statement))
+										   ((type . "SYMBOL")
+										    (name . raise_statement))
+										   ((type . "SYMBOL")
+										    (name . pass_statement))
+										   ((type . "SYMBOL")
+										    (name . break_statement))
+										   ((type . "SYMBOL")
+										    (name . continue_statement))
+										   ((type . "SYMBOL")
+										    (name . global_statement))
+										   ((type . "SYMBOL")
+										    (name . nonlocal_statement))
+										   ((type . "SYMBOL")
+										    (name . assignment))
+										   ((type . "SYMBOL")
+										    (name . augmented_assignment))
+										   ((type . "SYMBOL")
+										    (name . yield))
+										   ((type . "SYMBOL")
+										    (name . exec_statement))))
+									 ((type . "REPEAT")
 									  (content (type . "SEQ")
 										   (members ((type . "STRING")
 											     (value . ";"))
 											    ((type . "CHOICE")
 											     (members ((type . "SYMBOL")
+												       (name . expression))
+												      ((type . "SYMBOL")
 												       (name . future_import_statement))
 												      ((type . "SYMBOL")
 												       (name . import_statement))
@@ -1238,7 +1700,7 @@
 												      ((type . "SYMBOL")
 												       (name . assert_statement))
 												      ((type . "SYMBOL")
-												       (name . expression_statement))
+												       (name . comma_statement))
 												      ((type . "SYMBOL")
 												       (name . return_statement))
 												      ((type . "SYMBOL")
@@ -1256,8 +1718,13 @@
 												      ((type . "SYMBOL")
 												       (name . nonlocal_statement))
 												      ((type . "SYMBOL")
-												       (name . exec_statement)))))))
-									 ((type . "BLANK"))))
+												       (name . assignment))
+												      ((type . "SYMBOL")
+												       (name . augmented_assignment))
+												      ((type . "SYMBOL")
+												       (name . yield))
+												      ((type . "SYMBOL")
+												       (name . exec_statement)))))))))
 							       ((type . "CHOICE")
 								(members ((type . "STRING")
 									  (value . ";"))
@@ -1270,7 +1737,12 @@
 					     (members ((type . "SYMBOL")
 						       (name . _indent))
 						      ((type . "SYMBOL")
-						       (name . block)))))))
+						       (name . block))))
+					    ((type . "ALIAS")
+					     (content (type . "SYMBOL")
+						      (name . _newline))
+					     (named . t)
+					     (value . block)))))
 			 ((type . "CHOICE")
 			  (members ((type . "SEQ")
 				    (members ((type . "REPEAT1")
@@ -1309,194 +1781,11 @@
 			 ((type . "CHOICE")
 			  (members ((type . "ALIAS")
 				    (content (type . "SEQ")
-					     (members ((type . "CHOICE")
-						       (members ((type . "SYMBOL")
-								 (name . future_import_statement))
-								((type . "SYMBOL")
-								 (name . import_statement))
-								((type . "SYMBOL")
-								 (name . import_from_statement))
-								((type . "SYMBOL")
-								 (name . print_statement))
-								((type . "SYMBOL")
-								 (name . assert_statement))
-								((type . "SYMBOL")
-								 (name . expression_statement))
-								((type . "SYMBOL")
-								 (name . return_statement))
-								((type . "SYMBOL")
-								 (name . delete_statement))
-								((type . "SYMBOL")
-								 (name . raise_statement))
-								((type . "SYMBOL")
-								 (name . pass_statement))
-								((type . "SYMBOL")
-								 (name . break_statement))
-								((type . "SYMBOL")
-								 (name . continue_statement))
-								((type . "SYMBOL")
-								 (name . global_statement))
-								((type . "SYMBOL")
-								 (name . nonlocal_statement))
-								((type . "SYMBOL")
-								 (name . exec_statement))))
-						      ((type . "CHOICE")
-						       (members ((type . "REPEAT")
-								 (content (type . "SEQ")
-									  (members ((type . "STRING")
-										    (value . ";"))
-										   ((type . "CHOICE")
-										    (members ((type . "SYMBOL")
-											      (name . future_import_statement))
-											     ((type . "SYMBOL")
-											      (name . import_statement))
-											     ((type . "SYMBOL")
-											      (name . import_from_statement))
-											     ((type . "SYMBOL")
-											      (name . print_statement))
-											     ((type . "SYMBOL")
-											      (name . assert_statement))
-											     ((type . "SYMBOL")
-											      (name . expression_statement))
-											     ((type . "SYMBOL")
-											      (name . return_statement))
-											     ((type . "SYMBOL")
-											      (name . delete_statement))
-											     ((type . "SYMBOL")
-											      (name . raise_statement))
-											     ((type . "SYMBOL")
-											      (name . pass_statement))
-											     ((type . "SYMBOL")
-											      (name . break_statement))
-											     ((type . "SYMBOL")
-											      (name . continue_statement))
-											     ((type . "SYMBOL")
-											      (name . global_statement))
-											     ((type . "SYMBOL")
-											      (name . nonlocal_statement))
-											     ((type . "SYMBOL")
-											      (name . exec_statement)))))))
-								((type . "BLANK"))))
-						      ((type . "CHOICE")
-						       (members ((type . "STRING")
-								 (value . ";"))
-								((type . "BLANK"))))
-						      ((type . "SYMBOL")
-						       (name . _newline))))
-				    (named . t)
-				    (value . block))
-				   ((type . "SEQ")
-				    (members ((type . "SYMBOL")
-					      (name . _indent))
-					     ((type . "SYMBOL")
-					      (name . block))))))))
- (finally_clause (type . "SEQ")
-		 (members ((type . "STRING")
-			   (value . "finally"))
-			  ((type . "STRING")
-			   (value . ":"))
-			  ((type . "CHOICE")
-			   (members ((type . "ALIAS")
-				     (content (type . "SEQ")
-					      (members ((type . "CHOICE")
-							(members ((type . "SYMBOL")
-								  (name . future_import_statement))
-								 ((type . "SYMBOL")
-								  (name . import_statement))
-								 ((type . "SYMBOL")
-								  (name . import_from_statement))
-								 ((type . "SYMBOL")
-								  (name . print_statement))
-								 ((type . "SYMBOL")
-								  (name . assert_statement))
-								 ((type . "SYMBOL")
-								  (name . expression_statement))
-								 ((type . "SYMBOL")
-								  (name . return_statement))
-								 ((type . "SYMBOL")
-								  (name . delete_statement))
-								 ((type . "SYMBOL")
-								  (name . raise_statement))
-								 ((type . "SYMBOL")
-								  (name . pass_statement))
-								 ((type . "SYMBOL")
-								  (name . break_statement))
-								 ((type . "SYMBOL")
-								  (name . continue_statement))
-								 ((type . "SYMBOL")
-								  (name . global_statement))
-								 ((type . "SYMBOL")
-								  (name . nonlocal_statement))
-								 ((type . "SYMBOL")
-								  (name . exec_statement))))
-						       ((type . "CHOICE")
-							(members ((type . "REPEAT")
-								  (content (type . "SEQ")
-									   (members ((type . "STRING")
-										     (value . ";"))
-										    ((type . "CHOICE")
-										     (members ((type . "SYMBOL")
-											       (name . future_import_statement))
-											      ((type . "SYMBOL")
-											       (name . import_statement))
-											      ((type . "SYMBOL")
-											       (name . import_from_statement))
-											      ((type . "SYMBOL")
-											       (name . print_statement))
-											      ((type . "SYMBOL")
-											       (name . assert_statement))
-											      ((type . "SYMBOL")
-											       (name . expression_statement))
-											      ((type . "SYMBOL")
-											       (name . return_statement))
-											      ((type . "SYMBOL")
-											       (name . delete_statement))
-											      ((type . "SYMBOL")
-											       (name . raise_statement))
-											      ((type . "SYMBOL")
-											       (name . pass_statement))
-											      ((type . "SYMBOL")
-											       (name . break_statement))
-											      ((type . "SYMBOL")
-											       (name . continue_statement))
-											      ((type . "SYMBOL")
-											       (name . global_statement))
-											      ((type . "SYMBOL")
-											       (name . nonlocal_statement))
-											      ((type . "SYMBOL")
-											       (name . exec_statement)))))))
-								 ((type . "BLANK"))))
-						       ((type . "CHOICE")
-							(members ((type . "STRING")
-								  (value . ";"))
-								 ((type . "BLANK"))))
-						       ((type . "SYMBOL")
-							(name . _newline))))
-				     (named . t)
-				     (value . block))
-				    ((type . "SEQ")
-				     (members ((type . "SYMBOL")
-					       (name . _indent))
-					      ((type . "SYMBOL")
-					       (name . block))))))))
- (with_statement (type . "SEQ")
-		 (members ((type . "CHOICE")
-			   (members ((type . "STRING")
-				     (value . "async"))
-				    ((type . "BLANK"))))
-			  ((type . "STRING")
-			   (value . "with"))
-			  ((type . "SYMBOL")
-			   (name . with_clause))
-			  ((type . "STRING")
-			   (value . ":"))
-			  ((type . "FIELD")
-			   (name . "body")
-			   (content (type . "CHOICE")
-				    (members ((type . "ALIAS")
-					      (content (type . "SEQ")
+					     (members ((type . "SEQ")
 						       (members ((type . "CHOICE")
 								 (members ((type . "SYMBOL")
+									   (name . expression))
+									  ((type . "SYMBOL")
 									   (name . future_import_statement))
 									  ((type . "SYMBOL")
 									   (name . import_statement))
@@ -1507,7 +1796,7 @@
 									  ((type . "SYMBOL")
 									   (name . assert_statement))
 									  ((type . "SYMBOL")
-									   (name . expression_statement))
+									   (name . comma_statement))
 									  ((type . "SYMBOL")
 									   (name . return_statement))
 									  ((type . "SYMBOL")
@@ -1525,14 +1814,289 @@
 									  ((type . "SYMBOL")
 									   (name . nonlocal_statement))
 									  ((type . "SYMBOL")
+									   (name . assignment))
+									  ((type . "SYMBOL")
+									   (name . augmented_assignment))
+									  ((type . "SYMBOL")
+									   (name . yield))
+									  ((type . "SYMBOL")
 									   (name . exec_statement))))
-								((type . "CHOICE")
-								 (members ((type . "REPEAT")
+								((type . "REPEAT")
+								 (content (type . "SEQ")
+									  (members ((type . "STRING")
+										    (value . ";"))
+										   ((type . "CHOICE")
+										    (members ((type . "SYMBOL")
+											      (name . expression))
+											     ((type . "SYMBOL")
+											      (name . future_import_statement))
+											     ((type . "SYMBOL")
+											      (name . import_statement))
+											     ((type . "SYMBOL")
+											      (name . import_from_statement))
+											     ((type . "SYMBOL")
+											      (name . print_statement))
+											     ((type . "SYMBOL")
+											      (name . assert_statement))
+											     ((type . "SYMBOL")
+											      (name . comma_statement))
+											     ((type . "SYMBOL")
+											      (name . return_statement))
+											     ((type . "SYMBOL")
+											      (name . delete_statement))
+											     ((type . "SYMBOL")
+											      (name . raise_statement))
+											     ((type . "SYMBOL")
+											      (name . pass_statement))
+											     ((type . "SYMBOL")
+											      (name . break_statement))
+											     ((type . "SYMBOL")
+											      (name . continue_statement))
+											     ((type . "SYMBOL")
+											      (name . global_statement))
+											     ((type . "SYMBOL")
+											      (name . nonlocal_statement))
+											     ((type . "SYMBOL")
+											      (name . assignment))
+											     ((type . "SYMBOL")
+											      (name . augmented_assignment))
+											     ((type . "SYMBOL")
+											      (name . yield))
+											     ((type . "SYMBOL")
+											      (name . exec_statement)))))))))
+						      ((type . "CHOICE")
+						       (members ((type . "STRING")
+								 (value . ";"))
+								((type . "BLANK"))))
+						      ((type . "SYMBOL")
+						       (name . _newline))))
+				    (named . t)
+				    (value . block))
+				   ((type . "SEQ")
+				    (members ((type . "SYMBOL")
+					      (name . _indent))
+					     ((type . "SYMBOL")
+					      (name . block))))
+				   ((type . "ALIAS")
+				    (content (type . "SYMBOL")
+					     (name . _newline))
+				    (named . t)
+				    (value . block))))))
+ (finally_clause (type . "SEQ")
+		 (members ((type . "STRING")
+			   (value . "finally"))
+			  ((type . "STRING")
+			   (value . ":"))
+			  ((type . "CHOICE")
+			   (members ((type . "ALIAS")
+				     (content (type . "SEQ")
+					      (members ((type . "SEQ")
+							(members ((type . "CHOICE")
+								  (members ((type . "SYMBOL")
+									    (name . expression))
+									   ((type . "SYMBOL")
+									    (name . future_import_statement))
+									   ((type . "SYMBOL")
+									    (name . import_statement))
+									   ((type . "SYMBOL")
+									    (name . import_from_statement))
+									   ((type . "SYMBOL")
+									    (name . print_statement))
+									   ((type . "SYMBOL")
+									    (name . assert_statement))
+									   ((type . "SYMBOL")
+									    (name . comma_statement))
+									   ((type . "SYMBOL")
+									    (name . return_statement))
+									   ((type . "SYMBOL")
+									    (name . delete_statement))
+									   ((type . "SYMBOL")
+									    (name . raise_statement))
+									   ((type . "SYMBOL")
+									    (name . pass_statement))
+									   ((type . "SYMBOL")
+									    (name . break_statement))
+									   ((type . "SYMBOL")
+									    (name . continue_statement))
+									   ((type . "SYMBOL")
+									    (name . global_statement))
+									   ((type . "SYMBOL")
+									    (name . nonlocal_statement))
+									   ((type . "SYMBOL")
+									    (name . assignment))
+									   ((type . "SYMBOL")
+									    (name . augmented_assignment))
+									   ((type . "SYMBOL")
+									    (name . yield))
+									   ((type . "SYMBOL")
+									    (name . exec_statement))))
+								 ((type . "REPEAT")
+								  (content (type . "SEQ")
+									   (members ((type . "STRING")
+										     (value . ";"))
+										    ((type . "CHOICE")
+										     (members ((type . "SYMBOL")
+											       (name . expression))
+											      ((type . "SYMBOL")
+											       (name . future_import_statement))
+											      ((type . "SYMBOL")
+											       (name . import_statement))
+											      ((type . "SYMBOL")
+											       (name . import_from_statement))
+											      ((type . "SYMBOL")
+											       (name . print_statement))
+											      ((type . "SYMBOL")
+											       (name . assert_statement))
+											      ((type . "SYMBOL")
+											       (name . comma_statement))
+											      ((type . "SYMBOL")
+											       (name . return_statement))
+											      ((type . "SYMBOL")
+											       (name . delete_statement))
+											      ((type . "SYMBOL")
+											       (name . raise_statement))
+											      ((type . "SYMBOL")
+											       (name . pass_statement))
+											      ((type . "SYMBOL")
+											       (name . break_statement))
+											      ((type . "SYMBOL")
+											       (name . continue_statement))
+											      ((type . "SYMBOL")
+											       (name . global_statement))
+											      ((type . "SYMBOL")
+											       (name . nonlocal_statement))
+											      ((type . "SYMBOL")
+											       (name . assignment))
+											      ((type . "SYMBOL")
+											       (name . augmented_assignment))
+											      ((type . "SYMBOL")
+											       (name . yield))
+											      ((type . "SYMBOL")
+											       (name . exec_statement)))))))))
+						       ((type . "CHOICE")
+							(members ((type . "STRING")
+								  (value . ";"))
+								 ((type . "BLANK"))))
+						       ((type . "SYMBOL")
+							(name . _newline))))
+				     (named . t)
+				     (value . block))
+				    ((type . "SEQ")
+				     (members ((type . "SYMBOL")
+					       (name . _indent))
+					      ((type . "SYMBOL")
+					       (name . block))))
+				    ((type . "ALIAS")
+				     (content (type . "SYMBOL")
+					      (name . _newline))
+				     (named . t)
+				     (value . block))))))
+ (with_statement (type . "SEQ")
+		 (members ((type . "CHOICE")
+			   (members ((type . "STRING")
+				     (value . "async"))
+				    ((type . "BLANK"))))
+			  ((type . "STRING")
+			   (value . "with"))
+			  ((type . "CHOICE")
+			   (members ((type . "SEQ")
+				     (members ((type . "PREC_DYNAMIC")
+					       (value . -1)
+					       (content (type . "SEQ")
+							(members ((type . "FIELD")
+								  (name . "value")
+								  (content (type . "SYMBOL")
+									   (name . expression))))))
+					      ((type . "REPEAT")
+					       (content (type . "SEQ")
+							(members ((type . "STRING")
+								  (value . ","))
+								 ((type . "PREC_DYNAMIC")
+								  (value . -1)
+								  (content (type . "SEQ")
+									   (members ((type . "FIELD")
+										     (name . "value")
+										     (content (type . "SYMBOL")
+											      (name . expression)))))))))))
+				    ((type . "SEQ")
+				     (members ((type . "STRING")
+					       (value . "("))
+					      ((type . "SEQ")
+					       (members ((type . "PREC_DYNAMIC")
+							 (value . -1)
+							 (content (type . "SEQ")
+								  (members ((type . "FIELD")
+									    (name . "value")
+									    (content (type . "SYMBOL")
+										     (name . expression))))))
+							((type . "REPEAT")
+							 (content (type . "SEQ")
+								  (members ((type . "STRING")
+									    (value . ","))
+									   ((type . "PREC_DYNAMIC")
+									    (value . -1)
+									    (content (type . "SEQ")
+										     (members ((type . "FIELD")
+											       (name . "value")
+											       (content (type . "SYMBOL")
+													(name . expression)))))))))))
+					      ((type . "STRING")
+					       (value . ")"))))))
+			  ((type . "STRING")
+			   (value . ":"))
+			  ((type . "FIELD")
+			   (name . "body")
+			   (content (type . "CHOICE")
+				    (members ((type . "ALIAS")
+					      (content (type . "SEQ")
+						       (members ((type . "SEQ")
+								 (members ((type . "CHOICE")
+									   (members ((type . "SYMBOL")
+										     (name . expression))
+										    ((type . "SYMBOL")
+										     (name . future_import_statement))
+										    ((type . "SYMBOL")
+										     (name . import_statement))
+										    ((type . "SYMBOL")
+										     (name . import_from_statement))
+										    ((type . "SYMBOL")
+										     (name . print_statement))
+										    ((type . "SYMBOL")
+										     (name . assert_statement))
+										    ((type . "SYMBOL")
+										     (name . comma_statement))
+										    ((type . "SYMBOL")
+										     (name . return_statement))
+										    ((type . "SYMBOL")
+										     (name . delete_statement))
+										    ((type . "SYMBOL")
+										     (name . raise_statement))
+										    ((type . "SYMBOL")
+										     (name . pass_statement))
+										    ((type . "SYMBOL")
+										     (name . break_statement))
+										    ((type . "SYMBOL")
+										     (name . continue_statement))
+										    ((type . "SYMBOL")
+										     (name . global_statement))
+										    ((type . "SYMBOL")
+										     (name . nonlocal_statement))
+										    ((type . "SYMBOL")
+										     (name . assignment))
+										    ((type . "SYMBOL")
+										     (name . augmented_assignment))
+										    ((type . "SYMBOL")
+										     (name . yield))
+										    ((type . "SYMBOL")
+										     (name . exec_statement))))
+									  ((type . "REPEAT")
 									   (content (type . "SEQ")
 										    (members ((type . "STRING")
 											      (value . ";"))
 											     ((type . "CHOICE")
 											      (members ((type . "SYMBOL")
+													(name . expression))
+												       ((type . "SYMBOL")
 													(name . future_import_statement))
 												       ((type . "SYMBOL")
 													(name . import_statement))
@@ -1543,7 +2107,7 @@
 												       ((type . "SYMBOL")
 													(name . assert_statement))
 												       ((type . "SYMBOL")
-													(name . expression_statement))
+													(name . comma_statement))
 												       ((type . "SYMBOL")
 													(name . return_statement))
 												       ((type . "SYMBOL")
@@ -1561,8 +2125,13 @@
 												       ((type . "SYMBOL")
 													(name . nonlocal_statement))
 												       ((type . "SYMBOL")
-													(name . exec_statement)))))))
-									  ((type . "BLANK"))))
+													(name . assignment))
+												       ((type . "SYMBOL")
+													(name . augmented_assignment))
+												       ((type . "SYMBOL")
+													(name . yield))
+												       ((type . "SYMBOL")
+													(name . exec_statement)))))))))
 								((type . "CHOICE")
 								 (members ((type . "STRING")
 									   (value . ";"))
@@ -1575,47 +2144,19 @@
 					      (members ((type . "SYMBOL")
 							(name . _indent))
 						       ((type . "SYMBOL")
-							(name . block)))))))))
- (with_clause (type . "CHOICE")
-	      (members ((type . "SEQ")
-			(members ((type . "SYMBOL")
-				  (name . with_item))
-				 ((type . "REPEAT")
-				  (content (type . "SEQ")
-					   (members ((type . "STRING")
-						     (value . ","))
-						    ((type . "SYMBOL")
-						     (name . with_item)))))))
-		       ((type . "SEQ")
-			(members ((type . "STRING")
-				  (value . "("))
-				 ((type . "SEQ")
-				  (members ((type . "SYMBOL")
-					    (name . with_item))
-					   ((type . "REPEAT")
-					    (content (type . "SEQ")
-						     (members ((type . "STRING")
-							       (value . ","))
-							      ((type . "SYMBOL")
-							       (name . with_item)))))))
-				 ((type . "STRING")
-				  (value . ")"))))))
- (with_item (type . "PREC_DYNAMIC")
-	    (value . -1)
-	    (content (type . "SEQ")
-		     (members ((type . "FIELD")
-			       (name . "value")
-			       (content (type . "SYMBOL")
-					(name . expression)))
-			      ((type . "CHOICE")
-			       (members ((type . "SEQ")
-					 (members ((type . "STRING")
-						   (value . "as"))
-						  ((type . "FIELD")
-						   (name . "alias")
-						   (content (type . "SYMBOL")
-							    (name . pattern)))))
-					((type . "BLANK")))))))
+							(name . block))))
+					     ((type . "ALIAS")
+					      (content (type . "SYMBOL")
+						       (name . _newline))
+					      (named . t)
+					      (value . block)))))))
+ (_with_item (type . "PREC_DYNAMIC")
+	     (value . -1)
+	     (content (type . "SEQ")
+		      (members ((type . "FIELD")
+				(name . "value")
+				(content (type . "SYMBOL")
+					 (name . expression))))))
  (function_definition (type . "SEQ")
 		      (members ((type . "CHOICE")
 				(members ((type . "STRING")
@@ -1638,7 +2179,7 @@
 						   ((type . "FIELD")
 						    (name . "return_type")
 						    (content (type . "SYMBOL")
-							     (name . type)))))
+							     (name . expression)))))
 					 ((type . "BLANK"))))
 			       ((type . "STRING")
 				(value . ":"))
@@ -1647,44 +2188,54 @@
 				(content (type . "CHOICE")
 					 (members ((type . "ALIAS")
 						   (content (type . "SEQ")
-							    (members ((type . "CHOICE")
-								      (members ((type . "SYMBOL")
-										(name . future_import_statement))
-									       ((type . "SYMBOL")
-										(name . import_statement))
-									       ((type . "SYMBOL")
-										(name . import_from_statement))
-									       ((type . "SYMBOL")
-										(name . print_statement))
-									       ((type . "SYMBOL")
-										(name . assert_statement))
-									       ((type . "SYMBOL")
-										(name . expression_statement))
-									       ((type . "SYMBOL")
-										(name . return_statement))
-									       ((type . "SYMBOL")
-										(name . delete_statement))
-									       ((type . "SYMBOL")
-										(name . raise_statement))
-									       ((type . "SYMBOL")
-										(name . pass_statement))
-									       ((type . "SYMBOL")
-										(name . break_statement))
-									       ((type . "SYMBOL")
-										(name . continue_statement))
-									       ((type . "SYMBOL")
-										(name . global_statement))
-									       ((type . "SYMBOL")
-										(name . nonlocal_statement))
-									       ((type . "SYMBOL")
-										(name . exec_statement))))
-								     ((type . "CHOICE")
-								      (members ((type . "REPEAT")
+							    (members ((type . "SEQ")
+								      (members ((type . "CHOICE")
+										(members ((type . "SYMBOL")
+											  (name . expression))
+											 ((type . "SYMBOL")
+											  (name . future_import_statement))
+											 ((type . "SYMBOL")
+											  (name . import_statement))
+											 ((type . "SYMBOL")
+											  (name . import_from_statement))
+											 ((type . "SYMBOL")
+											  (name . print_statement))
+											 ((type . "SYMBOL")
+											  (name . assert_statement))
+											 ((type . "SYMBOL")
+											  (name . comma_statement))
+											 ((type . "SYMBOL")
+											  (name . return_statement))
+											 ((type . "SYMBOL")
+											  (name . delete_statement))
+											 ((type . "SYMBOL")
+											  (name . raise_statement))
+											 ((type . "SYMBOL")
+											  (name . pass_statement))
+											 ((type . "SYMBOL")
+											  (name . break_statement))
+											 ((type . "SYMBOL")
+											  (name . continue_statement))
+											 ((type . "SYMBOL")
+											  (name . global_statement))
+											 ((type . "SYMBOL")
+											  (name . nonlocal_statement))
+											 ((type . "SYMBOL")
+											  (name . assignment))
+											 ((type . "SYMBOL")
+											  (name . augmented_assignment))
+											 ((type . "SYMBOL")
+											  (name . yield))
+											 ((type . "SYMBOL")
+											  (name . exec_statement))))
+									       ((type . "REPEAT")
 										(content (type . "SEQ")
 											 (members ((type . "STRING")
 												   (value . ";"))
 												  ((type . "CHOICE")
 												   (members ((type . "SYMBOL")
+													     (name . expression))
+													    ((type . "SYMBOL")
 													     (name . future_import_statement))
 													    ((type . "SYMBOL")
 													     (name . import_statement))
@@ -1695,7 +2246,7 @@
 													    ((type . "SYMBOL")
 													     (name . assert_statement))
 													    ((type . "SYMBOL")
-													     (name . expression_statement))
+													     (name . comma_statement))
 													    ((type . "SYMBOL")
 													     (name . return_statement))
 													    ((type . "SYMBOL")
@@ -1713,8 +2264,13 @@
 													    ((type . "SYMBOL")
 													     (name . nonlocal_statement))
 													    ((type . "SYMBOL")
-													     (name . exec_statement)))))))
-									       ((type . "BLANK"))))
+													     (name . assignment))
+													    ((type . "SYMBOL")
+													     (name . augmented_assignment))
+													    ((type . "SYMBOL")
+													     (name . yield))
+													    ((type . "SYMBOL")
+													     (name . exec_statement)))))))))
 								     ((type . "CHOICE")
 								      (members ((type . "STRING")
 										(value . ";"))
@@ -1727,7 +2283,12 @@
 						   (members ((type . "SYMBOL")
 							     (name . _indent))
 							    ((type . "SYMBOL")
-							     (name . block)))))))))
+							     (name . block))))
+						  ((type . "ALIAS")
+						   (content (type . "SYMBOL")
+							    (name . _newline))
+						   (named . t)
+						   (value . block)))))))
  (parameters (type . "SEQ")
 	     (members ((type . "STRING")
 		       (value . "("))
@@ -1836,44 +2397,54 @@
 			     (content (type . "CHOICE")
 				      (members ((type . "ALIAS")
 						(content (type . "SEQ")
-							 (members ((type . "CHOICE")
-								   (members ((type . "SYMBOL")
-									     (name . future_import_statement))
-									    ((type . "SYMBOL")
-									     (name . import_statement))
-									    ((type . "SYMBOL")
-									     (name . import_from_statement))
-									    ((type . "SYMBOL")
-									     (name . print_statement))
-									    ((type . "SYMBOL")
-									     (name . assert_statement))
-									    ((type . "SYMBOL")
-									     (name . expression_statement))
-									    ((type . "SYMBOL")
-									     (name . return_statement))
-									    ((type . "SYMBOL")
-									     (name . delete_statement))
-									    ((type . "SYMBOL")
-									     (name . raise_statement))
-									    ((type . "SYMBOL")
-									     (name . pass_statement))
-									    ((type . "SYMBOL")
-									     (name . break_statement))
-									    ((type . "SYMBOL")
-									     (name . continue_statement))
-									    ((type . "SYMBOL")
-									     (name . global_statement))
-									    ((type . "SYMBOL")
-									     (name . nonlocal_statement))
-									    ((type . "SYMBOL")
-									     (name . exec_statement))))
-								  ((type . "CHOICE")
-								   (members ((type . "REPEAT")
+							 (members ((type . "SEQ")
+								   (members ((type . "CHOICE")
+									     (members ((type . "SYMBOL")
+										       (name . expression))
+										      ((type . "SYMBOL")
+										       (name . future_import_statement))
+										      ((type . "SYMBOL")
+										       (name . import_statement))
+										      ((type . "SYMBOL")
+										       (name . import_from_statement))
+										      ((type . "SYMBOL")
+										       (name . print_statement))
+										      ((type . "SYMBOL")
+										       (name . assert_statement))
+										      ((type . "SYMBOL")
+										       (name . comma_statement))
+										      ((type . "SYMBOL")
+										       (name . return_statement))
+										      ((type . "SYMBOL")
+										       (name . delete_statement))
+										      ((type . "SYMBOL")
+										       (name . raise_statement))
+										      ((type . "SYMBOL")
+										       (name . pass_statement))
+										      ((type . "SYMBOL")
+										       (name . break_statement))
+										      ((type . "SYMBOL")
+										       (name . continue_statement))
+										      ((type . "SYMBOL")
+										       (name . global_statement))
+										      ((type . "SYMBOL")
+										       (name . nonlocal_statement))
+										      ((type . "SYMBOL")
+										       (name . assignment))
+										      ((type . "SYMBOL")
+										       (name . augmented_assignment))
+										      ((type . "SYMBOL")
+										       (name . yield))
+										      ((type . "SYMBOL")
+										       (name . exec_statement))))
+									    ((type . "REPEAT")
 									     (content (type . "SEQ")
 										      (members ((type . "STRING")
 												(value . ";"))
 											       ((type . "CHOICE")
 												(members ((type . "SYMBOL")
+													  (name . expression))
+													 ((type . "SYMBOL")
 													  (name . future_import_statement))
 													 ((type . "SYMBOL")
 													  (name . import_statement))
@@ -1884,7 +2455,7 @@
 													 ((type . "SYMBOL")
 													  (name . assert_statement))
 													 ((type . "SYMBOL")
-													  (name . expression_statement))
+													  (name . comma_statement))
 													 ((type . "SYMBOL")
 													  (name . return_statement))
 													 ((type . "SYMBOL")
@@ -1902,8 +2473,13 @@
 													 ((type . "SYMBOL")
 													  (name . nonlocal_statement))
 													 ((type . "SYMBOL")
-													  (name . exec_statement)))))))
-									    ((type . "BLANK"))))
+													  (name . assignment))
+													 ((type . "SYMBOL")
+													  (name . augmented_assignment))
+													 ((type . "SYMBOL")
+													  (name . yield))
+													 ((type . "SYMBOL")
+													  (name . exec_statement)))))))))
 								  ((type . "CHOICE")
 								   (members ((type . "STRING")
 									     (value . ";"))
@@ -1916,7 +2492,12 @@
 						(members ((type . "SYMBOL")
 							  (name . _indent))
 							 ((type . "SYMBOL")
-							  (name . block)))))))))
+							  (name . block))))
+					       ((type . "ALIAS")
+						(content (type . "SYMBOL")
+							 (name . _newline))
+						(named . t)
+						(value . block)))))))
  (parenthesized_list_splat (type . "PREC")
 			   (value . 1)
 			   (content (type . "SEQ")
@@ -1997,44 +2578,54 @@
  (_suite (type . "CHOICE")
 	 (members ((type . "ALIAS")
 		   (content (type . "SEQ")
-			    (members ((type . "CHOICE")
-				      (members ((type . "SYMBOL")
-						(name . future_import_statement))
-					       ((type . "SYMBOL")
-						(name . import_statement))
-					       ((type . "SYMBOL")
-						(name . import_from_statement))
-					       ((type . "SYMBOL")
-						(name . print_statement))
-					       ((type . "SYMBOL")
-						(name . assert_statement))
-					       ((type . "SYMBOL")
-						(name . expression_statement))
-					       ((type . "SYMBOL")
-						(name . return_statement))
-					       ((type . "SYMBOL")
-						(name . delete_statement))
-					       ((type . "SYMBOL")
-						(name . raise_statement))
-					       ((type . "SYMBOL")
-						(name . pass_statement))
-					       ((type . "SYMBOL")
-						(name . break_statement))
-					       ((type . "SYMBOL")
-						(name . continue_statement))
-					       ((type . "SYMBOL")
-						(name . global_statement))
-					       ((type . "SYMBOL")
-						(name . nonlocal_statement))
-					       ((type . "SYMBOL")
-						(name . exec_statement))))
-				     ((type . "CHOICE")
-				      (members ((type . "REPEAT")
+			    (members ((type . "SEQ")
+				      (members ((type . "CHOICE")
+						(members ((type . "SYMBOL")
+							  (name . expression))
+							 ((type . "SYMBOL")
+							  (name . future_import_statement))
+							 ((type . "SYMBOL")
+							  (name . import_statement))
+							 ((type . "SYMBOL")
+							  (name . import_from_statement))
+							 ((type . "SYMBOL")
+							  (name . print_statement))
+							 ((type . "SYMBOL")
+							  (name . assert_statement))
+							 ((type . "SYMBOL")
+							  (name . comma_statement))
+							 ((type . "SYMBOL")
+							  (name . return_statement))
+							 ((type . "SYMBOL")
+							  (name . delete_statement))
+							 ((type . "SYMBOL")
+							  (name . raise_statement))
+							 ((type . "SYMBOL")
+							  (name . pass_statement))
+							 ((type . "SYMBOL")
+							  (name . break_statement))
+							 ((type . "SYMBOL")
+							  (name . continue_statement))
+							 ((type . "SYMBOL")
+							  (name . global_statement))
+							 ((type . "SYMBOL")
+							  (name . nonlocal_statement))
+							 ((type . "SYMBOL")
+							  (name . assignment))
+							 ((type . "SYMBOL")
+							  (name . augmented_assignment))
+							 ((type . "SYMBOL")
+							  (name . yield))
+							 ((type . "SYMBOL")
+							  (name . exec_statement))))
+					       ((type . "REPEAT")
 						(content (type . "SEQ")
 							 (members ((type . "STRING")
 								   (value . ";"))
 								  ((type . "CHOICE")
 								   (members ((type . "SYMBOL")
+									     (name . expression))
+									    ((type . "SYMBOL")
 									     (name . future_import_statement))
 									    ((type . "SYMBOL")
 									     (name . import_statement))
@@ -2045,7 +2636,7 @@
 									    ((type . "SYMBOL")
 									     (name . assert_statement))
 									    ((type . "SYMBOL")
-									     (name . expression_statement))
+									     (name . comma_statement))
 									    ((type . "SYMBOL")
 									     (name . return_statement))
 									    ((type . "SYMBOL")
@@ -2063,8 +2654,13 @@
 									    ((type . "SYMBOL")
 									     (name . nonlocal_statement))
 									    ((type . "SYMBOL")
-									     (name . exec_statement)))))))
-					       ((type . "BLANK"))))
+									     (name . assignment))
+									    ((type . "SYMBOL")
+									     (name . augmented_assignment))
+									    ((type . "SYMBOL")
+									     (name . yield))
+									    ((type . "SYMBOL")
+									     (name . exec_statement)))))))))
 				     ((type . "CHOICE")
 				      (members ((type . "STRING")
 						(value . ";"))
@@ -2077,49 +2673,63 @@
 		   (members ((type . "SYMBOL")
 			     (name . _indent))
 			    ((type . "SYMBOL")
-			     (name . block))))))
+			     (name . block))))
+		  ((type . "ALIAS")
+		   (content (type . "SYMBOL") (name . _newline))
+		   (named . t)
+		   (value . block))))
  (block (type . "SEQ")
-	(members ((type . "REPEAT1")
+	(members ((type . "REPEAT")
 		  (content (type . "CHOICE")
 			   (members ((type . "SEQ")
-				     (members ((type . "CHOICE")
-					       (members ((type . "SYMBOL")
-							 (name . future_import_statement))
-							((type . "SYMBOL")
-							 (name . import_statement))
-							((type . "SYMBOL")
-							 (name . import_from_statement))
-							((type . "SYMBOL")
-							 (name . print_statement))
-							((type . "SYMBOL")
-							 (name . assert_statement))
-							((type . "SYMBOL")
-							 (name . expression_statement))
-							((type . "SYMBOL")
-							 (name . return_statement))
-							((type . "SYMBOL")
-							 (name . delete_statement))
-							((type . "SYMBOL")
-							 (name . raise_statement))
-							((type . "SYMBOL")
-							 (name . pass_statement))
-							((type . "SYMBOL")
-							 (name . break_statement))
-							((type . "SYMBOL")
-							 (name . continue_statement))
-							((type . "SYMBOL")
-							 (name . global_statement))
-							((type . "SYMBOL")
-							 (name . nonlocal_statement))
-							((type . "SYMBOL")
-							 (name . exec_statement))))
-					      ((type . "CHOICE")
-					       (members ((type . "REPEAT")
+				     (members ((type . "SEQ")
+					       (members ((type . "CHOICE")
+							 (members ((type . "SYMBOL")
+								   (name . expression))
+								  ((type . "SYMBOL")
+								   (name . future_import_statement))
+								  ((type . "SYMBOL")
+								   (name . import_statement))
+								  ((type . "SYMBOL")
+								   (name . import_from_statement))
+								  ((type . "SYMBOL")
+								   (name . print_statement))
+								  ((type . "SYMBOL")
+								   (name . assert_statement))
+								  ((type . "SYMBOL")
+								   (name . comma_statement))
+								  ((type . "SYMBOL")
+								   (name . return_statement))
+								  ((type . "SYMBOL")
+								   (name . delete_statement))
+								  ((type . "SYMBOL")
+								   (name . raise_statement))
+								  ((type . "SYMBOL")
+								   (name . pass_statement))
+								  ((type . "SYMBOL")
+								   (name . break_statement))
+								  ((type . "SYMBOL")
+								   (name . continue_statement))
+								  ((type . "SYMBOL")
+								   (name . global_statement))
+								  ((type . "SYMBOL")
+								   (name . nonlocal_statement))
+								  ((type . "SYMBOL")
+								   (name . assignment))
+								  ((type . "SYMBOL")
+								   (name . augmented_assignment))
+								  ((type . "SYMBOL")
+								   (name . yield))
+								  ((type . "SYMBOL")
+								   (name . exec_statement))))
+							((type . "REPEAT")
 							 (content (type . "SEQ")
 								  (members ((type . "STRING")
 									    (value . ";"))
 									   ((type . "CHOICE")
 									    (members ((type . "SYMBOL")
+										      (name . expression))
+										     ((type . "SYMBOL")
 										      (name . future_import_statement))
 										     ((type . "SYMBOL")
 										      (name . import_statement))
@@ -2130,7 +2740,7 @@
 										     ((type . "SYMBOL")
 										      (name . assert_statement))
 										     ((type . "SYMBOL")
-										      (name . expression_statement))
+										      (name . comma_statement))
 										     ((type . "SYMBOL")
 										      (name . return_statement))
 										     ((type . "SYMBOL")
@@ -2148,8 +2758,13 @@
 										     ((type . "SYMBOL")
 										      (name . nonlocal_statement))
 										     ((type . "SYMBOL")
-										      (name . exec_statement)))))))
-							((type . "BLANK"))))
+										      (name . assignment))
+										     ((type . "SYMBOL")
+										      (name . augmented_assignment))
+										     ((type . "SYMBOL")
+										      (name . yield))
+										     ((type . "SYMBOL")
+										      (name . exec_statement)))))))))
 					      ((type . "CHOICE")
 					       (members ((type . "STRING")
 							 (value . ";"))
@@ -2172,7 +2787,9 @@
 					      ((type . "SYMBOL")
 					       (name . class_definition))
 					      ((type . "SYMBOL")
-					       (name . decorated_definition)))))))
+					       (name . decorated_definition))
+					      ((type . "SYMBOL")
+					       (name . match_statement)))))))
 		 ((type . "SYMBOL")
 		  (name . _dedent))))
  (expression_list (type . "PREC_RIGHT")
@@ -2194,15 +2811,15 @@
 							 (members ((type . "STRING")
 								   (value . ","))
 								  ((type . "BLANK")))))))))))
- (dotted_name (type . "SEQ")
-	      (members ((type . "SYMBOL")
-			(name . identifier))
-		       ((type . "REPEAT")
-			(content (type . "SEQ")
-				 (members ((type . "STRING")
-					   (value . "."))
-					  ((type . "SYMBOL")
-					   (name . identifier)))))))
+ (_dotted_name (type . "SEQ")
+	       (members ((type . "SYMBOL")
+			 (name . identifier))
+			((type . "REPEAT")
+			 (content (type . "SEQ")
+				  (members ((type . "STRING")
+					    (value . "."))
+					   ((type . "SYMBOL")
+					    (name . identifier)))))))
  (_parameters (type . "SEQ")
 	      (members ((type . "SEQ")
 			(members ((type . "SYMBOL")
@@ -2239,20 +2856,22 @@
 		     ((type . "SYMBOL")
 		      (name . default_parameter))
 		     ((type . "SYMBOL")
-		      (name . typed_default_parameter))
-		     ((type . "SYMBOL")
 		      (name . list_splat_pattern))
 		     ((type . "SYMBOL")
 		      (name . tuple_pattern))
-		     ((type . "ALIAS")
-		      (content (type . "STRING") (value . "*"))
-		      (named . t)
-		      (value . list_splat_pattern))
+		     ((type . "SYMBOL")
+		      (name . keyword_separator))
+		     ((type . "SYMBOL")
+		      (name . positional_separator))
 		     ((type . "SYMBOL")
 		      (name . dictionary_splat_pattern))))
  (pattern (type . "CHOICE")
 	  (members ((type . "SYMBOL")
 		    (name . identifier))
+		   ((type . "ALIAS")
+		    (content (type . "STRING") (value . "match"))
+		    (named . t)
+		    (value . identifier))
 		   ((type . "SYMBOL")
 		    (name . keyword_identifier))
 		   ((type . "SYMBOL")
@@ -2310,31 +2929,16 @@
  (default_parameter (type . "SEQ")
    (members ((type . "FIELD")
 	     (name . "name")
-	     (content (type . "SYMBOL") (name . identifier)))
+	     (content (type . "CHOICE")
+		      (members ((type . "SYMBOL")
+				(name . identifier))
+			       ((type . "SYMBOL")
+				(name . typed_parameter)))))
 	    ((type . "STRING")
 	     (value . "="))
 	    ((type . "FIELD")
 	     (name . "value")
 	     (content (type . "SYMBOL") (name . expression)))))
- (typed_default_parameter (type . "PREC")
-			  (value . -1)
-			  (content (type . "SEQ")
-				   (members ((type . "FIELD")
-					     (name . "name")
-					     (content (type . "SYMBOL")
-						      (name . identifier)))
-					    ((type . "STRING")
-					     (value . ":"))
-					    ((type . "FIELD")
-					     (name . "type")
-					     (content (type . "SYMBOL")
-						      (name . type)))
-					    ((type . "STRING")
-					     (value . "="))
-					    ((type . "FIELD")
-					     (name . "value")
-					     (content (type . "SYMBOL")
-						      (name . expression))))))
  (list_splat_pattern (type . "SEQ")
 		     (members ((type . "STRING")
 			       (value . "*"))
@@ -2359,6 +2963,20 @@
 					       (name . subscript))
 					      ((type . "SYMBOL")
 					       (name . attribute))))))
+ (as_pattern (type . "PREC_LEFT")
+	     (value . 0)
+	     (content (type . "SEQ")
+		      (members ((type . "SYMBOL")
+				(name . expression))
+			       ((type . "STRING")
+				(value . "as"))
+			       ((type . "FIELD")
+				(name . "alias")
+				(content (type . "ALIAS")
+					 (content (type . "SYMBOL")
+						  (name . expression))
+					 (named . t)
+					 (value . as_pattern_target))))))
  (_expression_within_for_in_clause (type . "CHOICE")
 				   (members ((type . "SYMBOL")
 					     (name . expression))
@@ -2383,12 +3001,18 @@
 		      ((type . "SYMBOL")
 		       (name . conditional_expression))
 		      ((type . "SYMBOL")
-		       (name . named_expression))))
+		       (name . named_expression))
+		      ((type . "SYMBOL")
+		       (name . as_pattern))))
  (primary_expression (type . "CHOICE")
 		     (members ((type . "SYMBOL")
 			       (name . binary_operator))
 			      ((type . "SYMBOL")
 			       (name . identifier))
+			      ((type . "ALIAS")
+			       (content (type . "STRING") (value . "match"))
+			       (named . t)
+			       (value . identifier))
 			      ((type . "SYMBOL")
 			       (name . keyword_identifier))
 			      ((type . "SYMBOL")
@@ -2793,14 +3417,14 @@
 					  ((type . "FIELD")
 					   (name . "type")
 					   (content (type . "SYMBOL")
-						    (name . type)))))
+						    (name . expression)))))
 				((type . "SEQ")
 				 (members ((type . "STRING")
 					   (value . ":"))
 					  ((type . "FIELD")
 					   (name . "type")
 					   (content (type . "SYMBOL")
-						    (name . type)))
+						    (name . expression)))
 					  ((type . "STRING")
 					   (value . "="))
 					  ((type . "FIELD")
@@ -3014,8 +3638,7 @@
 				    ((type . "FIELD")
 				     (name . "type")
 				     (content (type . "SYMBOL")
-					      (name . type))))))
- (type (type . "SYMBOL") (name . expression))
+					      (name . expression))))))
  (keyword_argument (type . "SEQ")
 		   (members ((type . "FIELD")
 			     (name . "name")
@@ -3023,7 +3646,12 @@
 				      (members ((type . "SYMBOL")
 						(name . identifier))
 					       ((type . "SYMBOL")
-						(name . keyword_identifier)))))
+						(name . keyword_identifier))
+					       ((type . "ALIAS")
+						(content (type . "STRING")
+							 (value . "match"))
+						(named . t)
+						(value . identifier)))))
 			    ((type . "STRING")
 			     (value . "="))
 			    ((type . "FIELD")
@@ -3181,8 +3809,11 @@
 					 (content (type . "CHOICE")
 						  (members ((type . "SYMBOL")
 							    (name . for_in_clause))
-							   ((type . "SYMBOL")
-							    (name . if_clause)))))))
+							   ((type . "SEQ")
+							    (members ((type . "STRING")
+								      (value . "if"))
+								     ((type . "SYMBOL")
+								      (name . expression)))))))))
 			      ((type . "STRING")
 			       (value . "]"))))
  (dictionary_comprehension (type . "SEQ")
@@ -3199,8 +3830,11 @@
 					       (content (type . "CHOICE")
 							(members ((type . "SYMBOL")
 								  (name . for_in_clause))
-								 ((type . "SYMBOL")
-								  (name . if_clause)))))))
+								 ((type . "SEQ")
+								  (members ((type . "STRING")
+									    (value . "if"))
+									   ((type . "SYMBOL")
+									    (name . expression)))))))))
 				    ((type . "STRING")
 				     (value . "}"))))
  (set_comprehension (type . "SEQ")
@@ -3216,8 +3850,11 @@
 					(content (type . "CHOICE")
 						 (members ((type . "SYMBOL")
 							   (name . for_in_clause))
-							  ((type . "SYMBOL")
-							   (name . if_clause)))))))
+							  ((type . "SEQ")
+							   (members ((type . "STRING")
+								     (value . "if"))
+								    ((type . "SYMBOL")
+								     (name . expression)))))))))
 			     ((type . "STRING")
 			      (value . "}"))))
  (generator_expression (type . "SEQ")
@@ -3234,8 +3871,11 @@
 					   (content (type . "CHOICE")
 						    (members ((type . "SYMBOL")
 							      (name . for_in_clause))
-							     ((type . "SYMBOL")
-							      (name . if_clause)))))))
+							     ((type . "SEQ")
+							      (members ((type . "STRING")
+									(value . "if"))
+								       ((type . "SYMBOL")
+									(name . expression)))))))))
 				((type . "STRING")
 				 (value . ")"))))
  (_comprehension_clauses (type . "SEQ")
@@ -3245,8 +3885,11 @@
 				   (content (type . "CHOICE")
 					    (members ((type . "SYMBOL")
 						      (name . for_in_clause))
-						     ((type . "SYMBOL")
-						      (name . if_clause)))))))
+						     ((type . "SEQ")
+						      (members ((type . "STRING")
+								(value . "if"))
+							       ((type . "SYMBOL")
+								(name . expression)))))))))
  (parenthesized_expression (type . "PREC")
 			   (value . 1)
 			   (content (type . "SEQ")
@@ -3332,11 +3975,6 @@
 				   (members ((type . "STRING")
 					     (value . ","))
 					    ((type . "BLANK")))))))
- (if_clause (type . "SEQ")
-	    (members ((type . "STRING")
-		      (value . "if"))
-		     ((type . "SYMBOL")
-		      (name . expression))))
  (conditional_expression (type . "PREC_RIGHT")
 			 (value . -1)
 			 (content (type . "SEQ")
@@ -3364,6 +4002,11 @@
 		   (content (type . "CHOICE")
 			    (members ((type . "SYMBOL")
 				      (name . interpolation))
+				     ((type . "CHOICE")
+				      (members ((type . "STRING")
+						(value . "{{"))
+					       ((type . "STRING")
+						(value . "}}"))))
 				     ((type . "SYMBOL")
 				      (name . escape_sequence))
 				     ((type . "STRING")
@@ -3380,6 +4023,10 @@
 			 ((type . "SYMBOL")
 			  (name . expression))
 			 ((type . "CHOICE")
+			  (members ((type . "STRING")
+				    (value . "="))
+				   ((type . "BLANK"))))
+			 ((type . "CHOICE")
 			  (members ((type . "SYMBOL")
 				    (name . type_conversion))
 				   ((type . "BLANK"))))
@@ -3389,6 +4036,11 @@
 				   ((type . "BLANK"))))
 			 ((type . "STRING")
 			  (value . "}"))))
+ (_escape_interpolation (type . "CHOICE")
+			(members ((type . "STRING")
+				  (value . "{{"))
+				 ((type . "STRING")
+				  (value . "}}"))))
  (escape_sequence (type . "TOKEN")
 		  (content (type . "PREC")
 			   (value . 1)
@@ -3573,13 +4225,12 @@
 			     (value . "#"))
 			    ((type . "PATTERN")
 			     (value . ".*")))))
- (_semicolon (type . "STRING") (value . ";")))
+ (positional_separator (type . "STRING") (value . "/"))
+ (keyword_separator (type . "STRING") (value . "*")))
 
 
  tree-edit--identifier-regex
- 
-"[_\\p{XID_Start}][_\\p{XID_Continue}]*"
-
+ nil
 
  tree-edit--supertypes
  '
@@ -3598,13 +4249,16 @@
  (print_statement print_statement _simple_statement)
  (chevron chevron)
  (assert_statement assert_statement _simple_statement)
- (expression_statement expression_statement _simple_statement)
+ (comma_statement comma_statement _simple_statement)
  (named_expression named_expression
 		   expression
+		   _simple_statement
 		   _expressions
+		   _with_item
 		   _expression_within_for_in_clause
 		   _right_hand_side
 		   _collection_elements)
+ (_named_expresssion_lhs _named_expresssion_lhs)
  (return_statement return_statement _simple_statement)
  (delete_statement delete_statement _simple_statement)
  (_expressions _expressions)
@@ -3616,14 +4270,15 @@
  (if_statement if_statement _statement _compound_statement)
  (elif_clause elif_clause)
  (else_clause else_clause)
+ (match_statement match_statement _statement _compound_statement)
+ (case_clause case_clause)
  (for_statement for_statement _statement _compound_statement)
  (while_statement while_statement _statement _compound_statement)
  (try_statement try_statement _statement _compound_statement)
  (except_clause except_clause)
  (finally_clause finally_clause)
  (with_statement with_statement _statement _compound_statement)
- (with_clause with_clause)
- (with_item with_item)
+ (_with_item _with_item)
  (function_definition function_definition _statement _compound_statement)
  (parameters parameters)
  (lambda_parameters lambda_parameters)
@@ -3640,7 +4295,7 @@
  (_suite _suite)
  (block block _suite)
  (expression_list expression_list _expressions _right_hand_side)
- (dotted_name dotted_name _import_list)
+ (_dotted_name _dotted_name)
  (_parameters _parameters)
  (_patterns _patterns)
  (parameter parameter _parameters)
@@ -3653,7 +4308,6 @@
 		_left_hand_side)
  (list_pattern list_pattern pattern _patterns _left_hand_side)
  (default_parameter default_parameter parameter _parameters)
- (typed_default_parameter typed_default_parameter parameter _parameters)
  (list_splat_pattern list_splat_pattern
 		     parameter
 		     _parameters
@@ -3661,70 +4315,98 @@
 		     _patterns
 		     _left_hand_side)
  (dictionary_splat_pattern dictionary_splat_pattern parameter _parameters)
+ (as_pattern as_pattern
+	     expression
+	     _simple_statement
+	     _expressions
+	     _with_item
+	     _expression_within_for_in_clause
+	     _right_hand_side
+	     _collection_elements)
  (_expression_within_for_in_clause _expression_within_for_in_clause)
  (expression expression
+	     _simple_statement
 	     _expressions
+	     _with_item
 	     _expression_within_for_in_clause
 	     _right_hand_side
 	     _collection_elements)
  (primary_expression primary_expression
 		     expression
+		     _simple_statement
 		     _expressions
+		     _with_item
 		     _expression_within_for_in_clause
 		     _right_hand_side
 		     _collection_elements)
  (not_operator not_operator
 	       expression
+	       _simple_statement
 	       _expressions
+	       _with_item
 	       _expression_within_for_in_clause
 	       _right_hand_side
 	       _collection_elements)
  (boolean_operator boolean_operator
 		   expression
+		   _simple_statement
 		   _expressions
+		   _with_item
 		   _expression_within_for_in_clause
 		   _right_hand_side
 		   _collection_elements)
  (binary_operator binary_operator
 		  primary_expression
 		  expression
+		  _simple_statement
 		  _expressions
+		  _with_item
 		  _expression_within_for_in_clause
 		  _right_hand_side
 		  _collection_elements)
  (unary_operator unary_operator
 		 primary_expression
 		 expression
+		 _simple_statement
 		 _expressions
+		 _with_item
 		 _expression_within_for_in_clause
 		 _right_hand_side
 		 _collection_elements)
  (comparison_operator comparison_operator
 		      expression
+		      _simple_statement
 		      _expressions
+		      _with_item
 		      _expression_within_for_in_clause
 		      _right_hand_side
 		      _collection_elements)
  (lambda lambda
    _expression_within_for_in_clause
    expression
+   _simple_statement
    _expressions
+   _with_item
    _right_hand_side
    _collection_elements)
  (lambda_within_for_in_clause lambda_within_for_in_clause)
- (assignment assignment _right_hand_side)
- (augmented_assignment augmented_assignment _right_hand_side)
+ (assignment assignment _simple_statement _right_hand_side)
+ (augmented_assignment augmented_assignment
+		       _simple_statement
+		       _right_hand_side)
  (_left_hand_side _left_hand_side)
  (pattern_list pattern_list _left_hand_side)
  (_right_hand_side _right_hand_side)
- (yield yield _right_hand_side _collection_elements)
+ (yield yield _simple_statement _right_hand_side _collection_elements)
  (attribute attribute
 	    pattern
 	    _patterns
 	    _left_hand_side
 	    primary_expression
 	    expression
+	    _simple_statement
 	    _expressions
+	    _with_item
 	    _expression_within_for_in_clause
 	    _right_hand_side
 	    _collection_elements)
@@ -3734,7 +4416,9 @@
 	    _left_hand_side
 	    primary_expression
 	    expression
+	    _simple_statement
 	    _expressions
+	    _with_item
 	    _expression_within_for_in_clause
 	    _right_hand_side
 	    _collection_elements)
@@ -3742,45 +4426,56 @@
  (ellipsis ellipsis
 	   primary_expression
 	   expression
+	   _simple_statement
 	   _expressions
+	   _with_item
 	   _expression_within_for_in_clause
 	   _right_hand_side
 	   _collection_elements)
  (call call
        primary_expression
        expression
+       _simple_statement
        _expressions
+       _with_item
        _expression_within_for_in_clause
        _right_hand_side
        _collection_elements)
  (typed_parameter typed_parameter parameter _parameters)
- (type type)
  (keyword_argument keyword_argument)
  (list list
        primary_expression
        expression
+       _simple_statement
        _expressions
+       _with_item
        _expression_within_for_in_clause
        _right_hand_side
        _collection_elements)
  (set set
       primary_expression
       expression
+      _simple_statement
       _expressions
+      _with_item
       _expression_within_for_in_clause
       _right_hand_side
       _collection_elements)
  (tuple tuple
 	primary_expression
 	expression
+	_simple_statement
 	_expressions
+	_with_item
 	_expression_within_for_in_clause
 	_right_hand_side
 	_collection_elements)
  (dictionary dictionary
 	     primary_expression
 	     expression
+	     _simple_statement
 	     _expressions
+	     _with_item
 	     _expression_within_for_in_clause
 	     _right_hand_side
 	     _collection_elements)
@@ -3788,28 +4483,36 @@
  (list_comprehension list_comprehension
 		     primary_expression
 		     expression
+		     _simple_statement
 		     _expressions
+		     _with_item
 		     _expression_within_for_in_clause
 		     _right_hand_side
 		     _collection_elements)
  (dictionary_comprehension dictionary_comprehension
 			   primary_expression
 			   expression
+			   _simple_statement
 			   _expressions
+			   _with_item
 			   _expression_within_for_in_clause
 			   _right_hand_side
 			   _collection_elements)
  (set_comprehension set_comprehension
 		    primary_expression
 		    expression
+		    _simple_statement
 		    _expressions
+		    _with_item
 		    _expression_within_for_in_clause
 		    _right_hand_side
 		    _collection_elements)
  (generator_expression generator_expression
 		       primary_expression
 		       expression
+		       _simple_statement
 		       _expressions
+		       _with_item
 		       _expression_within_for_in_clause
 		       _right_hand_side
 		       _collection_elements)
@@ -3817,34 +4520,42 @@
  (parenthesized_expression parenthesized_expression
 			   primary_expression
 			   expression
+			   _simple_statement
 			   _expressions
+			   _with_item
 			   _expression_within_for_in_clause
 			   _right_hand_side
 			   _collection_elements)
  (_collection_elements _collection_elements)
  (for_in_clause for_in_clause _comprehension_clauses)
- (if_clause if_clause)
  (conditional_expression conditional_expression
 			 expression
+			 _simple_statement
 			 _expressions
+			 _with_item
 			 _expression_within_for_in_clause
 			 _right_hand_side
 			 _collection_elements)
  (concatenated_string concatenated_string
 		      primary_expression
 		      expression
+		      _simple_statement
 		      _expressions
+		      _with_item
 		      _expression_within_for_in_clause
 		      _right_hand_side
 		      _collection_elements)
  (string string
 	 primary_expression
 	 expression
+	 _simple_statement
 	 _expressions
+	 _with_item
 	 _expression_within_for_in_clause
 	 _right_hand_side
 	 _collection_elements)
  (interpolation interpolation)
+ (_escape_interpolation _escape_interpolation)
  (escape_sequence escape_sequence)
  (_not_escape_sequence _not_escape_sequence)
  (format_specifier format_specifier)
@@ -3853,18 +4564,25 @@
  (integer integer
 	  primary_expression
 	  expression
+	  _simple_statement
 	  _expressions
+	  _with_item
 	  _expression_within_for_in_clause
 	  _right_hand_side
 	  _collection_elements)
  (float float
 	primary_expression
 	expression
+	_simple_statement
 	_expressions
+	_with_item
 	_expression_within_for_in_clause
 	_right_hand_side
 	_collection_elements)
  (identifier identifier
+	     _import_list
+	     _named_expresssion_lhs
+	     _dotted_name
 	     parameter
 	     _parameters
 	     pattern
@@ -3872,7 +4590,9 @@
 	     _left_hand_side
 	     primary_expression
 	     expression
+	     _simple_statement
 	     _expressions
+	     _with_item
 	     _expression_within_for_in_clause
 	     _right_hand_side
 	     _collection_elements)
@@ -3882,44 +4602,56 @@
 		     _left_hand_side
 		     primary_expression
 		     expression
+		     _simple_statement
 		     _expressions
+		     _with_item
 		     _expression_within_for_in_clause
 		     _right_hand_side
 		     _collection_elements)
  (true true
        primary_expression
        expression
+       _simple_statement
        _expressions
+       _with_item
        _expression_within_for_in_clause
        _right_hand_side
        _collection_elements)
  (false false
 	primary_expression
 	expression
+	_simple_statement
 	_expressions
+	_with_item
 	_expression_within_for_in_clause
 	_right_hand_side
 	_collection_elements)
  (none none
        primary_expression
        expression
+       _simple_statement
        _expressions
+       _with_item
        _expression_within_for_in_clause
        _right_hand_side
        _collection_elements)
  (await await
 	expression
+	_simple_statement
 	_expressions
+	_with_item
 	_expression_within_for_in_clause
 	_right_hand_side
 	_collection_elements)
  (comment comment)
- (_semicolon _semicolon))
+ (positional_separator positional_separator parameter _parameters)
+ (keyword_separator keyword_separator parameter _parameters))
 
 
  tree-edit--subtypes
  '
-((_semicolon _semicolon)
+((keyword_separator keyword_separator)
+ (positional_separator positional_separator)
  (comment comment)
  (await await)
  (none none)
@@ -3934,11 +4666,11 @@
  (format_specifier format_specifier)
  (_not_escape_sequence _not_escape_sequence)
  (escape_sequence escape_sequence)
+ (_escape_interpolation _escape_interpolation)
  (interpolation interpolation)
  (string string)
  (concatenated_string concatenated_string)
  (conditional_expression conditional_expression)
- (if_clause if_clause)
  (for_in_clause for_in_clause)
  (parenthesized_expression parenthesized_expression)
  (_comprehension_clauses for_in_clause _comprehension_clauses)
@@ -3952,7 +4684,6 @@
  (set set)
  (list list)
  (keyword_argument keyword_argument)
- (type type)
  (typed_parameter typed_parameter)
  (call call)
  (ellipsis ellipsis)
@@ -3995,9 +4726,9 @@
 		     unary_operator
 		     binary_operator
 		     primary_expression)
+ (as_pattern as_pattern)
  (dictionary_splat_pattern dictionary_splat_pattern)
  (list_splat_pattern list_splat_pattern)
- (typed_default_parameter typed_default_parameter)
  (default_parameter default_parameter)
  (list_pattern list_pattern)
  (tuple_pattern tuple_pattern)
@@ -4019,11 +4750,12 @@
 	  list_pattern
 	  tuple_pattern
 	  pattern)
- (parameter identifier
+ (parameter keyword_separator
+	    positional_separator
+	    identifier
 	    typed_parameter
 	    dictionary_splat_pattern
 	    list_splat_pattern
-	    typed_default_parameter
 	    default_parameter
 	    tuple_pattern
 	    parameter)
@@ -4036,16 +4768,17 @@
 	    tuple_pattern
 	    pattern
 	    _patterns)
- (_parameters identifier
+ (_parameters keyword_separator
+	      positional_separator
+	      identifier
 	      typed_parameter
 	      dictionary_splat_pattern
 	      list_splat_pattern
-	      typed_default_parameter
 	      default_parameter
 	      tuple_pattern
 	      parameter
 	      _parameters)
- (dotted_name dotted_name)
+ (_dotted_name identifier _dotted_name)
  (expression_list expression_list)
  (block block)
  (_suite block _suite)
@@ -4062,14 +4795,14 @@
  (lambda_parameters lambda_parameters)
  (parameters parameters)
  (function_definition function_definition)
- (with_item with_item)
- (with_clause with_clause)
  (with_statement with_statement)
  (finally_clause finally_clause)
  (except_clause except_clause)
  (try_statement try_statement)
  (while_statement while_statement)
  (for_statement for_statement)
+ (case_clause case_clause)
+ (match_statement match_statement)
  (else_clause else_clause)
  (elif_clause elif_clause)
  (if_statement if_statement)
@@ -4080,6 +4813,7 @@
 		      try_statement
 		      while_statement
 		      for_statement
+		      match_statement
 		      if_statement
 		      _compound_statement)
  (continue_statement continue_statement)
@@ -4088,6 +4822,7 @@
  (raise_statement raise_statement)
  (delete_statement delete_statement)
  (return_statement return_statement)
+ (_named_expresssion_lhs identifier _named_expresssion_lhs)
  (_collection_elements await
 		       none
 		       false
@@ -4122,6 +4857,7 @@
 		       not_operator
 		       primary_expression
 		       expression
+		       as_pattern
 		       parenthesized_list_splat
 		       list_splat
 		       named_expression)
@@ -4161,6 +4897,7 @@
 		   not_operator
 		   primary_expression
 		   expression
+		   as_pattern
 		   expression_list
 		   named_expression)
  (_expression_within_for_in_clause await
@@ -4196,7 +4933,43 @@
 				   primary_expression
 				   expression
 				   _expression_within_for_in_clause
+				   as_pattern
 				   named_expression)
+ (_with_item await
+	     none
+	     false
+	     true
+	     keyword_identifier
+	     identifier
+	     float
+	     integer
+	     string
+	     concatenated_string
+	     conditional_expression
+	     parenthesized_expression
+	     generator_expression
+	     set_comprehension
+	     dictionary_comprehension
+	     list_comprehension
+	     dictionary
+	     tuple
+	     set
+	     list
+	     call
+	     ellipsis
+	     subscript
+	     attribute
+	     lambda
+	     comparison_operator
+	     unary_operator
+	     binary_operator
+	     boolean_operator
+	     not_operator
+	     primary_expression
+	     expression
+	     as_pattern
+	     _with_item
+	     named_expression)
  (_expressions await
 	       none
 	       false
@@ -4229,6 +5002,7 @@
 	       not_operator
 	       primary_expression
 	       expression
+	       as_pattern
 	       expression_list
 	       _expressions
 	       named_expression)
@@ -4264,21 +5038,58 @@
 	     not_operator
 	     primary_expression
 	     expression
+	     as_pattern
 	     named_expression)
  (named_expression named_expression)
- (expression_statement expression_statement)
+ (comma_statement comma_statement)
  (assert_statement assert_statement)
  (chevron chevron)
  (print_statement print_statement)
  (wildcard_import wildcard_import)
  (aliased_import aliased_import)
- (_import_list dotted_name aliased_import _import_list)
+ (_import_list identifier aliased_import _import_list)
  (import_from_statement import_from_statement)
  (future_import_statement future_import_statement)
  (relative_import relative_import)
  (import_prefix import_prefix)
  (import_statement import_statement)
- (_simple_statement exec_statement
+ (_simple_statement await
+		    none
+		    false
+		    true
+		    keyword_identifier
+		    identifier
+		    float
+		    integer
+		    string
+		    concatenated_string
+		    conditional_expression
+		    parenthesized_expression
+		    generator_expression
+		    set_comprehension
+		    dictionary_comprehension
+		    list_comprehension
+		    dictionary
+		    tuple
+		    set
+		    list
+		    call
+		    ellipsis
+		    subscript
+		    attribute
+		    yield
+		    augmented_assignment
+		    assignment
+		    lambda
+		    comparison_operator
+		    unary_operator
+		    binary_operator
+		    boolean_operator
+		    not_operator
+		    primary_expression
+		    expression
+		    as_pattern
+		    exec_statement
 		    nonlocal_statement
 		    global_statement
 		    continue_statement
@@ -4287,7 +5098,8 @@
 		    raise_statement
 		    delete_statement
 		    return_statement
-		    expression_statement
+		    named_expression
+		    comma_statement
 		    assert_statement
 		    print_statement
 		    import_from_statement
@@ -4302,6 +5114,7 @@
 	     try_statement
 	     while_statement
 	     for_statement
+	     match_statement
 	     if_statement
 	     _statement)
  (module module))
@@ -4324,8 +5137,9 @@
  (print_statement)
  (chevron)
  (assert_statement)
- (expression_statement)
+ (comma_statement)
  (named_expression)
+ (_named_expresssion_lhs)
  (return_statement)
  (delete_statement)
  (_expressions)
@@ -4334,18 +5148,19 @@
  (break_statement)
  (continue_statement)
  (_compound_statement)
- (if_statement)
- (elif_clause)
- (else_clause)
- (for_statement)
- (while_statement)
- (try_statement)
- (except_clause)
- (finally_clause)
- (with_statement)
- (with_clause)
- (with_item)
- (function_definition)
+ (if_statement (_newline . block))
+ (elif_clause (_newline . block))
+ (else_clause (_newline . block))
+ (match_statement)
+ (case_clause (_newline . block))
+ (for_statement (_newline . block))
+ (while_statement (_newline . block))
+ (try_statement (_newline . block))
+ (except_clause (_newline . block))
+ (finally_clause (_newline . block))
+ (with_statement (_newline . block))
+ (_with_item)
+ (function_definition (_newline . block))
  (parameters)
  (lambda_parameters)
  (list_splat)
@@ -4353,16 +5168,16 @@
  (global_statement)
  (nonlocal_statement)
  (exec_statement)
- (class_definition)
+ (class_definition (_newline . block))
  (parenthesized_list_splat (parenthesized_list_splat . parenthesized_expression))
  (argument_list (parenthesized_list_splat . parenthesized_expression)
 		(parenthesized_list_splat . parenthesized_expression))
  (decorated_definition)
  (decorator)
- (_suite)
+ (_suite (_newline . block))
  (block)
  (expression_list)
- (dotted_name)
+ (_dotted_name)
  (_parameters)
  (_patterns)
  (parameter)
@@ -4370,9 +5185,9 @@
  (tuple_pattern)
  (list_pattern)
  (default_parameter)
- (typed_default_parameter)
  (list_splat_pattern)
  (dictionary_splat_pattern)
+ (as_pattern (expression . as_pattern_target))
  (_expression_within_for_in_clause (lambda_within_for_in_clause . lambda))
  (expression)
  (primary_expression)
@@ -4395,7 +5210,6 @@
  (ellipsis)
  (call)
  (typed_parameter)
- (type)
  (keyword_argument)
  (list)
  (set)
@@ -4411,11 +5225,11 @@
  (_collection_elements)
  (for_in_clause (lambda_within_for_in_clause . lambda)
 		(lambda_within_for_in_clause . lambda))
- (if_clause)
  (conditional_expression)
  (concatenated_string)
  (string (_string_start . \") (_string_end . \"))
  (interpolation)
+ (_escape_interpolation)
  (escape_sequence)
  (_not_escape_sequence)
  (format_specifier)
@@ -4430,32 +5244,19 @@
  (none)
  (await)
  (comment)
- (_semicolon))
+ (positional_separator)
+ (keyword_separator))
 
 
  tree-edit--containing-types
  '
-((module future_import_statement
-	 import_statement
-	 import_from_statement
-	 print_statement
-	 assert_statement
-	 expression_statement
-	 return_statement
-	 delete_statement
-	 raise_statement
-	 pass_statement
-	 break_statement
-	 continue_statement
-	 global_statement
-	 nonlocal_statement
-	 exec_statement
+((module expression
 	 future_import_statement
 	 import_statement
 	 import_from_statement
 	 print_statement
 	 assert_statement
-	 expression_statement
+	 comma_statement
 	 return_statement
 	 delete_statement
 	 raise_statement
@@ -4464,6 +5265,28 @@
 	 continue_statement
 	 global_statement
 	 nonlocal_statement
+	 assignment
+	 augmented_assignment
+	 yield
+	 exec_statement
+	 expression
+	 future_import_statement
+	 import_statement
+	 import_from_statement
+	 print_statement
+	 assert_statement
+	 comma_statement
+	 return_statement
+	 delete_statement
+	 raise_statement
+	 pass_statement
+	 break_statement
+	 continue_statement
+	 global_statement
+	 nonlocal_statement
+	 assignment
+	 augmented_assignment
+	 yield
 	 exec_statement
 	 _newline
 	 if_statement
@@ -4473,28 +5296,15 @@
 	 with_statement
 	 function_definition
 	 class_definition
-	 decorated_definition)
- (_statement future_import_statement
-	     import_statement
-	     import_from_statement
-	     print_statement
-	     assert_statement
-	     expression_statement
-	     return_statement
-	     delete_statement
-	     raise_statement
-	     pass_statement
-	     break_statement
-	     continue_statement
-	     global_statement
-	     nonlocal_statement
-	     exec_statement
+	 decorated_definition
+	 match_statement)
+ (_statement expression
 	     future_import_statement
 	     import_statement
 	     import_from_statement
 	     print_statement
 	     assert_statement
-	     expression_statement
+	     comma_statement
 	     return_statement
 	     delete_statement
 	     raise_statement
@@ -4503,6 +5313,28 @@
 	     continue_statement
 	     global_statement
 	     nonlocal_statement
+	     assignment
+	     augmented_assignment
+	     yield
+	     exec_statement
+	     expression
+	     future_import_statement
+	     import_statement
+	     import_from_statement
+	     print_statement
+	     assert_statement
+	     comma_statement
+	     return_statement
+	     delete_statement
+	     raise_statement
+	     pass_statement
+	     break_statement
+	     continue_statement
+	     global_statement
+	     nonlocal_statement
+	     assignment
+	     augmented_assignment
+	     yield
 	     exec_statement
 	     _newline
 	     if_statement
@@ -4512,28 +5344,15 @@
 	     with_statement
 	     function_definition
 	     class_definition
-	     decorated_definition)
- (_simple_statements future_import_statement
-		     import_statement
-		     import_from_statement
-		     print_statement
-		     assert_statement
-		     expression_statement
-		     return_statement
-		     delete_statement
-		     raise_statement
-		     pass_statement
-		     break_statement
-		     continue_statement
-		     global_statement
-		     nonlocal_statement
-		     exec_statement
+	     decorated_definition
+	     match_statement)
+ (_simple_statements expression
 		     future_import_statement
 		     import_statement
 		     import_from_statement
 		     print_statement
 		     assert_statement
-		     expression_statement
+		     comma_statement
 		     return_statement
 		     delete_statement
 		     raise_statement
@@ -4542,14 +5361,37 @@
 		     continue_statement
 		     global_statement
 		     nonlocal_statement
+		     assignment
+		     augmented_assignment
+		     yield
+		     exec_statement
+		     expression
+		     future_import_statement
+		     import_statement
+		     import_from_statement
+		     print_statement
+		     assert_statement
+		     comma_statement
+		     return_statement
+		     delete_statement
+		     raise_statement
+		     pass_statement
+		     break_statement
+		     continue_statement
+		     global_statement
+		     nonlocal_statement
+		     assignment
+		     augmented_assignment
+		     yield
 		     exec_statement
 		     _newline)
- (_simple_statement future_import_statement
+ (_simple_statement expression
+		    future_import_statement
 		    import_statement
 		    import_from_statement
 		    print_statement
 		    assert_statement
-		    expression_statement
+		    comma_statement
 		    return_statement
 		    delete_statement
 		    raise_statement
@@ -4558,42 +5400,60 @@
 		    continue_statement
 		    global_statement
 		    nonlocal_statement
+		    assignment
+		    augmented_assignment
+		    yield
 		    exec_statement)
- (import_statement dotted_name aliased_import dotted_name aliased_import)
+ (import_statement identifier
+		   identifier
+		   aliased_import
+		   identifier
+		   identifier
+		   aliased_import)
  (import_prefix)
- (relative_import import_prefix dotted_name)
- (future_import_statement dotted_name
+ (relative_import import_prefix identifier identifier)
+ (future_import_statement identifier
+			  identifier
 			  aliased_import
-			  dotted_name
+			  identifier
+			  identifier
 			  aliased_import
-			  dotted_name
+			  identifier
+			  identifier
 			  aliased_import
-			  dotted_name
+			  identifier
+			  identifier
 			  aliased_import)
  (import_from_statement relative_import
-			dotted_name
+			identifier
+			identifier
 			wildcard_import
-			dotted_name
+			identifier
+			identifier
 			aliased_import
-			dotted_name
+			identifier
+			identifier
 			aliased_import
-			dotted_name
+			identifier
+			identifier
 			aliased_import
-			dotted_name
+			identifier
+			identifier
 			aliased_import)
- (_import_list dotted_name aliased_import dotted_name aliased_import)
- (aliased_import dotted_name identifier)
+ (_import_list identifier
+	       identifier
+	       aliased_import
+	       identifier
+	       identifier
+	       aliased_import)
+ (aliased_import identifier identifier identifier)
  (wildcard_import)
  (print_statement chevron expression expression expression)
  (chevron expression)
  (assert_statement expression expression)
- (expression_statement expression
-		       expression
-		       expression
-		       assignment
-		       augmented_assignment
-		       yield)
- (named_expression identifier expression)
+ (comma_statement expression expression expression)
+ (named_expression identifier identifier expression)
+ (_named_expresssion_lhs identifier identifier)
  (return_statement expression expression_list)
  (delete_statement expression expression_list)
  (_expressions expression expression_list)
@@ -4608,10 +5468,13 @@
 		      with_statement
 		      function_definition
 		      class_definition
-		      decorated_definition)
- (if_statement expression block _indent block elif_clause else_clause)
- (elif_clause expression block _indent block)
- (else_clause block _indent block)
+		      decorated_definition
+		      match_statement)
+ (if_statement expression block _indent block block elif_clause else_clause)
+ (elif_clause expression block _indent block block)
+ (else_clause block _indent block block)
+ (match_statement expression expression case_clause)
+ (case_clause case_pattern case_pattern expression block _indent block block)
  (for_statement pattern
 		pattern_list
 		expression
@@ -4619,21 +5482,35 @@
 		block
 		_indent
 		block
+		block
 		else_clause)
- (while_statement expression block _indent block else_clause)
+ (while_statement expression block _indent block block else_clause)
  (try_statement block
 		_indent
+		block
 		block
 		except_clause
 		else_clause
 		finally_clause
 		finally_clause)
- (except_clause expression expression block _indent block)
- (finally_clause block _indent block)
- (with_statement with_clause block _indent block)
- (with_clause with_item with_item with_item with_item)
- (with_item expression pattern)
- (function_definition identifier parameters type block _indent block)
+ (except_clause expression expression block _indent block block)
+ (finally_clause block _indent block block)
+ (with_statement expression
+		 expression
+		 expression
+		 expression
+		 block
+		 _indent
+		 block
+		 block)
+ (_with_item expression)
+ (function_definition identifier
+		      parameters
+		      expression
+		      block
+		      _indent
+		      block
+		      block)
  (parameters parameter parameter)
  (lambda_parameters parameter parameter)
  (list_splat expression)
@@ -4641,7 +5518,7 @@
  (global_statement identifier identifier)
  (nonlocal_statement identifier identifier)
  (exec_statement string expression expression)
- (class_definition identifier argument_list block _indent block)
+ (class_definition identifier argument_list block _indent block block)
  (parenthesized_list_splat parenthesized_expression list_splat)
  (argument_list expression
 		list_splat
@@ -4655,28 +5532,14 @@
 		keyword_argument)
  (decorated_definition decorator class_definition function_definition)
  (decorator primary_expression _newline)
- (_suite block _indent block)
- (block future_import_statement
-	import_statement
-	import_from_statement
-	print_statement
-	assert_statement
-	expression_statement
-	return_statement
-	delete_statement
-	raise_statement
-	pass_statement
-	break_statement
-	continue_statement
-	global_statement
-	nonlocal_statement
-	exec_statement
+ (_suite block _indent block block)
+ (block expression
 	future_import_statement
 	import_statement
 	import_from_statement
 	print_statement
 	assert_statement
-	expression_statement
+	comma_statement
 	return_statement
 	delete_statement
 	raise_statement
@@ -4685,6 +5548,28 @@
 	continue_statement
 	global_statement
 	nonlocal_statement
+	assignment
+	augmented_assignment
+	yield
+	exec_statement
+	expression
+	future_import_statement
+	import_statement
+	import_from_statement
+	print_statement
+	assert_statement
+	comma_statement
+	return_statement
+	delete_statement
+	raise_statement
+	pass_statement
+	break_statement
+	continue_statement
+	global_statement
+	nonlocal_statement
+	assignment
+	augmented_assignment
+	yield
 	exec_statement
 	_newline
 	if_statement
@@ -4695,20 +5580,22 @@
 	function_definition
 	class_definition
 	decorated_definition
+	match_statement
 	_dedent)
  (expression_list expression expression)
- (dotted_name identifier identifier)
+ (_dotted_name identifier identifier)
  (_parameters parameter parameter)
  (_patterns pattern pattern)
  (parameter identifier
 	    typed_parameter
 	    default_parameter
-	    typed_default_parameter
 	    list_splat_pattern
 	    tuple_pattern
-	    list_splat_pattern
+	    keyword_separator
+	    positional_separator
 	    dictionary_splat_pattern)
  (pattern identifier
+	  identifier
 	  keyword_identifier
 	  subscript
 	  attribute
@@ -4717,10 +5604,10 @@
 	  list_pattern)
  (tuple_pattern pattern pattern)
  (list_pattern pattern pattern)
- (default_parameter identifier expression)
- (typed_default_parameter identifier type expression)
+ (default_parameter identifier typed_parameter expression)
  (list_splat_pattern identifier keyword_identifier subscript attribute)
  (dictionary_splat_pattern identifier keyword_identifier subscript attribute)
+ (as_pattern expression as_pattern_target)
  (_expression_within_for_in_clause expression lambda)
  (expression comparison_operator
 	     not_operator
@@ -4729,8 +5616,10 @@
 	     lambda
 	     primary_expression
 	     conditional_expression
-	     named_expression)
+	     named_expression
+	     as_pattern)
  (primary_expression binary_operator
+		     identifier
 		     identifier
 		     keyword_identifier
 		     string
@@ -4793,8 +5682,8 @@
 	     assignment
 	     augmented_assignment
 	     yield
-	     type
-	     type
+	     expression
+	     expression
 	     expression
 	     expression_list
 	     assignment
@@ -4823,9 +5712,8 @@
  (typed_parameter identifier
 		  list_splat_pattern
 		  dictionary_splat_pattern
-		  type)
- (type expression)
- (keyword_argument identifier keyword_identifier expression)
+		  expression)
+ (keyword_argument identifier keyword_identifier identifier expression)
  (list expression
        yield
        list_splat
@@ -4852,11 +5740,11 @@
 	parenthesized_list_splat)
  (dictionary pair dictionary_splat pair dictionary_splat)
  (pair expression expression)
- (list_comprehension expression for_in_clause for_in_clause if_clause)
- (dictionary_comprehension pair for_in_clause for_in_clause if_clause)
- (set_comprehension expression for_in_clause for_in_clause if_clause)
- (generator_expression expression for_in_clause for_in_clause if_clause)
- (_comprehension_clauses for_in_clause for_in_clause if_clause)
+ (list_comprehension expression for_in_clause for_in_clause expression)
+ (dictionary_comprehension pair for_in_clause for_in_clause expression)
+ (set_comprehension expression for_in_clause for_in_clause expression)
+ (generator_expression expression for_in_clause for_in_clause expression)
+ (_comprehension_clauses for_in_clause for_in_clause expression)
  (parenthesized_expression expression yield)
  (_collection_elements expression
 		       yield
@@ -4867,11 +5755,11 @@
 		       list_splat
 		       parenthesized_list_splat)
  (for_in_clause pattern pattern_list expression lambda expression lambda)
- (if_clause expression)
  (conditional_expression expression expression expression)
  (concatenated_string string string)
  (string \" interpolation escape_sequence _string_content \")
  (interpolation expression type_conversion format_specifier)
+ (_escape_interpolation)
  (escape_sequence)
  (_not_escape_sequence)
  (format_specifier format_expression)
@@ -4886,7 +5774,8 @@
  (none)
  (await expression)
  (comment)
- (_semicolon))
+ (positional_separator)
+ (keyword_separator))
 )
 
 (provide 'tree-edit-python-grammar)

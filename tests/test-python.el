@@ -9,7 +9,6 @@ if foo:
 bar()
 baz()"
               (evil-tree-edit-goto-parent)
-              (evil-tree-edit-goto-parent)
               (evil-tree-edit-slurp))
             :to-have-buffer-contents "
 if foo:
@@ -25,7 +24,6 @@ if nested:
         sadness()
     qwert()
 baz()"
-              (evil-tree-edit-goto-parent)
               (evil-tree-edit-goto-parent)
               (evil-tree-edit-slurp))
             :to-have-buffer-contents "
@@ -44,7 +42,6 @@ if TREE:
 else:
     [BAR]
 TREE"
-              (evil-tree-edit-goto-parent)
               (evil-tree-edit-goto-parent)
               (evil-tree-edit-slurp))
             :to-have-buffer-contents "
@@ -153,7 +150,6 @@ baz()"))
     (expect (with-tree-test-buffer #'python-mode "
 [foo()]
 bar()"
-              (evil-tree-edit-goto-parent)
               (evil-tree-edit-insert-sibling 'call))
             :to-have-buffer-contents "
 foo()
@@ -167,7 +163,6 @@ bar()"))
     (expect (with-tree-test-buffer #'python-mode "
 if TREE:
     [x]"
-              (evil-tree-edit-goto-parent)
               (evil-tree-edit-insert-sibling "y"))
             :to-have-buffer-contents "
 if TREE:
@@ -202,7 +197,6 @@ for [bar] in TREE:
     (expect (with-tree-test-buffer #'python-mode "
 for FOO in BAR:
     [hi]"
-              (evil-tree-edit-goto-parent)
               (let ((tree-edit-syntax-snippets
                      `((return_statement . ("return" expression)) . ,tree-edit-syntax-snippets)))
                 (evil-tree-edit-wrap-node 'return_statement)))
@@ -233,7 +227,6 @@ for qwer in BAR:
     (expect (with-tree-test-buffer #'python-mode "
 if foo:
     [bar()]"
-              (evil-tree-edit-goto-parent)
               (evil-tree-edit-delete))
             :to-throw 'tree-edit-transformation-error))
   ;; previously would not put 'pass' on a newline
@@ -242,7 +235,6 @@ if foo:
     (expect (with-tree-test-buffer #'python-mode "
 def foo() -> [bar]:
     pass"
-              (evil-tree-edit-goto-parent)
               (evil-tree-edit-delete))
             :to-have-buffer-contents "
 def foo():
