@@ -103,16 +103,19 @@
  ;; WARNING: Python is whitespace dependent, so messing with these parameters
  ;; may produce unparseable text
  tree-edit-whitespace-rules
- '((block . ((:newline :indent) . (:dedent :newline)))
-   (expression . (nil . nil))
-   (comment . (nil . (:newline)))
-   (decorator . (nil . (:newline)))
-   (_simple_statement . (nil . (:newline)))
-   (except_clause . (nil . (:newline)))
-   (finally_clause . (nil . (:newline)))
-   (elif_clause . (nil . (:newline)))
-   (else_clause . (nil . (:newline)))
-   (_compound_statement . (nil . (:newline))))
+ '((nil (block (:newline :indent) (:dedent :newline))
+        (comment nil (:newline))
+        (decorator nil (:newline))
+        (except_clause nil (:newline))
+        (finally_clause nil (:newline))
+        (elif_clause nil (:newline))
+        (else_clause nil (:newline))
+        (_compound_statement nil (:newline))
+        ;; XXX: expression is still a simp statemet
+        (expression nil nil)
+        (_simple_statement nil (:newline)))
+   (block (expression nil (:newline)))
+   (module (expression nil (:newline))))
 
  tree-edit-significant-node-types
  '(decorated_definition function_definition class_definition)

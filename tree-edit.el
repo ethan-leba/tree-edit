@@ -512,18 +512,16 @@ delete, and what syntax needs to be inserted after, if any."
 
 ;; NOTE: The node rendering code is pretty crappy, sorry. I'll probably rewrite this whole thing later on.
 ;;* Locals: node rendering
-(defun tree-edit--generate-node (node-type rules &optional tokens)
+(defun tree-edit--generate-node (type &optional parent-type)
   "Given a NODE-TYPE and a set of RULES, generate a node string.
 
 If TOKENS is passed in, that will be used as a basis for node
 construction, instead of looking up the rules for node-type."
-  (interactive)
-  (cons node-type
-        (--map
-         (if (and (not (keywordp it)) (symbolp it)) (tree-edit--generate-node it rules) `(,it ,it))
-         ;; TODO: See if we can make it via. the parser?
-         (or tokens (alist-get node-type rules)
-             (user-error "No node definition for %s" node-type)))))
+  (if (or (keywordp type) (stringp type)) `(,type)
+    (--mapcat
+     (tree-edit--add-whitespace-rules-to-tokens it parent-type (tree-edit--generate-node it type))
+     (or (alist-get type tree-edit-syntax-snippets)
+         (user-error "No node definition for %s" type)))))
 
 (defun tree-edit--needs-space-p (left right)
   "Check if the two tokens LEFT and RIGHT need a space between them.
@@ -537,18 +535,21 @@ https://tree-sitter.github.io/tree-sitter/creating-parsers#keyword-extraction"
             (+ (length (s-matched-positions-all regex left))
                (length (s-matched-positions-all regex right)))))))
 
-(defun tree-edit--whitespace-rules-for-type (type)
+(defun tree-edit--whitespace-rules-for-type (type parent-type)
   "Retrieve whitespace rules for TYPE.
 
 Will search for the most specific rule first and travel through
 the TYPE's supertypes until exhausted."
-  (car (-remove-item nil (--map (alist-get it tree-edit-whitespace-rules nil nil #'equal)
-                                (alist-get type tree-edit--supertypes `(,type))))))
+  (or (--any (alist-get it (alist-get parent-type tree-edit-whitespace-rules) nil nil #'equal)
+             (alist-get type tree-edit--supertypes `(,type)))
+      (--any (alist-get it (alist-get nil tree-edit-whitespace-rules) nil nil #'equal)
+             (alist-get type tree-edit--supertypes `(,type)))))
 
-(defun tree-edit--add-whitespace-rules-to-tokens (type tokens)
+(defun tree-edit--add-whitespace-rules-to-tokens (type parent-type tokens)
   "Wrap TOKENS in the whitespace defined for TYPE, if any."
-  (-let (((l . r) (tree-edit--whitespace-rules-for-type type)))
-    (append l tokens r)))
+  (if-let (ws (tree-edit--whitespace-rules-for-type type parent-type))
+      (-let [(l r) ws] (append l tokens r))
+    tokens))
 
 (defun tree-edit--render-node (left-tokens new-tokens right-token indentation)
   "Insert NEW-TOKENS into the buffer, properly formatting as needed.
@@ -573,37 +574,30 @@ matters (i.e. expressions are left alone but blocks are split)."
                (while stack
                  (-let ((current (pop stack)))
                    ;; TODO: use `pcase'
-                   (cond ((not current) '())
-                         ((consp current)
-                          (setq stack (append (tree-edit--add-whitespace-rules-to-tokens
-                                               (car current) (cdr current))
-                                              stack)))
-                         ((equal current :newline)
-                          (setq deferred-newline t))
-                         ((equal current :indent)
-                          (setq indentation (+ indentation tree-edit-indentation-level)))
-                         ((equal current :dedent)
-                          (setq indentation (- indentation tree-edit-indentation-level)))
-                         ((stringp current)
-                          (when deferred-newline
-                            (when (or do-insert do-whitespace)
-                              (newline)
-                              (indent-line-to indentation))
-                            (setq deferred-newline nil))
-                          (when (and (or do-insert do-whitespace)
-                                     (tree-edit--needs-space-p prev current))
-                            (insert " "))
-                          (when do-insert
-                            (insert current))))
+                   (cond
+                    ((equal current :newline)
+                     (setq deferred-newline t))
+                    ((equal current :indent)
+                     (setq indentation (+ indentation tree-edit-indentation-level)))
+                    ((equal current :dedent)
+                     (setq indentation (- indentation tree-edit-indentation-level)))
+                    ((stringp current)
+                     (when deferred-newline
+                       (when (or do-insert do-whitespace)
+                         (newline)
+                         (indent-line-to indentation))
+                       (setq deferred-newline nil))
+                     (when (and (or do-insert do-whitespace)
+                                (tree-edit--needs-space-p prev current))
+                       (insert " "))
+                     (when do-insert
+                       (insert current)))
+                    (t (error "bad data: %s" current)))
                    (when (or (equal :newline current) (stringp current))
                      (setq prev current))))))
       (process-tokens left-tokens nil nil)
       (process-tokens new-tokens t nil)
-      (process-tokens `(,right-token) nil t))))
-
-(defun tree-edit--text-and-type (node)
-  "Return a pair of NODE and it's text."
-  `(,(tsc-node-type node) ,(tsc-node-text node)))
+      (process-tokens right-token nil t))))
 
 (defun tree-edit--render-result (result parent)
   "Convert RESULT into a textual representation by editing the children of PARENT."
@@ -611,14 +605,18 @@ matters (i.e. expressions are left alone but blocks are split)."
           (end-index (tree-edit-result-end-index result))
           (fragment (tree-edit-result-tokens result))
           (children (tree-edit--get-all-children parent))
-          (left (-map #'tree-edit--text-and-type (-slice children 0 start-index)))
-          (right (-some-> end-index (nth children) (tree-edit--text-and-type)))
+          (left (--mapcat (tree-edit--split-node-for-insertion
+                           it
+                           (tsc-node-type parent))
+                          (-slice children 0 start-index)))
+          (right (-some--> end-index
+                   (nth it children)
+                   (tree-edit--add-whitespace-rules-to-tokens
+                    (tsc-node-type it)
+                    (tsc-node-type parent)
+                    `(,(tsc-node-text it)))))
           (render-fragment
-           (and fragment
-                (tree-edit--generate-node
-                 (tsc-node-type parent)
-                 tree-edit-syntax-snippets
-                 fragment)))
+           fragment)
           (indentation
            (save-excursion
              (if children (goto-char (tsc-node-start-position (car children))))
@@ -639,15 +637,16 @@ matters (i.e. expressions are left alone but blocks are split)."
         (delete-region start-edit end-edit)
         (tree-edit--render-node left (if fragment render-fragment) right indentation)))))
 
-(defun tree-edit--split-node-for-insertion (node)
+(cl-defun tree-edit--split-node-for-insertion (node &optional _parent-type skip-ws)
   "Split NODE into chunks of text as necessary for formatting."
-  (let ((rules (tree-edit--whitespace-rules-for-type (tsc-node-type node))))
-    (if (or (equal rules '(nil . nil)) (not rules))
-        (tree-edit--text-and-type node)
-      `(,(tsc-node-type node) .
-        ,(if (tsc-node-named-p node)
-             (-map #'tree-edit--split-node-for-insertion (tree-edit--get-all-children node))
-           `(,(tsc-node-text node)))))))
+  (let* ((type (tsc-node-type node))
+         (rules (tree-edit--whitespace-rules-for-type type _parent-type)))
+    (let ((result
+           (if (or (zerop (tsc-count-named-children node)) (not rules))
+               `(,(tsc-node-text node))
+             (--mapcat (tree-edit--split-node-for-insertion it type) (tree-edit--get-all-children node)))))
+      (if skip-ws result
+        (tree-edit--add-whitespace-rules-to-tokens type _parent-type result)))))
 
 (defun tree-edit--text-to-insertable-node (node text)
   "Split NODE for insertion, using TEXT instead of the current buffer.
@@ -672,6 +671,7 @@ the text."
     (tree-edit-transformation-error "Cannot exchange the root node!"))
   (if-let (result (tree-edit--try-transformation
                    new-node
+                   (-> node (tsc-get-parent) (tsc-node-type))
                    (lambda (type) (tree-edit--valid-replacement-p type node))))
       (tree-edit--render-result result (tsc-get-parent node))
     (tree-edit-transformation-error "Cannot replace %s with %s!" (tsc-node-type node) new-node)))
@@ -697,6 +697,7 @@ if BEFORE is t, the sibling node will be inserted before NODE, else after."
     (tree-edit-transformation-error "Cannot perform insertions on the root node!"))
   (if-let (result (tree-edit--try-transformation
                    new-node
+                   (-> node (tsc-get-parent) (tsc-node-type))
                    (lambda (type) (tree-edit--valid-insertions type node before))))
       (tree-edit--render-result result (tsc-get-parent node))
     (tree-edit-transformation-error "Cannot insert %s %s %s!" new-node (if before "before" "after") (tsc-node-type node))))
@@ -737,7 +738,7 @@ first possible location inside of the DWIM node."
                    (cl-return)))))
          (signal (car err) (cdr err)))))))
 
-(defun tree-edit--post-process-tokens (type result)
+(defun tree-edit--post-process-tokens (parent-type type replace-with result)
   "Replace alternate representations of TYPE in result with TYPE itself.
 
 For example, an 'identifier' type may be represented it's
@@ -745,10 +746,12 @@ supertype (expression), so we need to replace it with the
 original."
   (setf (tree-edit-result-tokens result)
         ;; TODO: Check supertype
-        (-map-first #'symbolp (-const type) (tree-edit-result-tokens result)))
+        (->> result
+             (tree-edit-result-tokens)
+             (--mapcat (tree-edit--add-whitespace-rules-to-tokens type parent-type (if (symbolp it) replace-with `(,it))))))
   result)
 
-(defun tree-edit--try-transformation (new-node pred)
+(defun tree-edit--try-transformation (new-node parent-type pred)
   "Run PRED on NEW-NODE and return tokens if valid.
 
 If NEW-NODE is a symbol, the symbol will be passed directly to
@@ -764,12 +767,12 @@ parser."
    ((symbolp new-node)
     (-some->> new-node
       (funcall pred)
-      (tree-edit--post-process-tokens new-node)))
+      (tree-edit--post-process-tokens parent-type new-node (tree-edit--generate-node new-node))))
    ((listp new-node)
     (cl-dolist (type new-node)
       (-some->> type
         (funcall pred)
-        (tree-edit--post-process-tokens type)
+        (tree-edit--post-process-tokens parent-type type (tree-edit--generate-node type))
         (cl-return))))
    ((stringp new-node)
     (cl-block nil
@@ -777,13 +780,16 @@ parser."
           (-let [(type . split-node) cached-node]
             (-some->> type
               (funcall pred)
-              (tree-edit--post-process-tokens split-node)
+              (tree-edit--post-process-tokens parent-type type split-node)
               (cl-return))))
       (dolist (fragment-node (tree-edit--parse-fragment new-node))
         (-some->> fragment-node
           (tsc-node-type)
           (funcall pred)
-          (tree-edit--post-process-tokens (tree-edit--text-to-insertable-node fragment-node new-node))
+          (tree-edit--post-process-tokens
+           parent-type
+           (tsc-node-type fragment-node)
+           (tree-edit--text-to-insertable-node fragment-node new-node))
           (cl-return)))))
    (t (user-error "Bad data: %s" new-node))))
 
@@ -799,6 +805,7 @@ type of the text."
       (tree-edit-insert-sibling new-node (tsc-get-nth-named-child node 0) t)
     (if-let (result (tree-edit--try-transformation
                      new-node
+                     (tsc-node-type node)
                      (lambda (type)
                        (when-let ((tokens (tree-edit--valid-node-including-type type (tsc-node-type node))))
                          (make-tree-edit-result :tokens tokens
@@ -867,7 +874,7 @@ type of the text."
   (interactive)
   (puthash (tsc-node-text node)
            (cons (tsc-node-type node)
-                 (tree-edit--split-node-for-insertion node))
+                 (tree-edit--split-node-for-insertion node nil t))
            tree-edit--type-cache))
 
 (defun tree-edit-copy (node)
