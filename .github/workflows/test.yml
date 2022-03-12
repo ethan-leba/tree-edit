@@ -10,12 +10,15 @@ jobs:
     strategy:
       matrix:
         emacs_version:
-          - 27.2
+          # Only using snapshot for now since we're using cutting edge TS features
           - snapshot
     steps:
     - uses: purcell/setup-emacs@master
       with:
         version: ${{ matrix.emacs_version }}
+
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Install Cask
       run: git clone https://github.com/cask/cask ~/.cask
@@ -23,9 +26,9 @@ jobs:
     - name: Add to path
       run: echo "${HOME}/.cask/bin" >> $GITHUB_PATH
 
-    - uses: actions/checkout@v2
-    - name: Install dependencies
-      run: cask
-
     - name: Run tests
-      run: './run-tests.sh'
+      run:
+        # XXX: This is really dumb but building grammars with C++ fails to load unless I do this
+        mkdir wtf/;
+        cp /lib/x86_64-linux-gnu/libstdc++.so.6 wtf/;
+        LD_LIBRARY_PATH=wtf/ make test
