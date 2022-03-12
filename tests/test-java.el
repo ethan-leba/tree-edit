@@ -9,7 +9,7 @@
 (describe "mode local settings"
   (it "sets keybindings"
     (expect (with-tree-test-buffer #'java-mode
-              "if ([foo] == 3) {}"
+                "if ([foo] == 3) {}"
               (execute-kbd-macro "j"))
             :to-have-buffer-contents "if (foo == [3]) {}")))
 
@@ -120,53 +120,6 @@ if (foo == 3) {
     (with-mode-local java-mode
       (tree-edit--render-node nil (apply #'tree-edit--generate-node args) nil 0)
       (buffer-substring-no-properties (point-min) (point-max)))))
-
-(describe "node creation"
-  (it "works with trivial nodes"
-    (expect (tree-edit-test-make-node 'break_statement '((break_statement . ("break" ";"))))
-            :to-equal "break;")
-    (expect (tree-edit-test-make-node 'continue_statement '((continue_statement . ("continue" ";"))))
-            :to-equal "continue;"))
-  (it "can select choices based on input"
-    (expect (tree-edit-test-make-node
-             'expression_statement
-             '((expression_statement . (identifier ";")) ;; _expression = identifier
-               (identifier . ("TREE_EDIT"))))
-            :to-equal "TREE_EDIT;")
-    (expect (tree-edit-test-make-node
-             'argument_list
-             '((expression_statement . (call_expression ";")) ;; _expression = identifier
-               (call_expression . (identifier argument_list))
-               (argument_list . ("(" identifier ")"))
-               (identifier . ("TREE_EDIT"))))
-            :to-equal "(TREE_EDIT)")
-    (expect (tree-edit-test-make-node
-             'expression_statement
-             '((expression_statement . (call_expression ";")) ;; _expression = identifier
-               (call_expression . (identifier argument_list))
-               (argument_list . ("(" identifier ")"))
-               (identifier . ("TREE_EDIT"))))
-            :to-equal "TREE_EDIT(TREE_EDIT);")
-    (expect (tree-edit-test-make-node
-             'if_statement
-             '((if_statement . ("if" parenthesized_expression expression_statement)) ;; _expression = identifier
-               (expression_statement . (identifier ";"))
-               (parenthesized_expression . ("(" identifier ")"))
-               (identifier . ("TREE"))))
-            :to-equal "if(TREE)TREE;"))
-  (it "can space words properly"
-    ;; FIXME: private void, etc?
-    (expect (tree-edit-test-make-node
-             'modifiers
-             '((modifiers . ("private" "void"))))
-            :to-equal "private void")
-    (expect (tree-edit-test-make-node
-             'if_statement
-             '((if_statement . ("if" parenthesized_expression expression_statement "else" expression_statement)) ;; _expression = identifier
-               (expression_statement . (identifier ";"))
-               (parenthesized_expression . ("(" identifier ")"))
-               (identifier . ("TREE"))))
-            :to-equal "if(TREE)TREE;else TREE;")))
 
 ;;* Raise node
 (describe "raise node"
@@ -290,7 +243,8 @@ if (foo == 3) {
             :to-have-buffer-contents "
 {foo();[break;]// i'm a comment!
 }"))
-  (it "can perform DWIM insertions"
+  ;; XXX: DWIM is out, grammar mods are in
+  (xit "can perform DWIM insertions"
     (expect (with-tree-test-buffer #'java-mode "{[foo(x);]}"
               (evil-tree-edit-insert-sibling 'null_literal))
             :to-have-buffer-contents "{foo(x);[null;]}")
@@ -556,7 +510,7 @@ class Main {
 foo(x, // comment
     [y]);
 }"
-                                   (evil-tree-edit-delete))
+              (evil-tree-edit-delete))
             :to-have-buffer-contents "{
 foo(x // comment
     );
