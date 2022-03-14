@@ -27,7 +27,7 @@
 
 (defun tree-edit-python-block-deletion-override (_ parent start-index end-index)
   "Allow deletion of NODE in block, unless it's the only node."
-  (when (> (tsc-count-children parent) 1)
+  (when (> (tsc-count-named-children parent) 1)
     (make-tree-edit-result :start-index start-index :end-index end-index :tokens nil)))
 
 (setq-mode-local
@@ -60,8 +60,7 @@
    (typed_parameter . (identifier ":" identifier))
    (decorated_definition . (decorator function_definition))
    (assignment . (identifier "=" expression))
-   (block . (expression_statement))
-   (expression_statement . (expression))
+   (block . (expression))
    (decorator . ("@" primary_expression))
 
    ;; Expressions & values
@@ -103,16 +102,19 @@
  ;; WARNING: Python is whitespace dependent, so messing with these parameters
  ;; may produce unparseable text
  tree-edit-whitespace-rules
- '((block . ((:newline :indent) . (:dedent :newline)))
-   (expression . (nil . nil))
-   (comment . (nil . (:newline)))
-   (decorator . (nil . (:newline)))
-   (_simple_statement . (nil . (:newline)))
-   (except_clause . (nil . (:newline)))
-   (finally_clause . (nil . (:newline)))
-   (elif_clause . (nil . (:newline)))
-   (else_clause . (nil . (:newline)))
-   (_compound_statement . (nil . (:newline))))
+ '((nil (block (:newline :indent) (:dedent :newline))
+        (comment nil (:newline))
+        (decorator nil (:newline))
+        (except_clause nil (:newline))
+        (finally_clause nil (:newline))
+        (elif_clause nil (:newline))
+        (else_clause nil (:newline))
+        (_compound_statement nil (:newline))
+        ;; XXX: expression is still a simp statemet
+        (expression nil nil)
+        (_simple_statement nil (:newline)))
+   (block (expression nil (:newline)))
+   (module (expression nil (:newline))))
 
  tree-edit-significant-node-types
  '(decorated_definition function_definition class_definition)
@@ -157,8 +159,6 @@
     :key "b")
    (:type try_statement
     :key "T")
-   (:type expression_statement
-    :key "e")
    (:type for_statement
     :key "f")
    (:type function_definition
@@ -431,7 +431,6 @@
            import_from_statement
            print_statement
            assert_statement
-           expression_statement
            return_statement
            delete_statement
            raise_statement

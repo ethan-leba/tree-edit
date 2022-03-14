@@ -11,14 +11,14 @@ jobs:
       matrix:
         emacs_version:
           - 27.2
-          - snapshot
     steps:
     - uses: purcell/setup-emacs@master
       with:
         version: ${{ matrix.emacs_version }}
 
+    # XXX: For some reason, specifying a git directory in Cask doesn't work on main
     - name: Install Cask
-      run: git clone https://github.com/cask/cask ~/.cask
+      run: git clone https://github.com/cask/cask ~/.cask && cd ~/.cask && git reset --hard 9600dd9
 
     - name: Add to path
       run: echo "${HOME}/.cask/bin" >> $GITHUB_PATH
@@ -27,5 +27,13 @@ jobs:
     - name: Install dependencies
       run: cask
 
+    - uses: actions/setup-node@v2
+    - run: npm install -g tree-sitter-cli
+
+    - name: Clone tree-edit python grammar
+      run: git clone https://github.com/tree-edit/tree-sitter-python.git ~/tree-sitter-python
+
     - name: Run tests
       run: './run-tests.sh'
+      env:
+        TREE_EDIT_REPOS: "~"

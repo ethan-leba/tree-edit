@@ -49,5 +49,5 @@ struct foo {
            :to-have-buffer-contents
            "
 {if (foo)[{
-    bar;
-  }]}")))
+  bar;
+}]}")))

@@ -28,17 +28,16 @@
  c-mode
 
  tree-edit-whitespace-rules
- '((compound_statement . ((:indent) . (:dedent)))
-   ("{" . (nil . (:indent :newline)))
-   ("}" . ((:dedent :newline) . nil))
-   (comment . (nil . (:newline)))
-   ;; TODO: should dig inwards for ; rules
-   (type_definition . (nil . (:newline)))
-   (field_declaration . (nil . (:newline)))
-   (_statement . (nil . (:newline)))
-   (preproc_def . (nil . (:newline)))
-   (declaration . (nil . (:newline)))
-   (_non_case_statement . (nil . (:newline))))
+ '((nil ("{" nil (:indent :newline))
+        ("}" (:dedent :newline) nil)
+        (comment nil (:newline))
+        ;; TODO: should dig inwards for ; rules
+        (type_definition nil (:newline))
+        (field_declaration nil (:newline))
+        (_statement nil (:newline))
+        (preproc_def nil (:newline))
+        (declaration nil (:newline))
+        (_non_case_statement nil (:newline))))
 
  tree-edit-significant-node-types
  '()

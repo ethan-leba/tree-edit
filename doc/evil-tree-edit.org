@@ -14,22 +14,26 @@
 :END:
 
 * Getting started
-=evil-tree-edit= can be installed on MELPA.
+The =evil-tree-edit= can be installed on MELPA.
 
-After installation, add hooks for any language you'd like tree-edit to
+Many, if not all languages will require custom grammars to be installed.
+#+begin_src elisp
+(with-demoted-errors ""
+  (require 'tree-sitter-langs)
+  (tree-sitter-langs-ensure 'te-python "~/Dropbox/tree-sitter-python")
+  (push '(python-mode . te-python) tree-sitter-major-mode-language-alist))
+#+end_src
+
+After installation, add hooks for any language you'd like evil-tree-edit to
 automatically enable in.
 
 #+begin_src elisp
 (add-hook 'java-mode-hook #'evil-tree-edit-mode)
 #+end_src
 
-It's also recommended to use tree-edit with an autoformatter in it's current
+It's also recommended to use evil-tree-edit with an autoformatter in it's current
 state, as tree-edit does not always produce text consistent in formatting with
-the surrounding nodes. If your language provides a performant formatter, you can
-even run it after every editing operation:
-#+begin_src elisp
-(add-hook 'evil-tree-edit-after-change-hook #'my-format-buffer-command)
-#+end_src
+the surrounding nodes.
 
 * Usage
 The concept of the *cursor*, a position in the 2D plane of text, is replaced by

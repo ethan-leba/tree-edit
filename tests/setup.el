@@ -6,6 +6,11 @@
 (require 'tree-sitter-langs)
 (require 'evil-tree-edit)
 
+(tree-sitter-langs-ensure
+ 'te-python
+ (string-join `(,(getenv "TREE_EDIT_REPOS") "tree-sitter-python") "/"))
+(push '(python-mode . te-python) tree-sitter-major-mode-language-alist)
+
 (defun buffer-status-as-string ()
   (if (equal evil-state 'tree)
       (progn
