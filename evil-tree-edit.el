@@ -420,6 +420,13 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
       (evil-tree-edit-view-mode -1)
     (evil-tree-edit-view-mode)))
 
+(defun evil-tree-edit-select-in-visual-state ()
+  "Move to visual state with the current node as the selection."
+  (interactive)
+  (evil-tree-edit-ensure-current-node)
+  (evil-visual-select (tsc-node-start-position evil-tree-edit-current-node)
+                      (tsc-node-end-position evil-tree-edit-current-node)))
+
 
 (defun evil-tree-edit--ambiguous-node-range-p (node-a node-b)
   "Do NODE-A and NODE-B share the same range?"
