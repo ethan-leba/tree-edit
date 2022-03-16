@@ -618,7 +618,8 @@ each language will have it's own set of nouns."
       (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
       (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
       (define-key mode-local-keymap "?" #'evil-tree-edit-node-info)
-      (define-key mode-local-keymap "v" #'evil-tree-edit-toggle-tree-view)
+      (define-key mode-local-keymap "v" #'evil-tree-edit-select-in-visual-state)
+      (define-key mode-local-keymap "V" #'evil-tree-edit-toggle-tree-view)
       (define-key mode-local-keymap "zz" #'evil-scroll-line-to-center)
       ;; `setq-mode-local' macroexpanded, since it doesn't accept symbols
       (mode-local-bind `((evil-tree-state-map . ,mode-local-keymap)) '(mode-variable-flag t) mode)
