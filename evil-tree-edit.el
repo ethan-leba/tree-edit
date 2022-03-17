@@ -350,7 +350,8 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
                          (tree-edit-all-aliases-for-type tree-edit-placeholder-node-type)))
                   ;; XXX: Assuming the placeholder type is a singleton list containing a string
                   (car (alist-get tree-edit-placeholder-node-type tree-edit-syntax-snippets)))
-          evil-tree-edit-current-node)
+          evil-tree-edit-current-node
+          :want-text t)
     (`(,first . ,_) (evil-tree-edit--goto-node first))
     (_ (user-error "No placeholders contained in the current!"))))
 

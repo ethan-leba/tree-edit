@@ -49,6 +49,8 @@ best we can do for now is pretend that these nodes don't exist at
 all.
 
 https://tree-sitter.github.io/tree-sitter/creating-parsers#hiding-rules")
+(defvar tree-edit--query-cursors nil
+  "A mapping from language to query cursor for performance.")
 ;; TODO: This should be mode local
 (defvar tree-edit--type-cache (make-hash-table :test #'equal)
   "Caches the type and split node for a given piece of text.
@@ -288,12 +290,21 @@ NODE-TYPE can be a symbol or a list of symbol."
        ;; Query string needs an @name here, or it won't return any results
        (format "[%s] @node" it)))
 
-(defun tree-edit-query (patterns node)
+(cl-defun tree-edit-query (patterns node &key want-text)
   "Execute query PATTERNS against the children of NODE and return captures.
 
-TODO: Build queries and cursors once, then reuse them?"
-  (let* ((query (tsc-make-query tree-sitter-language patterns)))
-    (-map #'cdr (tsc-query-captures query node #'tsc--buffer-substring-no-properties))))
+If WANT-TEXT is non-nil, the text will be retrieved for each
+node. Only use this if actually operating on the text for
+performance."
+  (let* ((cached-cursor (alist-get major-mode tree-edit--query-cursors))
+         (cursor (or cached-cursor (tsc-make-query-cursor)))
+         (query (tsc-make-query tree-sitter-language patterns)))
+    (unless cached-cursor
+      (push (cons major-mode cursor) tree-edit--query-cursors))
+    (->>
+     (if want-text #'tsc--buffer-substring-no-properties (-const nil))
+     (tsc-query-captures query node)
+     (-map #'cdr))))
 
 (defun tree-edit--relevant-types (type parent-type)
   "Return a list of the TYPE and all relevant types that occur in PARENT-TYPE.
