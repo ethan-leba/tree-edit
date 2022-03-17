@@ -222,8 +222,8 @@ If NODE is the root node, the sequence is empty."
           (tsc-mapc-children
            (lambda (child)
              (when (tsc-node-eq child this)
-               (push i steps)
-               (cl-return))
+               (push (cons (tsc-node-type this) i) steps)
+               (cl-return steps))
              (when (tsc-node-named-p child)
                (setq i (1+ i))))
            parent))
@@ -238,13 +238,31 @@ STEPS should be a sequence of steps, as described by `tsc--node-steps'.
 If a step cannot be followed, signal a `tsc--invalid-node-step'
 error. Differs from `tsc--node-from-steps' in that it does not
 validate the type of the steps."
-  (let ((this (tsc-root-node tree-sitter-tree)))
-    (cl-dolist (step steps)
-      (when (zerop (tsc-count-named-children this))
-        (cl-return))
-      (let ((new-node (tsc-get-nth-named-child this (min step (1- (tsc-count-named-children this))))))
-        (setq this new-node)))
-    this))
+  (cl-block nil
+    (let ((this (tsc-root-node tree-sitter-tree)))
+      (pcase-dolist (`(,_ . ,step) steps)
+        (when (zerop (tsc-count-named-children this))
+          (cl-return this))
+        (let ((new-node (tsc-get-nth-named-child this (min step (1- (tsc-count-named-children this))))))
+          (setq this new-node)))
+      this)))
+
+(defun tree-edit--node-from-steps-strict (steps)
+  "Follow STEPS from TREE's root node; return the final node.
+STEPS should be a sequence of steps, as described by `tsc--node-steps'.
+
+If a step cannot be followed, signal a `tsc--invalid-node-step' error."
+  (cl-block nil
+    (let ((this (tsc-root-node tree-sitter-tree)))
+      (pcase-dolist (`(,old-type . ,i) steps)
+        (let ((new-node (tsc-get-nth-named-child this i)))
+          (unless new-node
+            (cl-return nil))
+          (let ((new-type (tsc-node-type new-node)))
+            (unless (equal old-type new-type)
+              (cl-return nil)))
+          (setq this new-node)))
+      this)))
 
 (defun tree-edit--apply-until-interesting (fun node)
   "Apply FUN to NODE until a named node is hit."
