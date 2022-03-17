@@ -484,7 +484,13 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
       (progn
         (evil-tree-state)
         (evil-tree-edit--goto-node
-         (tree-edit--node-from-steps evil-tree-edit--return-position))
+         (or (tree-edit--node-from-steps-strict evil-tree-edit--return-position)
+             (progn
+               (message "Could not restore node position, selecting at point.")
+               (tsc-get-named-descendant-for-position-range
+                ;; Entering normal state will put the point before the selected
+                ;; text, so we increment it by one.
+                (tsc-root-node tree-sitter-tree) (1+ (point)) (1+ (point))))))
         (setq evil-tree-edit--return-position nil))
     (evil-normal-state)))
 

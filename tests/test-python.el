@@ -247,3 +247,21 @@ def foo() -> [bar]:
             :to-have-buffer-contents "
 def foo():
     [pass]")))
+
+(describe "change node"
+  ;; Simulating LSP autoimport
+  (it "will default to node at point if stored node position is invalid"
+    (expect (with-tree-test-buffer #'python-mode "
+foo([x])"
+              (evil-tree-edit-change)
+              (insert "baz")
+              (save-excursion
+                (goto-char (point-min))
+                (newline)
+                (insert "import baz")
+                (newline))
+              (evil-tree-edit-normal-or-tree-state))
+            :to-have-buffer-contents "
+import baz
+
+foo([baz])")))
