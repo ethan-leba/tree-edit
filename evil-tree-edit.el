@@ -235,7 +235,14 @@ NODE-TYPE can be a symbol or a list of symbol."
   "Avy jump to one of NODES."
   (interactive)
   (evil-tree-edit-ensure-current-node)
-  (let* ((position->node (--map (cons (tsc-node-start-position it) it) nodes))
+  (let* ((window-top-boundary (window-start))
+         (window-bottom-boundary (window-end))
+         (position->node
+          (--keep
+           (let ((position (tsc-node-start-position it)))
+             (if (>= window-bottom-boundary position window-top-boundary)
+                 (cons position it)))
+           nodes))
          ;; avy-action declares what should be done with the result of avy-process
          (avy-action (lambda (pos) (evil-tree-edit--goto-node (alist-get pos position->node)))))
     (cond ((not position->node) (user-error "Nothing to jump to!"))
