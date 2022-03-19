@@ -433,7 +433,7 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
   (interactive)
   (evil-tree-edit-ensure-current-node)
   (evil-visual-select (tsc-node-start-position evil-tree-edit-current-node)
-                      (tsc-node-end-position evil-tree-edit-current-node)))
+                      (1- (tsc-node-end-position evil-tree-edit-current-node))))
 
 
 (defun evil-tree-edit--ambiguous-node-range-p (node-a node-b)
