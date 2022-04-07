@@ -422,6 +422,15 @@ Fragments should parse as one of the following structures:
       (setq start (1- start)))
     (cons (1+ start) end)))
 
+(defmacro tree-edit--run-relation (tries var pred &rest goals)
+  "Run GOALS against VAR, returning the first matching PRED.
+
+Run PRED against TRIES answers, or all if TRIES is nil."
+  (declare (indent 2))
+  `(let ((,var (reazon--make-variable ',var))
+         (reazon--stop-time (and reazon-timeout (+ reazon-timeout (float-time)))))
+     (tree-edit--take-first (reazon--run-goal (reazon-conj ,@goals)) ,pred ,tries ,var)))
+
 (cl-defun tree-edit--attempt-structural-edit
     (parent &key (new-type nil) start-index (end-index nil) (overrides-alist nil))
   "Attempt to perform structural edit.
@@ -869,15 +878,6 @@ type of the text."
 
 ;;* Locals: Relational parser
 ;; Upstream this to `reazon'?
-(defmacro tree-edit--run-relation (tries var pred &rest goals)
-  "Run GOALS against VAR, returning the first matching PRED.
-
-Run PRED against TRIES answers, or all if TRIES is nil."
-  (declare (indent 2))
-  `(let ((,var (reazon--make-variable ',var))
-         (reazon--stop-time (and reazon-timeout (+ reazon-timeout (float-time)))))
-     (tree-edit--take-first (reazon--run-goal (reazon-conj ,@goals)) ,pred ,tries ,var)))
-
 (defun tree-edit--take-first (stream pred tries var)
   "Return the first item from STREAM for which PRED returns non-nil.
 
