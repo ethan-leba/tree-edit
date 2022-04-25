@@ -231,6 +231,20 @@ NODE-TYPE can be a symbol or a list of symbol."
   (setq evil-tree-edit-current-node node)
   (run-hooks 'evil-tree-edit-movement-hook))
 
+(defun evil-tree-edit-out (node-type/s)
+  "Move outwards until a node of NODE-TYPE/S has been hit."
+  (interactive)
+  (evil-tree-edit-ensure-current-node)
+  (evil-tree-edit--remember)
+  (let ((new-node evil-tree-edit-current-node)
+        (node-types (if (listp node-type/s) node-type/s `(,node-type/s))))
+    (while (and (tsc-get-parent new-node)
+                (not (member (tsc-node-type new-node) node-types)))
+      (setq new-node (tsc-get-parent new-node)))
+    (if (not (tsc-get-parent new-node))
+        (user-error "Current node has no parent of type %s" node-type/s)
+      (evil-tree-edit--goto-node new-node))))
+
 (defun evil-tree-edit--avy-jump (nodes)
   "Avy jump to one of NODES."
   (interactive)
@@ -609,6 +623,7 @@ each language will have it's own set of nouns."
       (define-evil-tree-edit-verb mode-local-keymap "w" #'evil-tree-edit-wrap-node t)
       (define-evil-tree-edit-avy-jump mode-local-keymap "s" #'evil-tree-edit-avy-jump)
       (define-evil-tree-edit-avy-jump mode-local-keymap "q" #'evil-tree-edit-sig-avy-jump)
+      (define-evil-tree-edit-avy-jump mode-local-keymap "o" #'evil-tree-edit-out)
       (define-key mode-local-keymap [escape] 'evil-normal-state)
       (define-key mode-local-keymap ">" #'evil-tree-edit-slurp)
       (define-key mode-local-keymap "<" #'evil-tree-edit-barf)
