@@ -236,7 +236,7 @@ NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
   (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--remember)
-  (let ((new-node evil-tree-edit-current-node)
+  (let ((new-node (tsc-get-parent evil-tree-edit-current-node))
         (node-types (if (listp node-type/s) node-type/s `(,node-type/s))))
     (while (and (tsc-get-parent new-node)
                 (not (member (tsc-node-type new-node) node-types)))
