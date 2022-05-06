@@ -393,7 +393,7 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
             `',(tree-edit--pretty-print (tree-edit--generate-alias-names grammar))
             `',(tree-edit--pretty-print (tree-edit--generate-containing-types grammar)))))
 
-(-let (((path name mode) command-line-args-left))
+(defun tree-edit-generate-grammars (path name mode)
   (message (format "Parsing %s grammar at %s." name path))
   (let ((time-start (float-time))
         (templated-string (tree-edit--generate-grammar-file path name mode)))
@@ -405,11 +405,12 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
               (map-apply (lambda (type grammar)
                            (cons type (car (reazon-run 1 q (tree-edit-parseo grammar q '())))))
                          tree-edit-grammar))))
-      (with-temp-file (format "tree-edit-%s.el" name)
-        (insert (format tree-edit--config-template
-                        name
-                        mode
-                        `',(tree-edit--pretty-print default-nodes)))))
+      (unless (file-exists-p (format "tree-edit-%s.el" name))
+        (with-temp-file (format "tree-edit-%s.el" name)
+          (insert (format tree-edit--config-template
+                          name
+                          mode
+                          `',(tree-edit--pretty-print default-nodes))))))
     (message
      (format "Completed after %s seconds."
              (round (- (float-time) time-start))))))
