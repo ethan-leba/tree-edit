@@ -4,7 +4,6 @@
 ;;
 ;; Example usage: cask emacs --script dev/tree-edit-generate-grammars.el ~/grammar.json python python-mode
 ;;
-
 (require 'dash)
 (require 'json)
 (require 'cl-extra)
@@ -399,21 +398,66 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
         (templated-string (tree-edit--generate-grammar-file path name mode)))
     (with-temp-file (format "tree-edit-%s-grammar.el" name)
       (insert templated-string))
-    (load-file (format "tree-edit-%s-grammar.el" name))
-    (let ((default-nodes
-            (with-mode-local-symbol (intern mode)
-              (map-apply (lambda (type grammar)
-                           (cons type (car (reazon-run 1 q (tree-edit-parseo grammar q '())))))
-                         tree-edit-grammar))))
-      (unless (file-exists-p (format "tree-edit-%s.el" name))
-        (with-temp-file (format "tree-edit-%s.el" name)
-          (insert (format tree-edit--config-template
-                          name
-                          mode
-                          `',(tree-edit--pretty-print default-nodes))))))
     (message
      (format "Completed after %s seconds."
              (round (- (float-time) time-start))))))
+
+(defvar tree-edit--store
+  (expand-file-name "store" (file-name-directory (locate-library "tree-edit.el"))))
+
+(make-directory tree-edit--store t)
+(defvar tree-edit--hashes ())
+
+(defun tree-edit--needs-recompilation (lang hash &optional force)
+  "Return non-nil when the stored hash for LANG does not match HASH."
+  (let* ((hashfile (expand-file-name ".filehashes.el" tree-edit--store))
+         (contents
+          (when (file-exists-p hashfile)
+            (with-temp-buffer
+              (insert-file-contents-literally hashfile)
+              (read (buffer-string)))))
+         (old-hash (alist-get lang contents nil nil #'equal)))
+    (if (and (not force) (string= old-hash hash)) nil
+      (delete-file hashfile)
+      (append-to-file
+       (prin1-to-string (if old-hash
+                            (--map-first (equal (car it) lang) `(,lang . ,hash) contents)
+                          (cons `(,lang . ,hash) contents)))
+       nil
+       hashfile)
+      t)))
+
+(defun tree-edit--lang-compile (path mode &optional force)
+  "Compile grammar at PATH if necessary."
+  (let* ((default-directory path)
+         (grammar-path (expand-file-name "./src/grammar.json"))
+         (parser-name (s-replace "_" "-" (alist-get 'name (json-read-file grammar-path))))
+         (grammar-hash
+          (with-temp-buffer
+            (insert-file-contents grammar-path)
+            (secure-hash 'sha1 (current-buffer))))
+         (shared-lib-name
+          (format
+           "%s.%s"
+           parser-name
+           (pcase system-type
+             ('darwin "dylib")
+             ('gnu/linux "so")
+             (_ (error "Unsupported system-type %s" system-type))))))
+    (when (tree-edit--needs-recompilation parser-name grammar-hash force)
+      (message "Compiling grammar at %s" path)
+      (with-temp-buffer
+        (unless (zerop (apply #'call-process "gcc" nil t nil
+                              "./src/parser.c" "-I./src/" "--shared" "-O3" "-o"
+                              shared-lib-name (if (file-exists-p "./src/scanner.cc")
+                                                  '("./src/scanner.cc" "-lstdc++"))))
+          (error "Unable to compile grammar, please file a bug report\n%s" (buffer-string))))
+      (rename-file shared-lib-name
+                   (expand-file-name "bin/" tree-sitter-langs-grammar-dir)
+                   :ok-if-already-exists)
+      (with-temp-file (expand-file-name (format "tree-edit-%s-grammar.el" parser-name) tree-edit--store)
+        (insert (tree-edit--generate-grammar-file grammar-path parser-name mode)))
+      (message "Completed compilation"))))
 
 (provide 'tree-edit-generate-grammars)
 ;;; tree-edit-generate-grammars.el ends here
