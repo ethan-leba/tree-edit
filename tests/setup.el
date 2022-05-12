@@ -5,11 +5,23 @@
 (require 's)
 (require 'tree-sitter-langs)
 (require 'evil-tree-edit)
+(require 'tree-edit-build)
 
-(tree-sitter-langs-ensure
- 'te-python
- (string-join `(,(getenv "TREE_EDIT_REPOS") "tree-sitter-python") "/"))
-(push '(python-mode . te-python) tree-sitter-major-mode-language-alist)
+(defun build-and-configure-for-lang (repo-url mode sym)
+  (let ((default-directory (or (getenv "TREE_EDIT_REPOS") "/tmp")))
+    (unless (file-exists-p (symbol-name sym))
+      (call-process "git" nil nil nil "clone" "--depth" "1" repo-url
+                    (expand-file-name (symbol-name sym))))
+    (tree-edit-compile-grammar (expand-file-name (symbol-name sym)) mode)
+    (push `(,mode . ,sym) tree-sitter-major-mode-language-alist)))
+
+(when (getenv "TESTING")
+  (build-and-configure-for-lang
+   "https://github.com/tree-edit/tree-sitter-python.git" 'python-mode 'te-python)
+  (build-and-configure-for-lang
+   "https://github.com/tree-edit/tree-sitter-java.git" 'java-mode 'java)
+  (build-and-configure-for-lang
+   "https://github.com/tree-edit/tree-sitter-c.git" 'c-mode 'c))
 
 (defun buffer-status-as-string ()
   (if (equal evil-state 'tree)

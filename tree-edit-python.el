@@ -24,7 +24,8 @@
 (require 'mode-local)
 (require 'tree-edit)
 
-(load-file (expand-file-name "tree-edit-te-python-grammar.el" tree-edit--store))
+;; FIXME: This should happen in `tree-edit-load-grammar-for-major-mode'
+(load-file (expand-file-name "tree-edit-te-python-grammar.el" tree-edit-storage-dir))
 
 (defun tree-edit-python-block-deletion-override (_ parent start-index end-index)
   "Allow deletion of NODE in block, unless it's the only node."

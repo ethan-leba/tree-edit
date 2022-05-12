@@ -3,6 +3,8 @@
 set -x # show executed commands
 set -e # exit on error
 
+export TESTING=1
+
 cask emacs \
     -q \
     -batch \

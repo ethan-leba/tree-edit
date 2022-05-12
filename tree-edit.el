@@ -159,7 +159,6 @@ in a DWIM node, that will happen instead.")
 Set by mode-local grammar file.
 
 TODO: Is there a builtin way to infer this from the buffer?")
-
 ;;* User settings
 (defgroup tree-edit nil
   "Structural editing library for tree-sitter languages."
@@ -171,6 +170,10 @@ TODO: Is there a builtin way to infer this from the buffer?")
   "Mapping from mode to language file."
   :type '(alist :key-type symbol :value-type symbol)
   :group 'tree-edit)
+(defcustom tree-edit-storage-dir
+  (expand-file-name "store" (file-name-directory (locate-library "tree-edit.el")))
+  "Storage location for preprocessed grammar files.")
+
 ;; TODO: Add timeout to queries
 ;; (defcustom tree-edit-query-timeout 0.1
 ;;   "How long a query should take before giving up."

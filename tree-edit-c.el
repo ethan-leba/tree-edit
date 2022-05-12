@@ -21,8 +21,9 @@
 ;;
 ;;; Code:
 (require 'mode-local)
-(require 'tree-edit-c-grammar)
 (require 'tree-edit)
+
+(load-file (expand-file-name "tree-edit-c-grammar.el" tree-edit-storage-dir))
 
 (setq-mode-local
  c-mode
