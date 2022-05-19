@@ -41,13 +41,12 @@ how the syntax generation works.
 
 | Status | Language |
 |--------+----------|
-| 🔶     | [[https://github.com/ethan-leba/tree-edit/issues/33][Python]]   |
+| ✅     | [[https://github.com/ethan-leba/tree-edit/issues/33][Python]]   |
 | 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/54][C]]        |
 | 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/34][Java]]     |
 
 
 | ✅ | Supported               |
-| 🔶 | Requires custom grammar |
 | 🔨 | Under development       |
 
 Tree-edit is designed to be as language-agnostic as possible. Currently the list
@@ -57,20 +56,20 @@ file for the language.
 
 See [[https://github.com/ethan-leba/tree-edit/blob/main/doc/using-tree-edit.org#adding-new-languages-to-tree-edit][here]] to learn the process for adding a new language.
 
-* Why forked grammars?
+* Custom grammars
 
-Tree-sitter grammars were not designed with tree-edit's usecase in mind, so many
-grammars are structured inconveniently for tree-edit's purposes:
+Tree-edit uses forked version of tree-sitter grammars to power it's editing. See
+here for how install the forked grammars.
 
-- Unnecessarily nested nodes :: some nodes are
+The tree-sitter API and grammars were not designed with the structural editing
+usecase in mind, so most grammars are structured in a way that makes navigation
+and editing in tree-edit awkward or impossible without complex and fragile
+hackarounds. For more context, see this GH issue:
+https://github.com/tree-sitter/tree-sitter/issues/1558
 
-- Aliased nodes ::
-
-- Hidden nodes ::
-
-All of these issues have little effect for syntax highlighting or large scale
-editing, but at the level of granularity tree-edit operates this becomes very
-detrimental.
+I hope that in the future more thought will be given to this usecase in terms of
+the tree-sitter API and grammar design so that the forks will eventually become
+necessary, but for now they're needed.
 
 * Contributing
 

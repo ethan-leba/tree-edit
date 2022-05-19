@@ -49,9 +49,9 @@ objects selecting the entire line.
 
 * Adding new languages to tree-edit
 
-1. [[https://github.com/cask/cask][Install cask]]
-2. Clone [[https://github.com/emacs-tree-sitter/tree-sitter-langs][tree-sitter-langs]]
-3. Run =cask emacs --script dev/tree-edit-generate-grammars.el <tree-sitter-langs>/repos/<language>/src/grammar.json <language> <language-mode>= in tree-edit root. This will generate two files: =tree-edit-<language>.el= and =tree-edit-<language>-grammar.el=. The grammar file should never needed to be modified, while =tree-edit-<language>.el= is a template that should be configured.
+1. [[https://github.com/cask/cask][Install Cask]]
+2. Install grammar via. LINK
+3. Copy one of the language files (=tree-edit-python.el= or similar)
 4. Add language to =tree-edit-language-alist=
 5. See what breaks!
 

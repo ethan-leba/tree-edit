@@ -23,6 +23,7 @@
 ;;; Code:
 ;;* Requires
 (require 'tree-sitter)
+(require 'mode-local)
 (require 'dash)
 (require 'reazon)
 (require 's)
@@ -51,6 +52,8 @@ all.
 https://tree-sitter.github.io/tree-sitter/creating-parsers#hiding-rules")
 (defvar tree-edit--query-cursors nil
   "A mapping from language to query cursor for performance.")
+(defvar tree-edit--parser-name nil
+  "The intended parser to be used with a given grammar file. Set by mode-local grammar file.")
 ;; TODO: This should be mode local
 (defvar tree-edit--type-cache (make-hash-table :test #'equal)
   "Caches the type and split node for a given piece of text.
@@ -166,7 +169,8 @@ TODO: Is there a builtin way to infer this from the buffer?")
   :prefix "tree-edit-")
 (defcustom tree-edit-language-alist '((java-mode . tree-edit-java)
                                       (python-mode . tree-edit-python)
-                                      (c-mode . tree-edit-c))
+                                      (c-mode . tree-edit-c)
+                                      (rustic-mode . tree-edit-rust))
   "Mapping from mode to language file."
   :type '(alist :key-type symbol :value-type symbol)
   :group 'tree-edit)
@@ -321,12 +325,22 @@ Relevant types are either supertypes of TYPE or alias names referring to TYPE."
 
 (defun tree-edit-load-grammar-for-major-mode ()
   "Load the grammar for the major mode, or error if none is registered."
-  (let ((language-file (alist-get major-mode tree-edit-language-alist)))
+  (let ((language-file (alist-get major-mode tree-edit-language-alist))
+        (parser-in-use (alist-get major-mode tree-sitter-major-mode-language-alist)))
     (unless language-file
       (user-error
        "No language file specified for major mode `%s' in `tree-edit-language-alist'!"
        (symbol-name major-mode)))
-    (require language-file)))
+    (require language-file)
+    (with-mode-local-symbol major-mode
+      (unless (equal parser-in-use tree-edit--parser-name)
+        ;; TODO: Documentation link in error
+        (user-error "Expected '%s' parser to be active, found '%s'! Ensure '%s' is installed and present in `tree-sitter-major-mode-language-alist'" tree-edit--parser-name
+                    parser-in-use tree-edit--parser-name))
+      (let ((grammar-file (expand-file-name (format "tree-edit-%s-grammar.el" tree-edit--parser-name) tree-edit-storage-dir)))
+        (if (file-exists-p grammar-file)
+            (load grammar-file nil t)
+          (user-error "No grammar file present for %s! Either install the grammar or remove %s from `tree-edit-language-alist'" major-mode major-mode))))))
 
 ;;* Locals: node transformations
 

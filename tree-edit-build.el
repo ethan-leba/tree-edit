@@ -377,13 +377,17 @@ be populated."
              ('darwin "dylib")
              ('gnu/linux "so")
              (_ (error "Unsupported system-type %s" system-type))))))
-    (when (tree-edit--needs-recompilation parser-name grammar-hash force)
+    (if (not (tree-edit--needs-recompilation parser-name grammar-hash force))
+        (message "Compiling grammar at %s")
       (message "Compiling grammar at %s" path)
       (with-temp-buffer
         (unless (zerop (apply #'call-process "gcc" nil t nil
                               "./src/parser.c" "-I./src/" "--shared" "-O3" "-o"
-                              shared-lib-name (if (file-exists-p "./src/scanner.cc")
-                                                  '("./src/scanner.cc" "-lstdc++"))))
+                              shared-lib-name
+                              (cond ((file-exists-p "./src/scanner.c")
+                                     '("./src/scanner.c"))
+                                    ((file-exists-p "./src/scanner.cc")
+                                     '("./src/scanner.cc" "-lstdc++")))))
           (error "Unable to compile grammar, please file a bug report\n%s" (buffer-string))))
       (rename-file shared-lib-name
                    (expand-file-name "bin/" tree-sitter-langs-grammar-dir)

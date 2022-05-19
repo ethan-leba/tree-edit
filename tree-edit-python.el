@@ -124,6 +124,9 @@
  tree-edit-placeholder-node-type
  'identifier
 
+ tree-edit--parser-name
+ 'te-python
+
  tree-edit-node-deletion-override
  '((block . tree-edit-python-block-deletion-override)
    (module . tree-edit-simple-delete-override))
