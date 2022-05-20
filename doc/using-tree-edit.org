@@ -1,5 +1,56 @@
-
 Documentation on using the tree-edit library. More to come!
+
+* Installing custom grammars
+
+** Straight/Doom (recommended)
+
+We can use the [[https://github.com/radian-software/straight.el][straight]] package manager to manage the tree-sitter repo
+repositories and automatically build the grammar whenever a new version is
+available via the =:pre-build= hook. Here's an example straight recipe:
+
+#+begin_src elisp
+'(tree-edit-python
+   :host github
+   :repo "tree-edit/tree-sitter-python"
+   :files ("*")
+   :build nil
+   :pre-build
+   (progn
+     (require 'tree-edit-build)
+     (tree-edit-compile-grammar default-directory 'rustic-mode :force)))
+#+end_src
+
+And the equivalent for Doom Emac's =package!= macro:
+
+#+begin_src elisp
+(package! tree-edit-python
+    :recipe (:host github
+             :repo "tree-edit/tree-sitter-python"
+             :files ("*")
+             :build nil
+             :pre-build
+             (progn
+               (require 'tree-edit-build)
+               (tree-edit-compile-grammar default-directory 'python-mode :force))))
+#+end_src
+
+** Manual
+
+If you don't use straight or similar VC-based package managers, you can instead
+manage the grammar repos directly:
+
+1. =git clone= a grammar to somewhere
+2. Add the following to your config:
+
+#+begin_src elisp
+(require 'tree-edit-build)
+(tree-edit-compile-grammar "~/my-python-grammar" 'python-mode)
+#+end_src
+
+=tree-edit= stores a hash of the grammar so that it will only be rebuilt when
+there are changes to =grammar.json=
+
+3. Whenever an update is wanted, perform a =git pull= on the grammar repository
 
 * Rolling your own tree-edit commands
 
@@ -50,12 +101,12 @@ objects selecting the entire line.
 * Adding new languages to tree-edit
 
 1. [[https://github.com/cask/cask][Install Cask]]
-2. Install grammar via. LINK
+2. Install grammar via. above process
 3. Copy one of the language files (=tree-edit-python.el= or similar)
 4. Add language to =tree-edit-language-alist=
 5. See what breaks!
 
 ** Customizing languages
 
-Check out the docstrings of the variables used in =tree-sitter-java.el= and the
+Check out the docstrings of the variables used in =tree-sitter-python.el= and the
 pre-existing language files to see how to customize languages.
