@@ -13,7 +13,6 @@ available via the =:pre-build= hook. Here's an example straight recipe:
    :host github
    :repo "tree-edit/tree-sitter-python"
    :files ("*")
-   :build nil
    :pre-build
    (progn
      (require 'tree-edit-build)
@@ -27,7 +26,6 @@ And the equivalent for Doom Emac's =package!= macro:
     :recipe (:host github
              :repo "tree-edit/tree-sitter-python"
              :files ("*")
-             :build nil
              :pre-build
              (progn
                (require 'tree-edit-build)

@@ -359,7 +359,7 @@ be populated."
       t)))
 
 ;;;###autoload
-(defun tree-edit-compile-grammar (path mode &optional force)
+(defun tree-edit-compile-grammar (path mode &optional force debug)
   "Compile grammar at PATH if necessary."
   (make-directory tree-edit-storage-dir t)
   (let* ((default-directory path)
@@ -378,7 +378,7 @@ be populated."
              ('gnu/linux "so")
              (_ (error "Unsupported system-type %s" system-type))))))
     (if (not (tree-edit--needs-recompilation parser-name grammar-hash force))
-        (message "Compiling grammar at %s")
+        (when debug (message "Grammar at %s is already compiled, skipping" path))
       (message "Compiling grammar at %s" path)
       (with-temp-buffer
         (unless (zerop (apply #'call-process "gcc" nil t nil

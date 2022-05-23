@@ -56,6 +56,9 @@
    (formal_parameter . ("int" "TREE"))
    (import_declaration . ("import" "TREE" ";")))
 
+ tree-edit--parser-name
+ 'java
+
  tree-edit-whitespace-rules
  '((nil (comment nil (:newline))))
 

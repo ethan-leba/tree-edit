@@ -79,9 +79,22 @@ Contributions are very much welcome! In particular, adding language files would
 be a great place to help. Otherwise, the issues are a good place to propose
 features or find ones to implement.
 
+In addition, reporting bugs and providing feedback on the overall design and UX
+of the package is much appreciated! Providing a good UX for structural editing
+is crucial and will become increasingly important to this package as more of the
+fundamental shortcomings get ironed out.
+
 The project is fairly complex and the documentation is still in progress, so
 feel free to open a discussion if you're interested in helping out but you're
 not sure where to start!
+
+** Running tests
+
+The tests can be run with the =./run-tests.sh= script. Note that due to the way
+Cask works, the =store/= directory containing grammar hashes and grammar files
+will be stored in the root of the =tree-edit= repository, while the actual
+compiled grammars will exist inside of the =.cask/= directory. So make sure to
+delete both of those directories if you need to clear your test environment.
 
 * Related projects
 - [[https://github.com/mickeynp/combobulate][combobulate]] :: Structural navigation and limited structural editing

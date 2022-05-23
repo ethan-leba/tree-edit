@@ -40,6 +40,9 @@
         (declaration nil (:newline))
         (_non_case_statement nil (:newline))))
 
+ tree-edit--parser-name
+ 'c
+
  tree-edit-significant-node-types
  '()
 

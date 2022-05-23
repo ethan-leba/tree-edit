@@ -338,8 +338,10 @@ Relevant types are either supertypes of TYPE or alias names referring to TYPE."
         (user-error "Expected '%s' parser to be active, found '%s'! Ensure '%s' is installed and present in `tree-sitter-major-mode-language-alist'" tree-edit--parser-name
                     parser-in-use tree-edit--parser-name))
       (let ((grammar-file (expand-file-name (format "tree-edit-%s-grammar.el" tree-edit--parser-name) tree-edit-storage-dir)))
-        (if (file-exists-p grammar-file)
-            (load grammar-file nil t)
+        (if (and (file-exists-p grammar-file))
+            (unless (featurep language-file)
+              (message "loadin it")
+              (load grammar-file nil t))
           (user-error "No grammar file present for %s! Either install the grammar or remove %s from `tree-edit-language-alist'" major-mode major-mode))))))
 
 ;;* Locals: node transformations
