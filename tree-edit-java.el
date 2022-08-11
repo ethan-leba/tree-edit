@@ -22,8 +22,6 @@
 (require 'mode-local)
 (require 'tree-edit)
 
-(load-file (expand-file-name "tree-edit-java-grammar.el" tree-edit-storage-dir))
-
 (setq-mode-local
  java-mode
 

@@ -12,7 +12,7 @@
     (unless (file-exists-p (symbol-name sym))
       (call-process "git" nil nil nil "clone" "--depth" "1" repo-url
                     (expand-file-name (symbol-name sym))))
-    (tree-edit-compile-grammar (expand-file-name (symbol-name sym)) mode nil :debug)
+    (tree-edit-compile-grammar (expand-file-name (symbol-name sym)) mode)
     (push `(,mode . ,sym) tree-sitter-major-mode-language-alist)))
 
 (when (getenv "TESTING")

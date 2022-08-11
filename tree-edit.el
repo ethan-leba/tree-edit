@@ -323,6 +323,7 @@ Relevant types are either supertypes of TYPE or alias names referring to TYPE."
     (alist-get type tree-edit--supertypes `(,type)))
    (alist-get parent-type tree-edit--containing-types)))
 
+;; XXX: Do lazily
 (defun tree-edit-load-grammar-for-major-mode ()
   "Load the grammar for the major mode, or error if none is registered."
   (let ((language-file (alist-get major-mode tree-edit-language-alist))
@@ -332,16 +333,24 @@ Relevant types are either supertypes of TYPE or alias names referring to TYPE."
        "No language file specified for major mode `%s' in `tree-edit-language-alist'!"
        (symbol-name major-mode)))
     (require language-file)
-    (with-mode-local-symbol major-mode
-      (unless (equal parser-in-use tree-edit--parser-name)
+    (let ((parser-name major-mode))
+      (unless (equal parser-in-use (with-mode-local-symbol major-mode tree-edit--parser-name))
         ;; TODO: Documentation link in error
         (user-error "Expected '%s' parser to be active, found '%s'! Ensure '%s' is installed and present in `tree-sitter-major-mode-language-alist'" tree-edit--parser-name
                     parser-in-use tree-edit--parser-name))
       (let ((grammar-file (expand-file-name (format "tree-edit-%s-grammar.el" tree-edit--parser-name) tree-edit-storage-dir)))
-        (if (and (file-exists-p grammar-file))
-            (unless (featurep language-file)
-              (message "loadin it")
-              (load grammar-file nil t))
+        (if (file-exists-p grammar-file)
+            (let (sexp)
+              (with-temp-buffer
+                (insert-file-contents grammar-file)
+                (goto-char (point-min))
+                ;; TODO: Error handling?
+                (setq sexp (read (current-buffer))))
+
+              (--each sexp
+                (-let [(var . val) it]
+                  (mode-local-bind `(,it) '(mode-variable-flag t) major-mode)
+                  (mode-local-map-mode-buffers (lambda nil (set (make-local-variable var) val)) major-mode))))
           (user-error "No grammar file present for %s! Either install the grammar or remove %s from `tree-edit-language-alist'" major-mode major-mode))))))
 
 ;;* Locals: node transformations
