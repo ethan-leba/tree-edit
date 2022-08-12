@@ -73,6 +73,56 @@ I hope that in the future more thought will be given to this usecase in terms of
 the tree-sitter API and grammar design so that the forks will eventually become
 necessary, but for now they're needed.
 
+** Installing custom grammars
+
+*** Straight/Doom (recommended)
+
+We can use the [[https://github.com/radian-software/straight.el][straight]] package manager to manage the tree-sitter repo
+repositories and automatically build the grammar whenever a new version is
+available via the =:pre-build= hook. Here's an example straight recipe:
+
+#+begin_src elisp
+'(tree-edit-python
+   :host github
+   :repo "tree-edit/tree-sitter-python"
+   :files ("*")
+   :post-build
+   (progn
+     (require 'tree-edit-build)
+     (tree-edit-compile-grammar 'rustic-mode)))
+#+end_src
+
+And the equivalent for Doom Emac's =package!= macro:
+
+#+begin_src elisp
+(package! tree-edit-python
+    :recipe (:host github
+             :repo "tree-edit/tree-sitter-python"
+             :files ("*")
+             :post-build
+             (progn
+               (require 'tree-edit-build)
+               (tree-edit-compile-grammar 'python-mode))))
+#+end_src
+
+*** Manual
+
+If you don't use straight or similar VC-based package managers, you can instead
+manage the grammar repos directly:
+
+1. =git clone= a grammar to somewhere
+2. Add the following to your config:
+
+#+begin_src elisp
+(require 'tree-edit-build)
+(tree-edit-compile-grammar "~/my-python-grammar" 'python-mode)
+#+end_src
+
+=tree-edit= stores a hash of the grammar so that it will only be rebuilt when
+there are changes to =grammar.json=
+
+3. Whenever an update is wanted, perform a =git pull= on the grammar repository
+
 * Contributing
 
 Contributions are very much welcome! In particular, adding language files would
