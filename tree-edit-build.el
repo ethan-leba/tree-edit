@@ -271,10 +271,11 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
 
 
 ;;;###autoload
-(defun tree-edit-compile-grammar (path mode)
+(defun tree-edit-compile-grammar (mode &optional path)
   "Compile grammar at PATH for the given MODE."
+  (interactive "aMajor mode: \nfTree-sitter repository path: \n")
   (make-directory tree-edit-storage-dir t)
-  (let* ((default-directory path)
+  (let* ((default-directory (or path default-directory))
          (grammar-path (expand-file-name "./src/grammar.json"))
          (parser-name (s-replace "_" "-" (alist-get 'name (json-read-file grammar-path))))
          (grammar-hash
@@ -282,8 +283,7 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
             (insert-file-contents grammar-path)
             (secure-hash 'sha1 (current-buffer))))
          (shared-lib-name
-          (format
-           "%s.%s"
+          (concat
            parser-name
            (or module-file-suffix (error "Unsupported system-type %s" system-type)))))
     (message "Compiling grammar at %s" path)

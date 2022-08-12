@@ -13,10 +13,10 @@ available via the =:pre-build= hook. Here's an example straight recipe:
    :host github
    :repo "tree-edit/tree-sitter-python"
    :files ("*")
-   :pre-build
+   :post-build
    (progn
      (require 'tree-edit-build)
-     (tree-edit-compile-grammar default-directory 'rustic-mode :force)))
+     (tree-edit-compile-grammar 'rustic-mode)))
 #+end_src
 
 And the equivalent for Doom Emac's =package!= macro:
@@ -26,10 +26,10 @@ And the equivalent for Doom Emac's =package!= macro:
     :recipe (:host github
              :repo "tree-edit/tree-sitter-python"
              :files ("*")
-             :pre-build
+             :post-build
              (progn
                (require 'tree-edit-build)
-               (tree-edit-compile-grammar default-directory 'python-mode :force))))
+               (tree-edit-compile-grammar 'python-mode))))
 #+end_src
 
 ** Manual
