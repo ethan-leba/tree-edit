@@ -2,15 +2,30 @@
 (require 'dash)
 (require 'mode-local)
 (require 'buttercup)
-(require 's)
-(require 'tree-sitter-langs)
+(require 'tree-edit)
 (require 'evil-tree-edit)
+(require 'tree-edit-build)
+(require 'url-parse)
+
+(defvar tree-edit--test-grammar-location (expand-file-name ".test-grammars/"))
+(defvar tree-edit--test-major-mode-mapping
+  '((python-mode . python)
+    (java-mode . java)
+    (c-mode . c)))
+
+(when (getenv "TESTING")
+  (make-directory tree-edit--test-grammar-location 'parents)
+  (setq user-emacs-directory tree-edit--test-grammar-location)
+  (setq treesit-extra-load-path `(,(expand-file-name "tree-sitter" user-emacs-directory)))
+  (tree-edit-install-grammars-wizard nil :accept-all))
 
 (defun buffer-status-as-string ()
   (if (equal evil-state 'tree)
       (progn
-        (let ((start (tsc-node-start-position evil-tree-edit-current-node))
-              (end (tsc-node-end-position evil-tree-edit-current-node)))
+        (let* ((current-node (or (evil-tree-edit-current-node)
+                                 (buttercup-fail "Buffer in invalid state, no current node")))
+               (start (treesit-node-start current-node))
+               (end (treesit-node-end current-node)))
           (evil-tree-state -1)
           (goto-char end)
           (insert "]")
@@ -35,11 +50,23 @@
     (let ((start (point)))
       (when (search-forward "]")
         (delete-char -1)
-        (let ((temp-node (tsc-get-descendant-for-position-range
-                          (tsc-root-node tree-sitter-tree) start (point))))
+        (let ((temp-node (treesit-node-descendant-for-range
+                          (treesit-buffer-root-node) start (point) :named)))
           (evil-tree-state)
-          (setq evil-tree-edit-current-node temp-node)
+          (evil-tree-edit-set-current-node temp-node)
           (evil-tree-edit--update-overlay))))))
+
+(defun tree-edit--test-setup (mode)
+  ;; FIXME, disable mode grammar activaiton?
+  (funcall mode)
+
+  (treesit-parser-create
+   (or (alist-get mode tree-edit--test-major-mode-mapping)
+       (user-error "[test harness] no grammar specified for %s" major-mode))
+   temp-buffer)
+
+  (evil-mode)
+  (evil-tree-edit-mode))
 
 (defmacro with-base-test-buffer (mode contents &rest test-forms)
   "This awesome macro is adapted (borrowed) from
@@ -50,12 +77,12 @@
        (kill-buffer b))
      (let ((temp-buffer (get-buffer-create "tree-edit-test-buffer"))
            evil-tree-edit-after-change-hook
-           evil-tree-edit-movement-hook)
+           evil-tree-edit-movement-hook
+           python-indent-guess-indent-offset-verbose)
        (save-window-excursion
          (switch-to-buffer temp-buffer)
-         (funcall ,mode)
-         (evil-mode)
-         (evil-tree-edit-mode)
+
+         (tree-edit--test-setup ,mode)
          (mode-local--activate-bindings)
          (insert ,contents)
          (goto-char 0)

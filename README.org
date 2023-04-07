@@ -28,8 +28,7 @@ To get an overview of tree-edit's capabilities, check out the [[https://emacscon
 
 #+HTML: <p align="center"><img src="assets/diagram.png"></p>
 
-Tree-edit relies heavily on the tree-sitter parser, leveraging the JSON
-intermediate representation that tree-sitter outputs to have a full
+Tree-edit relies heavily on the tree-sitter parser, leveraging the JSON intermediate representation that tree-sitter outputs to have a full
 understanding of what is valid for a given language with no language specific
 efforts on tree-edit's part.
 
@@ -39,48 +38,50 @@ how the syntax generation works.
 
 * Supported languages
 
-| Status | Language |
-|--------+----------|
-| ✅     | [[https://github.com/ethan-leba/tree-edit/issues/33][Python]]   |
-| 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/54][C]]        |
-| 🔨     | [[https://github.com/ethan-leba/tree-edit/issues/34][Java]]     |
+| Status | Language       |
+|--------+----------------|
+| ✅     | [[https://github.com/tree-edit/tree-sitter-python][Python]] ([[https://github.com/ethan-leba/tree-edit/issues/33][issue]]) |
+| 🔨     | [[https://github.com/tree-edit/tree-sitter-c][C]] ([[https://github.com/ethan-leba/tree-edit/issues/54][issue]])      |
+| 🔨     | [[https://github.com/tree-edit/tree-sitter-java][Java]] ([[https://github.com/ethan-leba/tree-edit/issues/34][issue]])   |
 
+See links for grammar repository and issue tracker respectively.
 
 | ✅ | Supported               |
-| 🔶 | Requires custom grammar |
 | 🔨 | Under development       |
 
-Tree-edit is designed to be as language-agnostic as possible. Currently the list
-of supported languages is not very impressive, but /in theory/ it should be as
-simple as running a script to preprocess a grammar and adding a configuration
-file for the language.
+Tree-edit is designed to be as language-agnostic as possible. Currently the list of supported languages is not very impressive, but /in theory/ it should be as simple as running a script to preprocess a grammar and adding a configuration file for the language. In practice the grammars usually also need modifications in order to make the grammar ergonomic for structural modification.
 
 See [[https://github.com/ethan-leba/tree-edit/blob/main/doc/using-tree-edit.org#adding-new-languages-to-tree-edit][here]] to learn the process for adding a new language.
 
-* Limitations
+* Custom grammars
 
-A non-comprehensive list of some of the larger limitations that tree-edit currently has:
+Tree-edit uses forked version of tree-sitter grammars to power it's editing. They are intended to work as a drop-in replacement for the standard grammar, but with tweaks to better work with tree-edit. See below for how install the forked grammars.
 
-- Impedance mismatch :: Most tree-sitter grammars were not designed with
-  tree-edit's usecase in mind, so some grammars may be structured inconveniently
-  for tree-edit's purposes.
+The tree-sitter API and grammars were not designed with the structural editing
+usecase in mind, so most grammars are structured in a way that makes navigation and editing in tree-edit awkward or impossible without complex and fragile hackarounds. For more context, see this GH issue:
+https://github.com/tree-sitter/tree-sitter/issues/1558
 
-- Tree-sitter-langs :: Tree-edit currently depends on [[https://github.com/emacs-tree-sitter/tree-sitter-langs][tree-sitter-langs]] to power
-  the tree-sitter parsers, however tree-sitter-langs does not always have the
-  most up-to-date grammars and is missing some languages. If this continues to
-  be an issue a fork may be needed.
+I hope that in the future more thought will be given to this usecase in terms of the tree-sitter API and grammar design so that the forks will eventually become unnecessary, but for now they're needed.
+
+** Installing custom grammars
+The function =tree-edit-install-grammars-wizard= can be used interactively to install grammars.
 
 * Contributing
 
-Contributions are very much welcome! In particular, adding language files would
-be a great place to help. Otherwise, the issues are a good place to propose
-features or find ones to implement.
+Contributions are very much welcome! In particular, adding language files would be a great place to help. Otherwise, the issues are a good place to propose features or find ones to implement.
+
+In addition, reporting bugs and providing feedback on the overall design and UX of the package is much appreciated! Providing a good UX for structural editing is crucial and will become increasingly important to this package as more of the fundamental shortcomings get ironed out.
 
 The project is fairly complex and the documentation is still in progress, so
 feel free to open a discussion if you're interested in helping out but you're
 not sure where to start!
 
+** Running tests
+
+The tests can be run with =make test=, while cached grammars can be cleaned out with =make clean=.
+
 * Related projects
+- [[https://github.com/drym-org/symex.el][symex]] :: Structural navigation and editing with backends for lisp and tree-sitter
 - [[https://github.com/mickeynp/combobulate][combobulate]] :: Structural navigation and limited structural editing
 - [[https://github.com/manateelazycat/grammatical-edit][grammatical-edit]] :: Smartparens-like using tree-sitter (?)
 - [[https://github.com/meain/evil-textobj-tree-sitter][evil-textobj-tree-sitter]] :: Evil mode text objects using tree-sitter queries.

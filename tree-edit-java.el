@@ -20,7 +20,6 @@
 ;;
 ;;; Code:
 (require 'mode-local)
-(require 'tree-edit-java-grammar)
 (require 'tree-edit)
 
 (setq-mode-local
@@ -55,8 +54,11 @@
    (formal_parameter . ("int" "TREE"))
    (import_declaration . ("import" "TREE" ";")))
 
+ tree-edit--parser-name
+ 'java
+
  tree-edit-whitespace-rules
- '((comment . (nil . (:newline))))
+ '((nil (comment nil (:newline))))
 
  tree-edit-significant-node-types
  '(block class_body)
