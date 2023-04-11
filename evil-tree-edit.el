@@ -104,7 +104,8 @@ but it seems to not work reliably with `tree-edit--node-from-steps'."
   "Move NODE to the next (interesting) named sibling."
   (let ((parent (treesit-node-parent node)))
     (cond
-     ((not parent) node)
+     ((or (not parent)
+          (not (treesit-node-parent parent))) node)
      ((treesit-node-eq parent (treesit-buffer-root-node)) node)
      ((--any (member (treesit-node-type parent)
                      (cons it (alist-get it tree-edit--subtypes '())))
