@@ -553,13 +553,15 @@ construction, instead of looking up the rules for node-type."
   "Check if the two tokens LEFT and RIGHT need a space between them.
 
 https://tree-sitter.github.io/tree-sitter/creating-parsers#keyword-extraction"
-  ;; TODO: Parse from grammar -- this is Java's identifier regex
-  (let ((regex "[[:alpha:]_$][[:alpha:][:digit:]_$]*"))
-    (and (stringp left)
-         (stringp right)
-         (< (length (s-matched-positions-all regex (string-join `(,left ,right))))
-            (+ (length (s-matched-positions-all regex left))
-               (length (s-matched-positions-all regex right)))))))
+  (and (stringp left)
+       (stringp right)
+       (let ((parsed
+              (treesit-parse-string
+               (string-join `(,left ,right))
+               (treesit-parser-language (car (treesit-parser-list))))))
+         (and (not (treesit-node-check parsed 'has-error))
+              (equal (treesit-node-child-count parsed) 1)
+              (< (treesit-node-child-count (treesit-node-child parsed 1)))))))
 
 (defun tree-edit--whitespace-rules-for-type (type parent-type)
   "Retrieve whitespace rules for TYPE.
