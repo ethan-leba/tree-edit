@@ -561,17 +561,22 @@ construction, instead of looking up the rules for node-type."
      (or (alist-get type tree-edit-syntax-snippets)
          (user-error "No node definition for %s" type)))))
 
-(defun tree-edit--needs-space-p (left right)
-  "Check if the two tokens LEFT and RIGHT need a space between them.
+(defun tree-edit--needs-space-p (to-insert)
+  "Check if the token TO-INSERT needs a space before it.
 
-https://tree-sitter.github.io/tree-sitter/creating-parsers#keyword-extraction"
-  ;; TODO: Parse from grammar -- this is Java's identifier regex
-  (let ((regex "[[:alpha:]_$][[:alpha:][:digit:]_$]*"))
-    (and (stringp left)
-         (stringp right)
-         (< (length (s-matched-positions-all regex (string-join `(,left ,right))))
-            (+ (length (s-matched-positions-all regex left))
-               (length (s-matched-positions-all regex right)))))))
+This function uses the point.
+
+This function inserts and deletes into the buffer! This may be a
+very bad idea, I'm not sure."
+  (and (stringp to-insert)
+       (let (result)
+         (insert to-insert)
+         (goto-char (- (point) (length to-insert)))
+         (setq result
+               (not (equal (treesit-node-start (treesit-node-at (point)))
+                           (point))))
+         (delete-char (length to-insert))
+         result)))
 
 (defun tree-edit--whitespace-rules-for-type (type parent-type)
   "Retrieve whitespace rules for TYPE.
@@ -626,7 +631,7 @@ matters (i.e. expressions are left alone but blocks are split)."
                          (indent-line-to indentation))
                        (setq deferred-newline nil))
                      (when (and (or do-insert do-whitespace)
-                                (tree-edit--needs-space-p prev current))
+                                (tree-edit--needs-space-p current))
                        (insert " "))
                      (when do-insert
                        (insert current)))
