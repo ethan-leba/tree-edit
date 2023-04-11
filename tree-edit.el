@@ -306,7 +306,7 @@ NODE-TYPE can be a symbol or a list of symbol."
 If WANT-TEXT is non-nil, the text will be retrieved for each
 node. Only use this if actually operating on the text for
 performance."
-  (-map #'cdr (treesit-query-capture (treesit-buffer-root-node) patterns)))
+  (-map #'cdr (treesit-query-capture node patterns)))
 
 (defun tree-edit--relevant-types (type parent-type)
   "Return a list of the TYPE and all relevant types that occur in PARENT-TYPE.
