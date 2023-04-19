@@ -305,6 +305,7 @@ https://tree-sitter.github.io/tree-sitter/using-parsers#named-vs-anonymous-nodes
 
     (message "Completed compilation")))
 
+;;;###autoload
 (defun tree-edit-install-grammars-wizard (force-rebuild &optional accept-all)
   "Install all available tree-sitter grammars compatible with tree-edit.
 
