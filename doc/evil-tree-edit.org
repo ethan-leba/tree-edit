@@ -97,7 +97,7 @@ generated.
 | Copy                          | @@html:<kbd>@@y@@html:</kbd>@@ | Copy the text of the current node.                                                                                     |
 | Undo                          | @@html:<kbd>@@u@@html:</kbd>@@ | Undo the last operation.                                                                                               |
 | Preview                       | @@html:<kbd>@@?@@html:</kbd>@@ | Preview the possible variations of the current node.                                                                   |
-| Tree view                     | @@html:<kbd>@@v@@html:</kbd>@@ | Enable =tree-edit-view= or display if already enabled.                                                                 |
+| Tree view                     | @@html:<kbd>@@V@@html:</kbd>@@ | Enable =tree-edit-view= or display if already enabled.                                                                 |
 
 ** Pasting
 Along with the standard node-types of the given language, tree-edit has a

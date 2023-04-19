@@ -444,14 +444,24 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
     (tree-edit-cache-node (evil-tree-edit-current-node))
     (evil-tree-edit-insert-sibling node-text)))
 
+(defun evil-tree-edit--treesit--explorer-refresh-advice (func &rest args)
+  "If in `evil-tree-state', set the region to the range of the current node.
+
+This is so that the current node will be properly highlighted in explorer mode."
+  (if (not (eq evil-state 'tree)) (apply func args)
+    (save-mark-and-excursion
+      (goto-char (treesit-node-start (evil-tree-edit-current-node)))
+      (set-mark (treesit-node-end (evil-tree-edit-current-node)))
+      (apply func args))))
+
+(advice-add 'treesit--explorer-refresh :around
+            #'evil-tree-edit--treesit--explorer-refresh-advice)
+
 (defun evil-tree-edit-toggle-tree-view ()
   "Toggle `evil-tree-edit-view-mode'."
   (interactive)
   (evil-tree-edit-ensure-current-node)
-  (require 'evil-tree-edit-view)
-  (if evil-tree-edit-view-mode
-      (evil-tree-edit-view-mode -1)
-    (evil-tree-edit-view-mode)))
+  (treesit-explore-mode))
 
 (defun evil-tree-edit-select-in-visual-state ()
   "Move to visual state with the current node as the selection."
