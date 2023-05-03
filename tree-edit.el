@@ -830,7 +830,7 @@ type of the text."
 (defun tree-edit--get-next-node (node)
   "Get the next node to the left of NODE."
   (when-let ((parent (treesit-node-parent node)))
-    (or (treesit-node-next-sibling parent :named)
+    (or (treesit-node-next-sibling node :named)
         (tree-edit--get-next-node parent))))
 
 (defun tree-edit-slurp (node)
