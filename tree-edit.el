@@ -806,7 +806,7 @@ parser."
                 result)))))))
    (t (user-error "Bad data: %s" new-node))))
 
-(defun tree-edit-insert-child (new-node node)
+(defun tree-edit-insert-child (new-node node &optional idx)
   "Attempt to insert NEW-NODE inside of NODE.
 
 If NODE already has named children, the new node will be inserted
@@ -815,7 +815,7 @@ before the first child.
 If NEW-NODE is a string, the tree-edit will attempt to infer the
 type of the text."
   (if (> (treesit-node-child-count node :named) 0)
-      (tree-edit-insert-sibling new-node (treesit-node-child node 0 :named) t)
+      (tree-edit-insert-sibling new-node (treesit-node-child node (or idx 0) :named) t)
     (if-let (result (tree-edit--try-transformation
                      new-node
                      (tree-edit--node-type node)
