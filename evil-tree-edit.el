@@ -343,11 +343,18 @@ See `tree-edit-insert-sibling'."
   (evil-tree-edit-insert-sibling type :before))
 
 (defun evil-tree-edit-insert-child (type-or-text)
-  "Insert a node of the given TYPE-OR-TEXT inside of the current node."
+  "Insert a node of the given TYPE-OR-TEXT inside of the current node at the beginning."
   (interactive)
   (evil-tree-edit-ensure-current-node)
   (tree-edit-insert-child type-or-text (evil-tree-edit-current-node))
   (evil-tree-edit-goto-child))
+
+(defun evil-tree-edit-insert-child-last (type-or-text)
+  "Insert a node of the given TYPE-OR-TEXT inside of the current node at the end."
+  (interactive)
+  (evil-tree-edit-ensure-current-node)
+  (tree-edit-insert-child type-or-text (evil-tree-edit-current-node) -1)
+  (evil-tree-edit--goto-node (treesit-node-child (evil-tree-edit-current-node) -1 :named)))
 
 (defun evil-tree-edit-slurp ()
   "Transform current node's next sibling into it's leftmost child, if possible."
@@ -645,6 +652,7 @@ each language will have it's own set of nouns."
       (define-evil-tree-edit-verb mode-local-keymap "i" #'evil-tree-edit-insert-sibling-before)
       (define-evil-tree-edit-verb mode-local-keymap "a" #'evil-tree-edit-insert-sibling)
       (define-evil-tree-edit-verb mode-local-keymap "I" #'evil-tree-edit-insert-child)
+      (define-evil-tree-edit-verb mode-local-keymap "A" #'evil-tree-edit-insert-child-last)
       (define-evil-tree-edit-verb mode-local-keymap "e" #'evil-tree-edit-exchange)
       (define-evil-tree-edit-verb mode-local-keymap "w" #'evil-tree-edit-wrap-node t)
       (define-evil-tree-edit-avy-jump mode-local-keymap "s" #'evil-tree-edit-avy-jump)
