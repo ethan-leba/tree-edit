@@ -552,16 +552,23 @@ construction, instead of looking up the rules for node-type."
 (defun tree-edit--needs-space-p (left right)
   "Check if the two tokens LEFT and RIGHT need a space between them.
 
-https://tree-sitter.github.io/tree-sitter/creating-parsers#keyword-extraction"
+If the parser can successfully parse the two nodes as a single
+one, then we know a space is needed."
   (and (stringp left)
        (stringp right)
        (let ((parsed
               (treesit-parse-string
                (string-join `(,left ,right))
                (treesit-parser-language (car (treesit-parser-list))))))
-         (and (not (treesit-node-check parsed 'has-error))
-              (equal (treesit-node-child-count parsed) 1)
-              (< (treesit-node-child-count (treesit-node-child parsed 1)))))))
+         (and
+          (not (treesit-node-check parsed 'has-error))
+          ;; Usually the top level node is a source node, check for single child
+          (cl-block nil
+            (while t
+              (pcase (treesit-node-child-count parsed)
+                (0 (cl-return t))
+                (1 (setq parsed (treesit-node-child parsed 0)))
+                (_ (cl-return nil)))))))))
 
 (defun tree-edit--whitespace-rules-for-type (type parent-type)
   "Retrieve whitespace rules for TYPE.
