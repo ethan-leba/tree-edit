@@ -1,4 +1,4 @@
-;;; tree-edit-c-grammar.el --- Description -*- lexical-binding: t; -*-
+;;; tree-edit-c.el --- Description -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2021 Ethan Leba
 ;; Author: Ethan Leba <ethanleba5@gmail.com>
