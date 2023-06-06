@@ -1,3 +1,5 @@
+#+HTML: <i><p align="center">I'm looking for work! Check out my <a href="https://www.linkedin.com/in/ethan-leba/">LinkedIn</a> or email me at <a href="mailto:ethanleba5@gmail.com">ethanleba5@gmail.com</a>.</p></i>
+
 #+HTML: <div align="center"><a href="https://melpa.org/#/evil-tree-edit"><img alt="MELPA" src="https://melpa.org/packages/evil-tree-edit-badge.svg"/></a></div>
 #+HTML: <p align="center">⚠ <b>Tree-edit is very much a work-in-progress.</b> Expect to run into bugs and breaking changes!</p>
 #+HTML: <p align="center"><img width="835" src="assets/demo.gif"></p>
