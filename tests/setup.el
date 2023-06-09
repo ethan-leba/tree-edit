@@ -109,7 +109,7 @@ executable programs, such as the C/C++ compiler and linker."
   (funcall mode)
 
   (treesit-parser-create
-   (or (alist-get mode tree-edit--test-major-mode-mapping)
+   (or (alist-get mode tree-edit-language-alist)
        (user-error "[test harness] no grammar specified for %s" major-mode))
    temp-buffer)
 

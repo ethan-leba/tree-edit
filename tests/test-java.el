@@ -26,8 +26,8 @@
     (with-base-test-buffer #'java-mode ""
       (let ((evil-tree-state-map (make-sparse-keymap))
             (tree-edit-nodes
-             '((:type if_statement
-                :key "i"))))
+             '((java (:type if_statement
+                      :key "i")))))
         (define-evil-tree-edit-verb evil-tree-state-map "t" #'dummy-verb)
         (evil-tree-state)
         (expect (key-binding "ti"))
@@ -44,7 +44,7 @@
   (it "loads grammar"
     (with-base-test-buffer #'java-mode "" (expect tree-edit-grammar)))
   (it "errors and disables tree-edit-mode on unknown mode"
-    (expect (with-base-test-buffer #'emacs-lisp-mode "") :to-throw 'error))
+    (expect (with-base-test-buffer #'fundamental-mode "") :to-throw 'error))
 
   ;; TODO
   (xit "uses node overrides"))
@@ -445,14 +445,14 @@ class Main {[void bar() {}]
   break;[break;]
 }")
     ;; (expect (with-tree-test-buffer #'java-mode "
-;; class Main {[public] void main() {}
-;; }"
-;;               ;; FIXME: Test selects anonymous keyword 'public', instead of 'modifiers
-;;               (evil-tree-edit-goto-parent)
-;;               (evil-tree-edit-delete))
-;;             :to-have-buffer-contents "
-;; class Main {[void] main() {}
-;; }")
+    ;; class Main {[public] void main() {}
+    ;; }"
+    ;;               ;; FIXME: Test selects anonymous keyword 'public', instead of 'modifiers
+    ;;               (evil-tree-edit-goto-parent)
+    ;;               (evil-tree-edit-delete))
+    ;;             :to-have-buffer-contents "
+    ;; class Main {[void] main() {}
+    ;; }")
     (expect (with-tree-test-buffer #'java-mode "{foo([x],y);}"
               (evil-tree-edit-delete))
             :to-have-buffer-contents "{foo([y]);}")

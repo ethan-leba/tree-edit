@@ -78,7 +78,7 @@ moving the sibling index by the provided value."
        ,@body
        (run-hooks 'evil-tree-edit-after-change-hook)
        (evil-tree-edit-set-current-node
-             (tree-edit--node-from-steps ,location-sym))
+        (tree-edit--node-from-steps ,location-sym))
        (evil-tree-edit--update-overlay))))
 
 (defun evil-tree-edit--preserve-current-node-before (_ __)
@@ -109,7 +109,7 @@ but it seems to not work reliably with `tree-edit--node-from-steps'."
      ((treesit-node-eq parent (treesit-buffer-root-node)) node)
      ((--any (member (treesit-node-type parent)
                      (cons it (alist-get it tree-edit--subtypes '())))
-             tree-edit-significant-node-types)
+             (tree-edit-significant-node-types))
       parent)
      (t (evil-tree-edit--get-sig-parent parent)))))
 
@@ -200,13 +200,13 @@ If RETURN-NODE is unset, `evil-tree-edit-current-node' is used."
 (defun evil-tree-edit-append-sibling-placeholder-and-change ()
   "Add a placeholder node and then change it."
   (interactive)
-  (evil-tree-edit-insert-sibling tree-edit-placeholder-node-type)
+  (evil-tree-edit-insert-sibling (tree-edit-placeholder-node-type))
   (evil-tree-edit-change))
 
 (defun evil-tree-edit-insert-child-placeholder-and-change ()
   "Add a placeholder node and then change it."
   (interactive)
-  (evil-tree-edit-insert-child tree-edit-placeholder-node-type)
+  (evil-tree-edit-insert-child (tree-edit-placeholder-node-type))
   (evil-tree-edit-change))
 
 (defun evil-tree-edit-sig-avy-jump (node-type)
@@ -218,7 +218,7 @@ NODE-TYPE can be a symbol or a list of symbol."
   (evil-tree-edit--remember)
   (let ((query-node
          (if (member (treesit-node-type (evil-tree-edit-current-node))
-                     tree-edit-significant-node-types)
+                     (tree-edit-significant-node-types))
              (evil-tree-edit-current-node)
            (evil-tree-edit--get-sig-parent (evil-tree-edit-current-node)))))
     (-> node-type
@@ -374,15 +374,15 @@ See `tree-edit-insert-sibling'."
 Placeholder is defined by `tree-edit-placeholder-node-type'."
   (interactive)
   (evil-tree-edit-ensure-current-node)
-  (unless tree-edit-placeholder-node-type
+  (unless (tree-edit-placeholder-node-type)
     (user-error "`tree-edit-placeholder-node-type' not set!"))
   (pcase (tree-edit-query
           (format "((%s) (#equal @node %s))"
                   (tree-edit--format-query-string
-                   (cons tree-edit-placeholder-node-type
-                         (tree-edit-all-aliases-for-type tree-edit-placeholder-node-type)))
+                   (cons (tree-edit-placeholder-node-type)
+                         (tree-edit-all-aliases-for-type (tree-edit-placeholder-node-type))))
                   ;; XXX: Assuming the placeholder type is a singleton list containing a string
-                  (car (alist-get tree-edit-placeholder-node-type tree-edit-syntax-snippets)))
+                  (car (alist-get (tree-edit-placeholder-node-type) (tree-edit-syntax-snippets))))
           (evil-tree-edit-current-node)
           :want-text t)
     (`(,first . ,_) (evil-tree-edit--goto-node first))
@@ -416,7 +416,7 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
                                   (plist-get it :type)
                                 `(,(plist-get it :type))))
                   (plist-get it :key))
-                tree-edit-nodes)))))
+                (tree-edit-nodes))))))
 
 (defun evil-tree-edit-preview-node ()
   "Preview the different variations of the current node."
@@ -515,9 +515,9 @@ This is so that the current node will be properly highlighted in explorer mode."
   (let ((node (treesit-node-descendant-for-range
                (treesit-buffer-root-node) (point) (point))))
     (evil-tree-edit-set-current-node
-          (if (tree-edit--boring-nodep node)
-              (tree-edit--apply-until-interesting #'treesit-node-parent node)
-            node)))
+     (if (tree-edit--boring-nodep node)
+         (tree-edit--apply-until-interesting #'treesit-node-parent node)
+       node)))
   (overlay-put evil-tree-edit--node-overlay 'face 'region)
   (evil-tree-edit--update-overlay))
 
@@ -590,105 +590,101 @@ This is so that the current node will be properly highlighted in explorer mode."
   "Define a key command in KEYMAP prefixed by KEY calling FUNC.
 
 FUNC must take one argument, a symbol of the node type."
-  (dolist (node (append tree-edit-nodes tree-edit-query-nodes))
+  (dolist (node (append (tree-edit-nodes) (tree-edit-query-nodes)))
     (define-key
-      keymap
-      (string-join (list key (plist-get node :key)))
-      (cons
-       ;; emacs-which-key integration
-       (cond ((plist-get node :name) (plist-get node :name))
-             ((listp (plist-get node :type)) (s-join "/" (--map (s-replace "_" " " (symbol-name it)) (plist-get node :type))))
-             (t (s-replace "_" " " (symbol-name (plist-get node :type)))))
-       `(lambda ()
-          (interactive)
-          (,func ',(plist-get node :type)))))))
+     keymap
+     (string-join (list key (plist-get node :key)))
+     (cons
+      ;; emacs-which-key integration
+      (cond ((plist-get node :name) (plist-get node :name))
+            ((listp (plist-get node :type)) (s-join "/" (--map (s-replace "_" " " (symbol-name it)) (plist-get node :type))))
+            (t (s-replace "_" " " (symbol-name (plist-get node :type)))))
+      `(lambda ()
+         (interactive)
+         (,func ',(plist-get node :type)))))))
 
 (defun define-evil-tree-edit-verb (keymap key func &optional wrap)
   "Define a key command in KEYMAP prefixed by KEY calling FUNC.
 
 FUNC must take one argument, a symbol of the node type.
 If WRAP is t, include :wrap-override."
-  (dolist (node tree-edit-nodes)
+  (dolist (node (tree-edit-nodes))
     (define-key
-      keymap
-      (string-join (list key (plist-get node :key)))
-      (cons
-       ;; emacs-which-key integration
-       (cond ((plist-get node :name) (plist-get node :name))
-             ((listp (plist-get node :type)) (s-join "/" (--map (s-replace "_" " " (symbol-name it)) (plist-get node :type))))
-             (t (s-replace "_" " " (symbol-name (plist-get node :type)))))
-       `(lambda ()
-          (interactive)
-          (let ((tree-edit-syntax-snippets
-                 (append ,(plist-get node :node-override)
-                         ,(if wrap (plist-get node :wrap-override))
-                         tree-edit-syntax-snippets)))
-            (,func ',(plist-get node :type)))))))
+     keymap
+     (string-join (list key (plist-get node :key)))
+     (cons
+      ;; emacs-which-key integration
+      (cond ((plist-get node :name) (plist-get node :name))
+            ((listp (plist-get node :type)) (s-join "/" (--map (s-replace "_" " " (symbol-name it)) (plist-get node :type))))
+            (t (s-replace "_" " " (symbol-name (plist-get node :type)))))
+      `(lambda ()
+         (interactive)
+         (let ((tree-edit-syntax-snippets
+                (append ,(plist-get node :node-override)
+                        ,(if wrap (plist-get node :wrap-override))
+                        tree-edit-syntax-snippets)))
+           (,func ',(plist-get node :type)))))))
   ;; Can this be integrated into the loop?
   (define-key
-    keymap
-    (string-join (list key "p"))
-    (cons
-     "yank"
-     `(lambda ()
-        (interactive)
-        (,func (car kill-ring)))))
+   keymap
+   (string-join (list key "p"))
+   (cons
+    "yank"
+    `(lambda ()
+       (interactive)
+       (,func (car kill-ring)))))
   (define-key
-    keymap
-    (string-join (list key "P"))
-    (cons
-     "yank-pop"
-     `(lambda ()
-        (interactive)
-        (,func (evil-tree-edit--read-from-kill-ring "Kill-ring: "))))))
+   keymap
+   (string-join (list key "P"))
+   (cons
+    "yank-pop"
+    `(lambda ()
+       (interactive)
+       (,func (evil-tree-edit--read-from-kill-ring "Kill-ring: "))))))
 
-(defun evil-tree-edit-set-state-bindings (mode)
+(defun evil-tree-edit-set-state-bindings (parser)
   "Set keybindings for MODE in `evil-tree-state'.
 
 Should only be used in the context of mode-local bindings, as
 each language will have it's own set of nouns."
-  (with-mode-local-symbol mode
-    (let ((mode-local-keymap (make-composed-keymap (make-sparse-keymap) evil-suppress-map)))
-      (define-evil-tree-edit-verb mode-local-keymap "i" #'evil-tree-edit-insert-sibling-before)
-      (define-evil-tree-edit-verb mode-local-keymap "a" #'evil-tree-edit-insert-sibling)
-      (define-evil-tree-edit-verb mode-local-keymap "I" #'evil-tree-edit-insert-child)
-      (define-evil-tree-edit-verb mode-local-keymap "A" #'evil-tree-edit-insert-child-last)
-      (define-evil-tree-edit-verb mode-local-keymap "e" #'evil-tree-edit-exchange)
-      (define-evil-tree-edit-verb mode-local-keymap "w" #'evil-tree-edit-wrap-node t)
-      (define-evil-tree-edit-avy-jump mode-local-keymap "s" #'evil-tree-edit-avy-jump)
-      (define-evil-tree-edit-avy-jump mode-local-keymap "q" #'evil-tree-edit-sig-avy-jump)
-      (define-evil-tree-edit-avy-jump mode-local-keymap "o" #'evil-tree-edit-out)
-      (define-key mode-local-keymap [escape] 'evil-normal-state)
-      (define-key mode-local-keymap ">" #'evil-tree-edit-slurp)
-      (define-key mode-local-keymap "<" #'evil-tree-edit-barf)
-      (define-key mode-local-keymap "j" #'evil-tree-edit-goto-next-sibling)
-      (define-key mode-local-keymap "k" #'evil-tree-edit-goto-prev-sibling)
-      (define-key mode-local-keymap "h" #'evil-tree-edit-goto-parent)
-      (define-key mode-local-keymap "f" #'evil-tree-edit-goto-child)
-      (define-key mode-local-keymap "b" #'evil-tree-edit-back)
-      (define-key mode-local-keymap "x" #'evil-tree-edit-append-sibling-placeholder-and-change)
-      (define-key mode-local-keymap "X" #'evil-tree-edit-insert-child-placeholder-and-change)
-      (define-key mode-local-keymap "n" #'evil-tree-edit-goto-next-placeholder)
-      (define-key mode-local-keymap "N" #'evil-tree-edit-change-next-placeholder)
-      (define-key mode-local-keymap "c" #'evil-tree-edit-change)
-      (define-key mode-local-keymap "d" #'evil-tree-edit-delete)
-      (define-key mode-local-keymap "m" #'evil-tree-edit-move)
-      (define-key mode-local-keymap "r" #'evil-tree-edit-raise)
-      (define-key mode-local-keymap "y" #'evil-tree-edit-copy)
-      (define-key mode-local-keymap "p" #'evil-tree-edit-yank)
-      (define-key mode-local-keymap "P" #'evil-tree-edit-yank-pop)
-      (define-key mode-local-keymap "C" #'evil-tree-edit-clone)
-      (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
-      (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
-      (define-key mode-local-keymap "?" #'evil-tree-edit-node-info)
-      (define-key mode-local-keymap "v" #'evil-tree-edit-select-in-visual-state)
-      (define-key mode-local-keymap "V" #'evil-tree-edit-toggle-tree-view)
-      (define-key mode-local-keymap "zz" #'evil-scroll-line-to-center)
-      ;; `setq-mode-local' macroexpanded, since it doesn't accept symbols
-      (mode-local-bind `((evil-tree-state-map . ,mode-local-keymap)) '(mode-variable-flag t) mode)
-      (mode-local-map-mode-buffers
-       (lambda () (set (make-local-variable 'evil-tree-state-map) mode-local-keymap))
-       mode))))
+  (let ((mode-local-keymap (make-composed-keymap (make-sparse-keymap) evil-suppress-map)))
+    (define-evil-tree-edit-verb mode-local-keymap "i" #'evil-tree-edit-insert-sibling-before)
+    (define-evil-tree-edit-verb mode-local-keymap "a" #'evil-tree-edit-insert-sibling)
+    (define-evil-tree-edit-verb mode-local-keymap "I" #'evil-tree-edit-insert-child)
+    (define-evil-tree-edit-verb mode-local-keymap "A" #'evil-tree-edit-insert-child-last)
+    (define-evil-tree-edit-verb mode-local-keymap "e" #'evil-tree-edit-exchange)
+    (define-evil-tree-edit-verb mode-local-keymap "w" #'evil-tree-edit-wrap-node t)
+    (define-evil-tree-edit-avy-jump mode-local-keymap "s" #'evil-tree-edit-avy-jump)
+    (define-evil-tree-edit-avy-jump mode-local-keymap "q" #'evil-tree-edit-sig-avy-jump)
+    (define-evil-tree-edit-avy-jump mode-local-keymap "o" #'evil-tree-edit-out)
+    (define-key mode-local-keymap [escape] 'evil-normal-state)
+    (define-key mode-local-keymap ">" #'evil-tree-edit-slurp)
+    (define-key mode-local-keymap "<" #'evil-tree-edit-barf)
+    (define-key mode-local-keymap "j" #'evil-tree-edit-goto-next-sibling)
+    (define-key mode-local-keymap "k" #'evil-tree-edit-goto-prev-sibling)
+    (define-key mode-local-keymap "h" #'evil-tree-edit-goto-parent)
+    (define-key mode-local-keymap "f" #'evil-tree-edit-goto-child)
+    (define-key mode-local-keymap "b" #'evil-tree-edit-back)
+    (define-key mode-local-keymap "x" #'evil-tree-edit-append-sibling-placeholder-and-change)
+    (define-key mode-local-keymap "X" #'evil-tree-edit-insert-child-placeholder-and-change)
+    (define-key mode-local-keymap "n" #'evil-tree-edit-goto-next-placeholder)
+    (define-key mode-local-keymap "N" #'evil-tree-edit-change-next-placeholder)
+    (define-key mode-local-keymap "c" #'evil-tree-edit-change)
+    (define-key mode-local-keymap "d" #'evil-tree-edit-delete)
+    (define-key mode-local-keymap "m" #'evil-tree-edit-move)
+    (define-key mode-local-keymap "r" #'evil-tree-edit-raise)
+    (define-key mode-local-keymap "y" #'evil-tree-edit-copy)
+    (define-key mode-local-keymap "p" #'evil-tree-edit-yank)
+    (define-key mode-local-keymap "P" #'evil-tree-edit-yank-pop)
+    (define-key mode-local-keymap "C" #'evil-tree-edit-clone)
+    (define-key mode-local-keymap "u" #'evil-tree-edit-undo)
+    (define-key mode-local-keymap "A" #'evil-tree-edit-goto-sig-parent)
+    (define-key mode-local-keymap "?" #'evil-tree-edit-node-info)
+    (define-key mode-local-keymap "v" #'evil-tree-edit-select-in-visual-state)
+    (define-key mode-local-keymap "V" #'evil-tree-edit-toggle-tree-view)
+    (define-key mode-local-keymap "zz" #'evil-scroll-line-to-center)
+    ;; TODO: This could probably be better
+    (setq-local evil-tree-state-map mode-local-keymap)))
 
 (unless evil-tree-edit-disable-nontree-bindings
   (evil-define-key 'normal evil-tree-edit-mode-map "Q" #'evil-tree-state)
