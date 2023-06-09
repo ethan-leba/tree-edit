@@ -316,6 +316,7 @@ ACCEPT-ALL, if non-nil, installs all grammars without confirmation."
       (`(,lang . ,url)
        '((python "https://github.com/tree-edit/tree-sitter-python")
          (c "https://github.com/tree-edit/tree-sitter-c")
+         (elisp "https://github.com/tree-edit/tree-sitter-elisp")
          (java "https://github.com/tree-edit/tree-sitter-java")))
     (when
         ;; TODO: Some way to detect if the grammar is out of date
