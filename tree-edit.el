@@ -176,9 +176,21 @@ TODO: Is there a builtin way to infer this from the buffer?")
   "Mapping from TS grammar name to language file."
   :type '(alist :key-type symbol :value-type symbol)
   :group 'tree-edit)
+
 (defcustom tree-edit-storage-dir
-  (expand-file-name "store" (file-name-directory (locate-library "tree-edit.el")))
-  "Storage location for preprocessed grammar files.")
+  (expand-file-name
+   "tree-edit/"
+   (let ((cache-dir (when (fboundp 'xdg-cache-home)
+                      (xdg-cache-home))))
+     (if (or (seq-empty-p cache-dir)
+             (not (file-exists-p cache-dir))
+             (file-exists-p (expand-file-name
+                             "tree-edit"
+                             user-emacs-directory)))
+         user-emacs-directory
+       cache-dir)))
+  "Storage location for preprocessed grammar files."
+  :type 'string)
 
 ;; TODO: Add timeout to queries
 ;; (defcustom tree-edit-query-timeout 0.1

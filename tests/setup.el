@@ -62,6 +62,8 @@ executable programs, such as the C/C++ compiler and linker."
 
   (make-directory tree-edit--test-grammar-location 'parents)
   (setq user-emacs-directory tree-edit--test-grammar-location)
+  (setq tree-edit-storage-dir tree-edit--test-grammar-location)
+
   (setq treesit-extra-load-path `(,(expand-file-name "tree-sitter" user-emacs-directory)))
   (tree-edit-install-grammars-wizard nil :accept-all))
 
