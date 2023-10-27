@@ -560,7 +560,11 @@ This is so that the current node will be properly highlighted in explorer mode."
   :lighter " TE"
   (cond
    (evil-tree-edit-mode
-    (tree-edit-load-grammar-for-major-mode)
+    (condition-case err
+        (tree-edit-load-grammar-for-major-mode)
+      (error
+       (evil-tree-edit-mode -1)
+       (signal (car err) (cdr err))))
     (evil-tree-edit-set-state-bindings major-mode)
     ;; HACK: Above mode binding won't come into effect until the state is changed.
     (evil-normal-state)
