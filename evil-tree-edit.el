@@ -5,7 +5,7 @@
 ;; Author: Ethan Leba <ethanleba5@gmail.com>
 ;; Version: 0.1.0
 ;; Homepage: https://github.com/ethan-leba/tree-edit
-;; Package-Requires: ((emacs "27.1") (tree-edit "0.1.0") (tree-sitter "0.15.0") (evil "1.0.0") (avy "0.5.0") (s "0.0.0"))
+;; Package-Requires: ((emacs "29.1") (tree-edit "0.1.0") (tree-sitter "0.15.0") (evil "1.0.0") (avy "0.5.0") (s "0.0.0"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 ;;
 ;; This file is not part of GNU Emacs.
@@ -107,7 +107,7 @@ but it seems to not work reliably with `tree-edit--node-from-steps'."
      ((or (not parent)
           (not (treesit-node-parent parent))) node)
      ((treesit-node-eq parent (treesit-buffer-root-node)) node)
-     ((--any (member (treesit-node-type parent)
+     ((--any (member (tree-edit--node-type parent)
                      (cons it (alist-get it tree-edit--subtypes '())))
              (tree-edit-significant-node-types))
       parent)
@@ -160,8 +160,8 @@ but it seems to not work reliably with `tree-edit--node-from-steps'."
 (defun evil-tree-edit-goto-sig-parent ()
   "Move to the next (interesting) named sibling."
   (interactive)
-  (evil-tree-edit--remember)
   (evil-tree-edit-ensure-current-node)
+  (evil-tree-edit--remember)
   (evil-tree-edit--apply-movement #'evil-tree-edit--get-sig-parent))
 
 (defun evil-tree-edit-back ()
@@ -217,7 +217,7 @@ NODE-TYPE can be a symbol or a list of symbol."
   (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--remember)
   (let ((query-node
-         (if (member (treesit-node-type (evil-tree-edit-current-node))
+         (if (member (tree-edit--node-type (evil-tree-edit-current-node))
                      (tree-edit-significant-node-types))
              (evil-tree-edit-current-node)
            (evil-tree-edit--get-sig-parent (evil-tree-edit-current-node)))))
@@ -248,14 +248,12 @@ NODE-TYPE can be a symbol or a list of symbol."
   (interactive)
   (evil-tree-edit-ensure-current-node)
   (evil-tree-edit--remember)
-  (let ((new-node (evil-tree-edit-current-node))
-        (node-types (if (listp node-type/s) node-type/s `(,node-type/s))))
-    (while (and (treesit-node-parent new-node)
-                (not (member (treesit-node-type new-node) node-types)))
-      (setq new-node (treesit-node-parent new-node)))
-    (if (not (treesit-node-parent new-node))
-        (user-error "Current node has no parent of type %s" node-type/s)
-      (evil-tree-edit--goto-node new-node))))
+  (let* ((node-types (if (listp node-type/s) node-type/s `(,node-type/s))))
+    (if-let (result (treesit-parent-until
+                     (evil-tree-edit-current-node)
+                     (lambda (node) (member (tree-edit--node-type node) node-types))))
+        (evil-tree-edit--goto-node result)
+      (user-error "Current node has no parent of type %s" node-type/s))))
 
 (defun evil-tree-edit--avy-jump (nodes)
   "Avy jump to one of NODES."
@@ -409,14 +407,17 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
    (current-prefix-arg (evil-tree-edit-preview-node))
    (t (evil-tree-edit-ensure-current-node)
       (message "Current node type is '%s', bound to key '%s'."
-               (treesit-node-type (evil-tree-edit-current-node))
-               (--any
-                (when (member (treesit-node-type (evil-tree-edit-current-node))
-                              (if (listp (plist-get it :type))
-                                  (plist-get it :type)
-                                `(,(plist-get it :type))))
-                  (plist-get it :key))
-                (tree-edit-nodes))))))
+               (tree-edit--node-type (evil-tree-edit-current-node))
+               (let ((node-type (thread-last
+                                  (evil-tree-edit-current-node)
+                                  (tree-edit--node-type))))
+                 (--any
+                  (when (member node-type
+                                (if (listp (plist-get it :type))
+                                    (plist-get it :type)
+                                  `(,(plist-get it :type))))
+                    (plist-get it :key))
+                  (tree-edit-nodes)))))))
 
 (defun evil-tree-edit-preview-node ()
   "Preview the different variations of the current node."
@@ -426,8 +427,8 @@ Placeholder is defined by `tree-edit-placeholder-node-type'."
         (reazon-timeout 0.1)
         (tree-edit-parse-comments nil))
     (--> (evil-tree-edit-current-node)
-         (treesit-node-type it)
-         (alist-get it tree-edit-grammar)
+         (tree-edit--node-type it)
+         (alist-get it (tree-edit-grammar))
          ;; TODO: Parametrize
          (reazon-run 10 q (tree-edit-parseo it q '()))
          ;; Sometime parser returns repeats, not sure if that's expected
@@ -502,7 +503,7 @@ This is so that the current node will be properly highlighted in explorer mode."
            (evil-tree-edit-current-node)))
       (overlay-put evil-tree-edit--node-overlay 'after-string
                    (propertize
-                    (let ((type (treesit-node-type (evil-tree-edit-current-node))))
+                    (let ((type (tree-edit--node-type (evil-tree-edit-current-node))))
                       (s-concat " " (if (stringp type) type (symbol-name type))))
                     ;; TODO: Abstract into var
                     'face '(italic :foreground "dark gray")))
