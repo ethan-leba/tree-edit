@@ -1,11 +1,11 @@
 ;; -*- lexical-binding: t; -*-
 (require 'dash)
-(require 'mode-local)
 (require 'buttercup)
-(require 'tree-edit)
-(require 'evil-tree-edit)
-(require 'tree-edit-build)
 (require 'url-parse)
+
+(require 'tree-edit)
+(require 'tree-edit-build)
+(require 'evil-tree-edit)
 
 (defvar tree-edit--test-grammar-location (expand-file-name ".test-grammars/"))
 (defvar tree-edit--test-major-mode-mapping
