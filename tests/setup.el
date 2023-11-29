@@ -14,52 +14,6 @@
     (c-mode . c)))
 
 (when (getenv "TESTING")
-
-  ;; HACK!! bug#62704 introduces a call to `read-string` that breaks CI
-  (defun treesit-install-language-grammar (lang)
-    "Build and install the tree-sitter language grammar library for LANG.
-
-Interactively, if `treesit-language-source-alist' doesn't already
-have data for building the grammar for LANG, prompt for its
-repository URL and the C/C++ compiler to use.
-
-This command requires Git, a C compiler and (sometimes) a C++ compiler,
-and the linker to be installed and on PATH.  It also requires that the
-recipe for LANG exists in `treesit-language-source-alist'.
-
-See `exec-path' for the current path where Emacs looks for
-executable programs, such as the C/C++ compiler and linker."
-    (interactive (list (intern
-                        (completing-read
-                         "Language: "
-                         (mapcar #'car treesit-language-source-alist)))))
-    (when-let ((recipe
-                (or (assoc lang treesit-language-source-alist)
-                    (treesit--install-language-grammar-build-recipe
-                     lang))))
-      (condition-case err
-          (apply #'treesit--install-language-grammar-1
-                 ;; The nil is OUT-DIR.
-                 (cons nil recipe))
-        (error
-         (display-warning
-          'treesit
-          (format "Error encountered when installing language grammar: %s"
-                  err)))))
-
-    ;; Check that the installed language grammar is loadable.
-    (pcase-let ((`(,available . ,err)
-                 (treesit-language-available-p lang t)))
-      (when (not available)
-        (display-warning
-         'treesit
-         (format "The installed language grammar for %s cannot be located or has problems (%s): %s"
-                 lang (nth 0 err)
-                 (string-join
-                  (mapcar (lambda (x) (format "%s" x))
-                          (cdr err))
-                  " "))))))
-
   (make-directory tree-edit--test-grammar-location 'parents)
   (setq user-emacs-directory tree-edit--test-grammar-location)
   (setq tree-edit-storage-dir tree-edit--test-grammar-location)
@@ -105,13 +59,7 @@ executable programs, such as the C/C++ compiler and linker."
           (evil-tree-edit--update-overlay))))))
 
 (defun tree-edit--test-setup (mode)
-  ;; FIXME, disable mode grammar activaiton?
   (funcall mode)
-
-  (treesit-parser-create
-   (or (alist-get mode tree-edit-language-alist)
-       (user-error "[test harness] no grammar specified for %s" major-mode))
-   temp-buffer)
 
   (evil-mode)
   (evil-tree-edit-mode))
@@ -131,7 +79,6 @@ executable programs, such as the C/C++ compiler and linker."
          (switch-to-buffer temp-buffer)
 
          (tree-edit--test-setup ,mode)
-         (mode-local--activate-bindings)
          (insert ,contents)
          (goto-char 0)
 
